@@ -5,6 +5,7 @@ import {
   FaMapMarkerAlt,
   FaParking,
   FaBed,
+  FaCompass,
   FaBath,
 } from "react-icons/fa";
 import { FaRulerCombined, FaEye, FaBuilding } from "react-icons/fa";
@@ -117,7 +118,7 @@ const DealProperties = () => {
                   </div>
                   <div className="flex items-center">
                     <span className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full mr-2">
-                      <FaEye className="text-gray-400" />
+                      <FaCompass className="mr-1 text-gray-500" />
                     </span>
                     <span>{property.facing}</span>
                   </div>

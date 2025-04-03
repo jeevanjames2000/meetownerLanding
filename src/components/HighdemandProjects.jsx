@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import {
-  FaArrowLeft,
-  FaArrowRight,
   FaMapMarkerAlt,
   FaRulerCombined,
   FaCompass,
@@ -9,6 +7,8 @@ import {
   FaParking,
   FaBath,
 } from "react-icons/fa";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+
 const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const projects = [
@@ -16,7 +16,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "630 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -28,7 +28,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "120 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -40,7 +40,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "80 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -52,7 +52,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "60 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -66,7 +66,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "200 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -78,7 +78,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "200 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -90,7 +90,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "350 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -102,7 +102,7 @@ const App = () => {
       {
         title: "Moonglade",
         location: "Hyderabad, Telangana, India",
-        size: "0 SQ.YD",
+        size: "1500 SQ.YD",
         facing: "East Facing",
         type: "BHK",
         parking: "Parking",
@@ -124,7 +124,7 @@ const App = () => {
     );
   };
   return (
-    <div className="max-w-7xl mx-auto px-4 py-2">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="relative">
         <h2 className="text-3xl font-bold text-gray-900 text-left">
           High-demand projects to invest now
@@ -162,7 +162,7 @@ const App = () => {
                       />
 
                       <div className="p-4">
-                        <h3 className="text-start text-lg font-semibold text-blue-600">
+                        <h3 className="text-start text-lg font-semibold text-[#1D3A76]">
                           {project.title}
                         </h3>
                         <p className="text-gray-600 text-sm flex items-center mt-1">
@@ -171,29 +171,29 @@ const App = () => {
                         </p>
 
                         <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700">
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-500 mb-1">
                             <FaRulerCombined className="mr-1 text-gray-500" />{" "}
                             {project.size}
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-500 mb-1">
                             <FaCompass className="mr-1 text-gray-500" />{" "}
                             {project.facing}
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-500 mb-1">
                             <FaBuilding className="mr-1 text-gray-500" />{" "}
                             {project.type}
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-500 mb-1">
                             <FaParking className="mr-1 text-gray-500" />{" "}
                             {project.parking}
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-500 mb-1">
                             <FaBath className="mr-1 text-gray-500" />{" "}
                             {project.bathrooms}
                           </div>
                         </div>
 
-                        <p className="text-start text-lg font-bold text-blue-600 mt-4">
+                        <p className="text-start text-lg font-bold text-[#1D3A76] mt-1">
                           {project.price}
                         </p>
                       </div>
@@ -206,30 +206,26 @@ const App = () => {
         </div>
 
         <div className="flex justify-center items-center mt-4">
-          <button
+          <FaAngleLeft
             onClick={handlePrev}
-            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-          >
-            <FaArrowLeft />
-          </button>
+            className="w-8 h-8 p-1 text-black border-1 border-gray-500 hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300"
+          />
 
           <div className="flex mx-4">
             {projects.map((_, index) => (
               <div
                 key={index}
-                className={`h-3 w-3 mx-1 rounded-full ${
+                className={`h-2 w-2 mx-1 rounded-full ${
                   currentIndex === index ? "bg-blue-600" : "bg-gray-300"
                 }`}
               />
             ))}
           </div>
 
-          <button
+          <FaAngleRight
             onClick={handleNext}
-            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-          >
-            <FaArrowRight />
-          </button>
+            className="w-8 h-8 p-1 text-black border-1 border-gray-500 hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300"
+          />
         </div>
       </div>
     </div>
