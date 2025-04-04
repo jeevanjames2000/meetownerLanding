@@ -3,16 +3,15 @@ import ListingsHeader from "./ListingHeader";
 import ListingsBody from "./ListingsBody";
 import ListingAds from "./ListingAds";
 
-const Listings =() => {
+const Listings = () => {
   return (
     <>
-    <ListingsHeader/>
-    <div className="flex w-full h-auto p-5 bg-[#F5F5F5]"> 
-     <ListingsBody/>
-     <ListingAds/>
-    </div>
-   
+      <ListingsHeader />
+      <div className="flex w-full h-auto p-5 bg-[#F5F5F5]">
+        <ListingsBody />
+        <ListingAds />
+      </div>
     </>
   );
-}
+};
 export default Listings;
