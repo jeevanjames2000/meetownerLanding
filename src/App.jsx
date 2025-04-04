@@ -22,6 +22,7 @@ function Home() {
       <HighDemandProjects />
       <RecommendedSellers />
       <ExclussiveCards />
+      <Footer />
     </>
   );
 }

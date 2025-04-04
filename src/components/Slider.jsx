@@ -3,6 +3,11 @@ import { FaMapMarkerAlt, FaParking, FaBed, FaBath } from "react-icons/fa";
 import { IoIosHeartEmpty } from "react-icons/io";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css";
 const properties = [
   {
     id: 1,
@@ -66,7 +71,7 @@ const PropertyListing = () => {
     return price.toLocaleString();
   };
   return (
-    <div className="max-w-7xl mx-auto px-4 py-1">
+    <div className="max-w-7xl z-auto mx-auto px-4 py-1">
       <div className="mb-8">
         <div className="relative">
           <h2 className="text-3xl font-bold text-gray-900 text-left">
@@ -121,7 +126,7 @@ const PropertyListing = () => {
           </div>
           <div>
             <button
-              className="text-[#1D3A76] cursor-pointer underline hover:text-blue-700 font-small flex items-center"
+              className="text-[#1D3A76] cursor-pointer underline hover:text-yellow-500 font-small flex items-center"
               onClick={handleNavigate}
             >
               View All
@@ -129,62 +134,94 @@ const PropertyListing = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <Swiper
+        spaceBetween={20}
+        slidesPerView={1}
+        pagination={{ clickable: true }}
+        modules={[Pagination]}
+        breakpoints={{
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        }}
+        className="pb-10 overflow-hidden h-[480px]"
+      >
         {filteredProperties.map((property) => (
-          <div
-            key={property.id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden"
-          >
-            <div className="relative">
-              <img
-                src={property.image}
-                alt={property.title}
-                className="w-full h-64 object-cover"
-              />
-              <div className="absolute top-4 left-4">
-                <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
-                  {property.tag}
-                </span>
+          <SwiperSlide key={property.id}>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="relative">
+                <img
+                  src={property.image}
+                  alt={property.title}
+                  className="w-full h-64 object-cover"
+                />
+
+                <div className="absolute top-4 left-4">
+                  <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
+                    {property.tag}
+                  </span>
+                </div>
+
+                <div className="absolute top-4 right-4 flex space-x-2">
+                  <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500" />
+                  <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500" />
+                </div>
               </div>
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500" />
-                <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500" />
+
+              <div className="p-4">
+                <h3 className="text-xl text-[#1D3A76] text-left font-semibold mb-2">
+                  {property.title}
+                </h3>
+
+                <div className="flex items-center text-gray-500 mb-3">
+                  <FaMapMarkerAlt className="mr-2 text-gray-700" />
+                  <span>{property.location}</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700">
+                  <div className="flex items-center">
+                    <FaBed className="mr-2" /> {property.beds} Beds
+                  </div>
+                  <div className="flex items-center">
+                    <FaBath className="mr-2" /> {property.baths} Baths
+                  </div>
+                  <div className="flex items-center">
+                    <FaParking className="mr-2" /> {property.parking} Parking
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-2">
+                  <div className="text-lg font-bold text-[#1D3A76]">
+                    ₹{formatPrice(property.price)}
+                  </div>
+                  <button className="bg-[#1D3A76] text-white px-6 py-2 rounded-full hover:bg-yellow-500 hover:text-black">
+                    Enquire Now
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="p-6">
-              <h3 className="text-xl text-[#1D3A76] text-left font-semibold mb-2">
-                {property.title}
-              </h3>
-              <div className="flex items-center text-gray-500 mb-4">
-                <FaMapMarkerAlt className="mr-2 text-gray-700" />
-                <span>{property.location}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="flex items-center">
-                  <FaBed className="mr-2 text-gray-700" />
-                  <span>{property.beds} Beds</span>
-                </div>
-                <div className="flex items-center">
-                  <FaBath className="mr-2 text-gray-700" />
-                  <span>{property.baths} Baths</span>
-                </div>
-                <div className="flex items-center">
-                  <FaParking className="mr-2 text-gray-700" />
-                  <span>{property.parking} Parking</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-xl font-bold text-[#1D3A76]">
-                  ₹{formatPrice(property.price)}
-                </div>
-                <button className="!bg-[#1D3A76] text-white px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
-                  Enquire Now
-                </button>
-              </div>
-            </div>
-          </div>
+          </SwiperSlide>
         ))}
-      </div>
+        <div className="swiper-pagination-custom flex justify-center"></div>
+
+        <style jsx>{`
+          .swiper-pagination-custom {
+            display: flex;
+            align-items: center;
+          }
+          .swiper-pagination-bullet {
+            width: 12px;
+            height: 12px;
+            background: #d1d5db;
+            opacity: 0.7;
+            margin: 0 6px;
+            border-radius: 50%;
+          }
+          .swiper-pagination-bullet-active {
+            background: #1d3a76;
+            opacity: 1;
+          }
+        `}</style>
+      </Swiper>
     </div>
   );
 };

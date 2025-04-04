@@ -79,11 +79,11 @@ const HousingPicks = () => {
             Explore Top-Tier Homes with Ease
           </p>
         </div>
-        <div className="mt-4 md:mt-0 grid grid-cols-2 gap-4">
+        <div className="mt-4 md:mt-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 w-full md:w-auto">
           {properties.map((property) => (
             <div
               key={property.id}
-              className="relative rounded-lg overflow-hidden w-68 h-32"
+              className="relative rounded-lg overflow-hidden w-full md:w-72 h-40 lg:h-30 sm:h-30 md:h-30"
             >
               <img
                 src={property.image}
@@ -105,7 +105,8 @@ const HousingPicks = () => {
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={10}
             slidesPerView={1.1}
-            centeredSlides={true}
+            slidesOffsetBefore={0}
+            slidesOffsetAfter={20}
             navigation={{
               prevEl: ".swiper-button-prev",
               nextEl: ".swiper-button-next",
@@ -121,7 +122,6 @@ const HousingPicks = () => {
                     <div>
                       <h3 className="text-2xl font-bold">{property.name}</h3>
                       <p className="text-white">{property.location}</p>
-
                       <div className="mt-2">
                         <p className="text-xl font-bold text-[#fff]">
                           ₹{formatPrice(property.priceRange)} - ₹
@@ -130,19 +130,16 @@ const HousingPicks = () => {
                         <p className="text-white/80">{property.type}</p>
                       </div>
                     </div>
-
                     <button className="!bg-[#fff] text-black px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
                       Contact
                     </button>
                   </div>
-
                   <div className="w-2/3 relative">
                     <img
                       src={property.image}
                       alt={property.name}
                       className="w-full h-full object-cover  rounded-r-lg"
                     />
-
                     <a
                       href="#"
                       className="absolute top-4 right-4 text-yellow-400 hover:text-yellow-300 transition-colors"
@@ -153,7 +150,6 @@ const HousingPicks = () => {
                 </div>
               </SwiperSlide>
             ))}
-
             <div className="swiper-button-prev !text-white !bg-black/30 !w-10 !h-10 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
             <div className="swiper-button-next !text-white !bg-black/30 !w-10 !h-10 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
           </Swiper>

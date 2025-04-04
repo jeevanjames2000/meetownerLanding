@@ -94,7 +94,7 @@ const sellers = [
 ];
 const App = () => {
   return (
-    <div className="py-2" style={{ backgroundColor: "#DCE8FF" }}>
+    <div className="py-2" style={{ backgroundColor: "#ddd" }}>
       <div className="max-w-7xl mx-auto p-6">
         <h1 className="text-start text-3xl font-bold text-gray-800 mb-2">
           Recommended Sellers
@@ -102,7 +102,7 @@ const App = () => {
         <p className="text-start text-gray-600 mb-6">
           Sellers With Complete Knowledge About Locality and Verified Listings
         </p>
-        <div className="relative">
+        <div className="relative ">
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={20}
@@ -118,7 +118,7 @@ const App = () => {
               nextEl: ".swiper-button-next",
             }}
             pagination={{ clickable: true }}
-            className="mySwiper"
+            className="rounded-lg overflow-hidden h-[320px] sm:h-[300px] md:h-[310px] lg:h-[310px]"
           >
             {sellers.map((group, groupIndex) =>
               group.map((seller, index) => (
@@ -127,7 +127,7 @@ const App = () => {
                     <img
                       src={seller.image}
                       alt={seller.username}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-cover"
                     />
                     <div className="p-3 flex justify-between items-center border-t border-gray-200">
                       <div className="text-left">
@@ -138,7 +138,7 @@ const App = () => {
                           Properties - {seller.listings}
                         </p>
                       </div>
-                      <div className="text-right border-l border-gray-200 pl-3">
+                      <div className="text-right border-l border-gray-500 pl-3">
                         <p className="text-sm text-gray-600">
                           {seller.location}
                         </p>
@@ -150,8 +150,14 @@ const App = () => {
             )}
           </Swiper>
 
-          <div className="swiper-button-prev !text-white !bg-black/30 hover:!bg-white hover:!text-black !w-8 !h-8 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
-          <div className="swiper-button-next !text-white !bg-black/30 hover:!bg-white hover:!text-black !w-8 !h-8 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
+          <div
+            className="swiper-button-prev !text-white !bg-black/30 hover:!bg-white hover:!text-black 
+                 !w-10 !h-10 !rounded-full !absolute !left-0 !top-1/2 !-translate-y-1/2 after:!text-lg"
+          />
+          <div
+            className="swiper-button-next !text-white !bg-black/30 hover:!bg-white hover:!text-black 
+                 !w-10 !h-10 !rounded-full !absolute !right-0 !top-1/2 !-translate-y-1/2 after:!text-lg"
+          />
         </div>
       </div>
     </div>

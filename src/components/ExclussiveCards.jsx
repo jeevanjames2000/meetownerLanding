@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 const App = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const images = [
     [
       {
@@ -40,85 +44,89 @@ const App = () => {
       },
     ],
   ];
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+  const flatImages = images.flat();
   return (
-    <div className="py-10">
-      <div className="max-w-7xl mx-auto p-6">
-        {}
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-start">
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="relative">
+        <h2 className="text-3xl font-bold text-gray-900 text-left">
           Meet Owner Exclusive
-        </h1>
-        <p className="text-gray-600 mb-6 text-start">
-          Sponsored By Projects and Events
-        </p>
-        {}
-        <div className="relative">
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {images.map((group, groupIndex) => (
-                <div key={groupIndex} className="flex w-full flex-shrink-0">
-                  {group.map((item, index) => (
-                    <div
-                      key={index}
-                      className="w-[25%] p-2 box-border lg:w-[25%] md:w-[33.33%] sm:w-[50%] xs:w-full"
-                    >
-                      {}
-                      <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
-                        {}
-                        <img
-                          src={item.image}
-                          alt="House"
-                          className="w-full h-40 object-cover"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-          {}
-          <div className="flex justify-center items-center mt-4">
-            {}
-            <button
-              onClick={handlePrev}
-              className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-            >
-              <FaArrowLeft />
-            </button>
-            {}
-            <div className="flex mx-4">
-              {images.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-3 w-3 mx-1 rounded-full ${
-                    currentIndex === index ? "bg-blue-600" : "bg-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            {}
-            <button
-              onClick={handleNext}
-              className="bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        </div>
+        </h2>
+        <svg
+          viewBox="0 0 120 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-44 ml-2 h-4 mt-2 flex items-center"
+        >
+          <path
+            d="M2 6 C20 14, 50 -6, 118 6"
+            stroke="#F0AA00"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </svg>
       </div>
+      <Swiper
+        modules={[Navigation, Pagination]}
+        navigation={{
+          nextEl: ".swiper-button-next-custom",
+          prevEl: ".swiper-button-prev-custom",
+        }}
+        pagination={{ clickable: true, el: ".swiper-pagination-custom" }}
+        spaceBetween={20}
+        breakpoints={{
+          320: { slidesPerView: 1 },
+          640: { slidesPerView: 1.5 },
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+          1280: { slidesPerView: 4 },
+        }}
+        className="mt-6"
+      >
+        {flatImages.map((item, index) => (
+          <SwiperSlide key={index}>
+            <div className="relative bg-white shadow-lg rounded-lg overflow-hidden group">
+              <img
+                src={item.image}
+                alt={`Slide ${index + 1}`}
+                className="w-full h-40 object-cover"
+              />
+
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button className="bg-white text-[#1D3A76] px-4 py-2 rounded-full font-semibold shadow-md hover:bg-[#1D3A76] hover:text-white transition-all">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
+        <div className="flex justify-center items-center gap-6 mt-6 max-w-fit mx-auto">
+          <button className="swiper-button-prev-custom">
+            <FaAngleLeft className="w-6 h-6 p-1 border border-gray-400 rounded-full hover:bg-gray-200" />
+          </button>
+          <div className="swiper-pagination-custom flex justify-center"></div>
+          <button className="swiper-button-next-custom">
+            <FaAngleRight className="w-6 h-6 p-1 border border-gray-400 rounded-full hover:bg-gray-200" />
+          </button>
+        </div>
+        <style jsx>{`
+          .swiper-pagination-custom {
+            display: flex;
+            align-items: center;
+          }
+          .swiper-pagination-bullet {
+            width: 10px;
+            height: 10px;
+            background: #d1d5db;
+            opacity: 0.7;
+            margin: 0 6px;
+            border-radius: 50%;
+          }
+          .swiper-pagination-bullet-active {
+            background: #1d3a76;
+            opacity: 1;
+          }
+        `}</style>
+      </Swiper>
     </div>
   );
 };

@@ -4,11 +4,12 @@ import {
   FaShareAlt,
   FaMapMarkerAlt,
   FaParking,
-  FaBed,
   FaCompass,
   FaBath,
 } from "react-icons/fa";
-import { FaRulerCombined, FaEye, FaBuilding } from "react-icons/fa";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import { Pagination } from "swiper/modules";
 const dealProperties = [
   {
     id: 1,
@@ -38,20 +39,34 @@ const dealProperties = [
     bathrooms: true,
     tag: "For Sale",
   },
+  {
+    id: 3,
+    image:
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    title: "Elegant Studio Flat",
+    location: "Hyderabad, Telangana, India",
+    price: "310000",
+    sqft: "1,200",
+    facing: "East Facing",
+    type: "BHK",
+    parking: true,
+    bathrooms: true,
+    tag: "For Sale",
+  },
 ];
+const formatPrice = (price) => {
+  if (price >= 10000000) {
+    return (price / 10000000).toFixed(2) + " Cr";
+  } else if (price >= 100000) {
+    return (price / 100000).toFixed(2) + " L";
+  }
+  return price.toLocaleString();
+};
 const DealProperties = () => {
-  const formatPrice = (price) => {
-    if (price >= 10000000) {
-      return (price / 10000000).toFixed(2) + " Cr";
-    } else if (price >= 100000) {
-      return (price / 100000).toFixed(2) + " L";
-    }
-    return price.toLocaleString();
-  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex justify-between items-center mb-8">
-        <div className="relative">
+      <div className="relative flex items-center mb-4 justify-between">
+        <div>
           <h2 className="text-3xl font-bold text-gray-900 text-left">
             Best Deal Properties
           </h2>
@@ -69,85 +84,83 @@ const DealProperties = () => {
             />
           </svg>
         </div>
-        <button className="text-[#1D3A76] cursor-pointer underline hover:text-blue-700 font-small flex items-center">
-          View All
-        </button>
+        <div>
+          <button className="text-[#1D3A76] cursor-pointer underline hover:text-yellow-500 font-small flex items-center">
+            View All
+          </button>
+        </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Swiper
+        spaceBetween={20}
+        slidesPerView={1}
+        pagination={{ clickable: true }}
+        modules={[Pagination]}
+        breakpoints={{
+          768: { slidesPerView: 1 },
+          1024: { slidesPerView: 2 },
+        }}
+        className="pb-10 overflow-hidden h-[500px] lg:h-[300px]"
+      >
         {dealProperties.map((property) => (
-          <div
-            key={property.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row"
-          >
-            <div className="relative w-full md:w-3/5">
+          <SwiperSlide key={property.id}>
+            <div className="bg-white rounded-lg shadow-lg border-1 border-gray-300 overflow-hidden flex flex-col lg:flex-row">
               <img
                 src={property.image}
                 alt={property.title}
-                className="w-full h-64 md:h-full object-cover"
+                className="w-full lg:w-60 h-64 object-cover"
               />
-              <div className="absolute top-4 left-4">
-                <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
-                  {property.tag}
-                </span>
-              </div>
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <button className="p-2 bg-white rounded-full text-gray-600 hover:text-red-500 transition-colors">
-                  <FaHeart />
-                </button>
-                <button className="p-2 bg-white rounded-full text-gray-600 hover:text-blue-500 transition-colors">
-                  <FaShareAlt />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 flex flex-col justify-between w-full md:w-3/5">
-              <div>
-                <h3 className="text-xl text-left font-semibold mb-2">
+              <div className="p-4 w-full lg:w-2/2 flex flex-col justify-between">
+                <h3 className="text-start text-xl font-semibold mb-2">
                   {property.title}
                 </h3>
-                <div className="flex items-center text-gray-500 mb-4">
+                <div className="flex items-center text-gray-500 mb-2">
                   <FaMapMarkerAlt className="mr-2 text-gray-600" />
                   <span>{property.location}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                   <div className="flex items-center">
-                    <span className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full mr-2">
-                      <FaRulerCombined className="text-gray-400" />
-                    </span>
-                    <span>{property.area} Sq.yd</span>
+                    <FaCompass className="mr-2" /> {property.facing}
                   </div>
                   <div className="flex items-center">
-                    <span className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full mr-2">
-                      <FaCompass className="mr-1 text-gray-500" />
-                    </span>
-                    <span>{property.facing}</span>
+                    <FaParking className="mr-2" /> Parking
                   </div>
                   <div className="flex items-center">
-                    <span className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full mr-2">
-                      <FaParking className="text-gray-400" />
-                    </span>
-                    <span>Parking</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full mr-2">
-                      <FaBath className="text-gray-400" />
-                    </span>
-                    <span>{property.bathrooms} Bathrooms</span>
+                    <FaBath className="mr-2" /> {property.bathrooms} Bathrooms
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-xl font-bold text-[#1D3A76]">
-                  ₹{formatPrice(property.price)}
+                <div className="flex justify-between items-center mt-4">
+                  <div className="text-xl font-bold text-[#1D3A76]">
+                    ₹{formatPrice(property.price)}
+                  </div>
+                  <button className="bg-[#1D3A76] text-white px-4 py-2 rounded-full">
+                    Enquire Now
+                  </button>
                 </div>
-                <button className="!bg-[#1D3A76] text-white px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
-                  Enquire Now
-                </button>
               </div>
             </div>
-          </div>
+          </SwiperSlide>
         ))}
-      </div>
+        <div className="swiper-pagination-custom flex justify-center"></div>
+
+        <style jsx>{`
+          .swiper-pagination-custom {
+            display: flex;
+            align-items: center;
+          }
+          .swiper-pagination-bullet {
+            width: 12px;
+            height: 12px;
+            background: #d1d5db;
+            opacity: 0.7;
+            margin: 0 6px;
+            border-radius: 50%;
+          }
+          .swiper-pagination-bullet-active {
+            background: #1d3a76;
+            opacity: 1;
+          }
+        `}</style>
+      </Swiper>
     </div>
   );
 };
