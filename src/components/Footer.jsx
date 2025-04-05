@@ -34,14 +34,14 @@ const App = () => {
               </div>
               <div className="flex flex-col space-y-3">
                 <div className="flex items-center w-40 space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
-                  <FaGooglePlay />
+                  <FaGooglePlay className="h-5 w-5" />
                   <div className="flex flex-col">
                     <span className="text-xs">Get it on</span>
                     <span className="text-xs">Google Play</span>
                   </div>
                 </div>
                 <div className="flex items-center w-40 space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
-                  <FaApple />
+                  <FaApple className="h-6 w-6" />
                   <div className="flex flex-col">
                     <span className="text-xs">Available on the</span>
                     <span className="text-xs">App Store</span>

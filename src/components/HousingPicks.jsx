@@ -100,7 +100,7 @@ const HousingPicks = () => {
         </div>
       </div>
       <div className="flex gap-2">
-        <div className="w-full ">
+        <div className="w-full">
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={10}
@@ -113,12 +113,12 @@ const HousingPicks = () => {
             }}
             pagination={{ clickable: true }}
             autoplay={{ delay: 8000, disableOnInteraction: false }}
-            className="rounded-lg overflow-hidden h-[450px]"
+            className="rounded-lg overflow-hidden h-auto"
           >
             {properties.map((property) => (
               <SwiperSlide key={property.id}>
-                <div className="flex h-[400px] bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="w-1/3 p-8 bg-gradient-to-r from-blue-900 to-orange-500 text-white flex flex-col justify-between text-left">
+                <div className="flex flex-col md:flex-row h-100 bg-white rounded-lg shadow-lg overflow-hidden">
+                  <div className="w-full md:w-1/3 p-6 bg-gradient-to-r from-blue-900 to-orange-500 text-white flex flex-col justify-between text-left">
                     <div>
                       <h3 className="text-2xl font-bold">{property.name}</h3>
                       <p className="text-white">{property.location}</p>
@@ -130,15 +130,16 @@ const HousingPicks = () => {
                         <p className="text-white/80">{property.type}</p>
                       </div>
                     </div>
-                    <button className="!bg-[#fff] text-black px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
+                    <button className="mt-4 !bg-[#fff] text-black px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
                       Contact
                     </button>
                   </div>
-                  <div className="w-2/3 relative">
+                  {}
+                  <div className="w-full md:w-2/3 relative">
                     <img
                       src={property.image}
                       alt={property.name}
-                      className="w-full h-full object-cover  rounded-r-lg"
+                      className="w-full h-[250px] md:h-full object-cover"
                     />
                     <a
                       href="#"

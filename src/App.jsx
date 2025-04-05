@@ -10,7 +10,8 @@ import RecommendedSellers from "./components/RecommendedSellers";
 import ExclussiveCards from "./components/ExclussiveCards";
 import Footer from "./components/Footer";
 import Listings from "./listings/Listings";
-
+import { Provider } from "react-redux";
+import store from "../store/store";
 function Home() {
   return (
     <>
@@ -29,13 +30,14 @@ function Home() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/listings" element={<Listings />} />
-      </Routes>
-      {/* <Footer /> */}
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/listings" element={<Listings />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
 }
 

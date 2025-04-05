@@ -7,11 +7,33 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import video1 from "../assets/Images/Bannercorousal1.mp4";
 import video2 from "../assets/Images/Bannercorousal2.mp4";
 import { FaLocationCrosshairs } from "react-icons/fa6";
+import {
+  vizagLocalities,
+  bengaluruLocalities,
+  customHydCities,
+  chennaiLocalities,
+  mumbaiLocalities,
+  puneLocalities,
+} from "../components/customCities";
+import { useSelector } from "react-redux";
 export default function SearchBar() {
+  const intrests = useSelector((state) => state.property.intrestedProperties);
+  console.log("intrests: ", intrests);
+
+  const cityLocalitiesMap = {
+    Hyderabad: customHydCities,
+    Visakhapatanam: vizagLocalities,
+    Bengaluru: bengaluruLocalities,
+    Chennai: chennaiLocalities,
+    Mumbai: mumbaiLocalities,
+    Pune: puneLocalities,
+  };
   const [activeTab, setActiveTab] = useState(0);
-  console.log("activeTab: ", activeTab);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const videoRefs = useRef([]);
   const sliderRef = useRef(null);
   const tabs = ["Buy", "Rent", "Plot", "Commercial"];
@@ -53,7 +75,6 @@ export default function SearchBar() {
       }
     },
   };
-  const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Buy");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [location, setLocation] = useState("Hyderabad");
@@ -76,6 +97,10 @@ export default function SearchBar() {
     "Rajamundry",
     "Eluru",
   ];
+  const currentLocalities = cityLocalitiesMap[location] || [];
+  const filteredLocalities = currentLocalities.filter((locality) =>
+    locality.toLowerCase().includes(searchInput.toLowerCase())
+  );
   const options = ["Buy", "Sell"];
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
@@ -119,37 +144,43 @@ export default function SearchBar() {
         </div>
         <div className="flex items-center justify-between space-x-2 bg-white/40 backdrop-blur-md p-2 rounded-lg shadow-sm border border-white/20">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
-            <div className="relative inline-block w-32">
+            <div className="relative  w-auto">
               <button
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="w-full text-left px-3 py-1 rounded bg-transparent text-[#1D3A76]  focus:outline-none flex justify-between items-center"
+                className="w-full gap-1 px-3 py-1 rounded bg-transparent text-[#1D3A76] focus:outline-none flex items-center justify-between"
               >
-                {location}
+                <span>{location}</span>
                 <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
               </button>
+
               {isLocationOpen && (
                 <ul
-                  className="absolute z-99999 left-0 top-12 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
+                  className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
                   onWheel={(e) => e.stopPropagation()}
                 >
-                  {locations.map((option) => (
-                    <li
-                      key={option}
-                      onClick={() => {
-                        if (option !== "Top Cities") {
-                          setLocation(option);
-                          setIsLocationOpen(false);
-                        }
-                      }}
-                      className={`px-3 py-1 text-left cursor-pointer rounded-md transition-all duration-200 ${
-                        option === "Top Cities"
-                          ? "font-bold text-gray-600 cursor-default"
-                          : "hover:bg-[#1D3A76] hover:text-white"
-                      }`}
-                    >
-                      {option}
-                    </li>
-                  ))}
+                  {locations.map((option) => {
+                    const isDisabled = option === "Top Cities";
+                    return (
+                      <li
+                        key={option}
+                        onClick={() => {
+                          if (!isDisabled) {
+                            setLocation(option);
+                            setIsLocationOpen(false);
+                            setSearchInput("");
+                            setIsSearchDropdownOpen(false);
+                          }
+                        }}
+                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                          isDisabled
+                            ? "text-gray-400 cursor-default"
+                            : "hover:bg-[#1D3A76] hover:text-white cursor-default"
+                        }`}
+                      >
+                        {option}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -157,13 +188,54 @@ export default function SearchBar() {
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
             <IoSearch className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search Locality, City, Property"
-              className="outline-none flex-1 bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base min-w-0"
-            />
+
+            <div className="relative flex-1 items-start text-left">
+              <input
+                type="text"
+                placeholder="Search Locality, City, Property"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onFocus={() => setIsSearchDropdownOpen(true)}
+                onBlur={() =>
+                  setTimeout(() => setIsSearchDropdownOpen(false), 200)
+                }
+                className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
+              />
+              {isSearchDropdownOpen && currentLocalities.length > 0 && (
+                <ul className="absolute z-50 left-0 top-10 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
+                  {filteredLocalities.length > 0 ? (
+                    filteredLocalities.map((locality) => {
+                      const isDisabled = locality === "Most Searched";
+                      return (
+                        <li
+                          key={locality}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setSearchInput(locality);
+                              setIsSearchDropdownOpen(false);
+                            }
+                          }}
+                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                            isDisabled
+                              ? "text-gray-400 cursor-default"
+                              : "hover:bg-[#1D3A76] hover:text-white cursor-default"
+                          }`}
+                        >
+                          {locality}
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <li className="px-3 py-1 text-gray-500">
+                      No matching localities
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
             <IoSearch className="w-6 h-6 text-gray-600 cursor-pointer md:hidden" />
           </div>
+
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
@@ -172,7 +244,7 @@ export default function SearchBar() {
               <div className="relative inline-block w-32">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="w-full text-left px-3 py-1 rounded bg-transparent text-[#1D3A76]  focus:outline-none flex justify-between items-center"
+                  className="w-full text-left px-3 py-1 rounded bg-transparent text-[#1D3A76] focus:outline-none flex justify-between items-center"
                 >
                   {selected}
                   <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />

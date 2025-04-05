@@ -1,18 +1,18 @@
 const ListingAds = () => {
   return (
     <>
-      <div className="bg-white relative  p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden lg:block md:block w-[22%] h-full bg-white relative p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&h=400"
             alt="Featured Property"
             className="w-full h-64 object-cover rounded-md"
           />
-          <div className="absolute top-4 right-4 flex gap-2">
-            <p className="bg-inherit text-[#fff] font-normal px-2 rounded-lg border-1 border-[#ffffff] transition">
+          <div className="absolute bottom-2 right-2 flex gap-2">
+            <p className="bg-inherit text-[#fff] font-normal hover:bg-white cursor-pointer hover:text-black px-2 rounded-lg border-1 border-[#ffffff] transition">
               View Details
             </p>
-            <p className="bg-inherit text-[#fff] font-normal px-2 rounded-lg border-1 border-[#ffffff] transition">
+            <p className="bg-inherit text-[#fff] font-normal px-2 hover:bg-white hover:text-black cursor-pointer rounded-lg border-1 border-[#ffffff] transition">
               Contact
             </p>
           </div>
@@ -53,7 +53,10 @@ const ListingAds = () => {
             </h3>
             <div className="grid grid-cols-2 gap-4 mb-4">
               {[1, 2].map((i) => (
-                <div key={i} className="flex gap-3">
+                <div
+                  key={i}
+                  className="flex gap-2 border-1 border-gray-400 rounded-lg"
+                >
                   <img
                     src={`https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&h=100&q=${
                       i + 2
@@ -61,9 +64,9 @@ const ListingAds = () => {
                     alt={`Property ${i}`}
                     className="w-14 h-14 rounded object-cover"
                   />
-                  <div>
-                    <p className="font-bold text-gray-900">₹1.8 Cr</p>
-                    <p className="text-sm text-gray-600">3 BHK Apartment</p>
+                  <div className="flex flex-col items-center justify-center">
+                    <p className="font-bold text-sm text-gray-900">₹1.8 Cr</p>
+                    <p className="text-sm text-gray-600">3 BHK</p>
                   </div>
                 </div>
               ))}

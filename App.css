@@ -54,7 +54,7 @@
 
 /* Hide scrollbar for Firefox */
 * {
-  scrollbar-width: none;
+  scrollbar-width: 5px;
 }
 
 /* Hide scrollbar for IE, Edge, and older versions of Firefox */
