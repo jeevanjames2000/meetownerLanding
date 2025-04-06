@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import Listings from "./listings/Listings";
 import { Provider } from "react-redux";
 import store from "../store/store";
+import Property from "./property/Property";
 function Home() {
   return (
     <>
@@ -35,6 +36,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/listings" element={<Listings />} />
+          <Route path="/property" element={<Property />} />
         </Routes>
       </Router>
     </Provider>

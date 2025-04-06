@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { IoIosHeartEmpty } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
+import { useNavigate, useNavigation } from "react-router-dom";
 function App() {
   const [isLiked, setIsLiked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -69,6 +70,10 @@ function App() {
       behavior: "smooth",
     });
   };
+  const navigate = useNavigate();
+  const handleNavigation = (property) => {
+    navigate("/property", { state: property });
+  };
 
   return (
     <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] bg-[#F5F5F5] p-1">
@@ -121,7 +126,8 @@ function App() {
           return (
             <div
               key={index}
-              className="flex flex-col md:flex-row rounded-lg shadow-[4px_4px_6px_4px_rgba(0,_0,_0,_0.1)] gap-8"
+              className="flex flex-col md:flex-row rounded-lg shadow-[4px_4px_6px_4px_rgba(0,_0,_0,_0.1)] gap-8 cursor-pointer"
+              onClick={() => handleNavigation(property)}
             >
               <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full">
                 <div className="flex flex-col md:flex-row gap-5">

@@ -20,27 +20,26 @@ const App = () => {
     >
       <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full -translate-y-1/2 opacity-10"></div>
       <div className="max-w-8xl mx-auto px-6">
-        <div className="flex justify-between text-white">
-          {}
-          <div className="w-[60%] flex flex-wrap justify-center gap-x-6 gap-y-6">
-            <div className="col-span-1 text-left">
+        <div className="flex flex-col md:flex-row justify-between text-white gap-8">
+          <div className="w-full md:w-[60%] flex flex-wrap justify-center gap-x-6 gap-y-6">
+            <div className="text-left w-40">
               <div>
                 <img
                   src={favicon}
                   alt="Meet Owner"
-                  className="w-10 h-10 md:hidden"
+                  className="w-10 h-10 md:hidden mb-2"
                 />
                 <h3 className="text-lg font-bold mb-4">MEET OWNER</h3>
               </div>
               <div className="flex flex-col space-y-3">
-                <div className="flex items-center w-40 space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
+                <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaGooglePlay className="h-5 w-5" />
                   <div className="flex flex-col">
                     <span className="text-xs">Get it on</span>
                     <span className="text-xs">Google Play</span>
                   </div>
                 </div>
-                <div className="flex items-center w-40 space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
+                <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaApple className="h-6 w-6" />
                   <div className="flex flex-col">
                     <span className="text-xs">Available on the</span>
@@ -49,7 +48,8 @@ const App = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-1 text-left">
+
+            <div className="text-left w-28">
               <h3 className="text-lg font-bold mb-4">About</h3>
               <ul className="space-y-2 md:text-sm text-xs">
                 <li>
@@ -69,7 +69,8 @@ const App = () => {
                 </li>
               </ul>
             </div>
-            <div className="col-span-1 text-left">
+
+            <div className="text-left w-40">
               <h3 className="text-lg font-bold mb-4">Legal</h3>
               <ul className="space-y-2 md:text-sm text-xs">
                 <li>
@@ -89,19 +90,19 @@ const App = () => {
                 </li>
               </ul>
             </div>
-            <div className="col-span-1 text-left">
+
+            <div className="text-left w-28">
               <h3 className="text-lg font-bold mb-4">Timings</h3>
               <p className="md:text-sm text-xs">10:00 AM TO 06:00 PM</p>
             </div>
           </div>
-          {}
-          <div className="w-[40%] flex flex-col text-left">
+
+          <div className="w-full md:w-[40%] flex flex-col text-left">
             <div className="bg-white/10 backdrop-blur-md p-6 rounded-lg">
               <h3 className="text-lg font-bold mb-4">Join our Newsletter</h3>
               <p className="mb-4 text-xs">
                 Be the first to receive the most recent news on our deals.
               </p>
-
               <div className="flex items-center mb-6">
                 <input
                   type="email"
@@ -112,7 +113,6 @@ const App = () => {
                   <FaArrowRight className="w-5 h-5" />
                 </button>
               </div>
-
               <div className="space-y-4 text-xs">
                 <p className="flex items-start gap-2">
                   <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
@@ -121,7 +121,6 @@ const App = () => {
                     Yella Reddy Guda, Hyderabad - 500073, Telangana
                   </span>
                 </p>
-
                 <p className="flex items-start gap-2">
                   <FaEnvelope className="mt-1 flex-shrink-0" />
                   <a
@@ -131,7 +130,6 @@ const App = () => {
                     support@meetowner.in
                   </a>
                 </p>
-
                 <p className="flex items-start gap-2">
                   <FaPhone className="mt-1 flex-shrink-0" />
                   <a href="tel:+919701888071" className="hover:underline">
@@ -142,7 +140,8 @@ const App = () => {
             </div>
           </div>
         </div>
-        <div className="flex justify-center space-x-4 mt-8">
+
+        <div className="flex justify-center space-x-4 mt-8 flex-wrap">
           <a
             href="https://www.linkedin.com"
             target="_blank"
