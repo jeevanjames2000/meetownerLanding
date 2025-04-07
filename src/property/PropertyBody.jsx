@@ -12,10 +12,9 @@ import {
   Users,
   Waves,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiBasketball } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
-
 const PropertyBody = () => {
   const { state: property } = useLocation();
   console.log("property: ", property);
@@ -36,13 +35,30 @@ const PropertyBody = () => {
   };
   const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
   const [isExpanded, setIsExpanded] = useState(false);
-
   const toggleReadMore = () => setIsExpanded(!isExpanded);
-
   const description = property?.description || "";
   const isLong = description.length > 320;
   const shortText = description.slice(0, 320);
-
+  const [floorplan, setFloorPlan] = useState("");
+  console.log("floorplan: ", floorplan.image);
+  useEffect(() => {
+    const fetchFloorPlans = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/listings/getAllFloorPlans/${property?.unique_property_id}`
+        );
+        const data = await response.json();
+        console.log("response: ", response);
+        console.log("data: ", data);
+        setFloorPlan(data[0]);
+      } catch (error) {
+        console.error("Failed to fetch floor plans:", error);
+      }
+    };
+    if (property?.unique_property_id) {
+      fetchFloorPlans();
+    }
+  }, [property?.unique_property_id]);
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h2 className="text-xl text-left font-normal text-indigo-800">
@@ -64,7 +80,6 @@ const PropertyBody = () => {
           <h3 className="text-2xl font-bold text-indigo-900">
             {property?.property_name}
           </h3>
-
           <div className="text-right flex items-center gap-2">
             <p className="text-lg font-bold text-[#4B1D1D]">
               ₹ {parseInt(property?.property_cost)?.toLocaleString()}
@@ -118,20 +133,33 @@ const PropertyBody = () => {
       </div>
       <div className="mt-6">
         <img
-          src={`https://api.meetowner.in/uploads/${property?.image}`}
+          src={
+            property.image
+              ? `https://api.meetowner.in/uploads/${property.image}`
+              : `https://placehold.co/600x400?text=${
+                  property?.property_name || "No Image Found"
+                }`
+          }
           alt="Property"
-          className="rounded-lg shadow-md w-full object-cover h-64"
+          crossOrigin="anonymous"
+          className="w-full h-70 object-fit rounded-md"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `https://placehold.co/600x400?text=${
+              property?.property_name || "No Image Found"
+            }`;
+          }}
         />
       </div>
-
       <div>
         <h2 className="text-xl text-left mb-2 font-normal text-indigo-800">
           Floor price
         </h2>
         <img
-          src={`https://api.meetowner.in/uploads/${property?.image}`}
+          src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
           alt="Property"
-          className="rounded-lg shadow-md w-full object-cover h-64"
+          crossOrigin="anonymous"
+          className="rounded-lg shadow-md w-full object-cover h-full"
         />
       </div>
       <div>
@@ -145,7 +173,7 @@ const PropertyBody = () => {
               className="flex items-center gap-2 p-4 text-[#4B1D1D]"
             >
               <div className="w-6 h-6">
-                {facilityIconMap[facility] || <Building2 />}
+                {facilityIconMap[facility] || <Building />}
               </div>
               <span className="text-sm">{facility}</span>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -15,11 +15,27 @@ import {
   mumbaiLocalities,
   puneLocalities,
 } from "../components/customCities";
-import { useSelector } from "react-redux";
+import {
+  setCity,
+  setTab,
+  setPropertyFor,
+  setPropertyIn,
+  setBHK,
+  setBudget,
+  setSubType,
+  setOccupancy,
+  setLocation,
+  setUserCity,
+  setLoading,
+  setError,
+  setSearchData,
+} from "../../store/slices/searchSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 export default function SearchBar() {
-  const intrests = useSelector((state) => state.property.intrestedProperties);
-  console.log("intrests: ", intrests);
-
+  const searchData = useSelector((state) => state.search.city);
+  const Data = useSelector((state) => state.search.tab);
+  console.log("searchData: ", searchData, Data);
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
     Visakhapatanam: vizagLocalities,
@@ -101,7 +117,36 @@ export default function SearchBar() {
   const filteredLocalities = currentLocalities.filter((locality) =>
     locality.toLowerCase().includes(searchInput.toLowerCase())
   );
-  const options = ["Buy", "Sell"];
+  const options = ["Buy", "Rent"];
+  const [plotSubType, setPlotSubType] = useState("Buy");
+  const [commercialSubType, setCommercialSubType] = useState("Buy");
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(
+      setSearchData({
+        city: location,
+        tab: tabs[activeTab],
+        property_for: selected,
+        location: searchInput,
+        plot_subType: plotSubType,
+        commercial_subType: commercialSubType,
+      })
+    );
+  }, [
+    location,
+    activeTab,
+    selected,
+    searchInput,
+    plotSubType,
+    commercialSubType,
+    dispatch,
+  ]);
+  const navigate = useNavigate();
+
+  const handleNavigation = () => {
+    navigate("/listings");
+  };
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
       <Slider {...settings} ref={sliderRef}>
@@ -255,6 +300,11 @@ export default function SearchBar() {
                       <li
                         key={option}
                         onClick={() => {
+                          if (activeTab === 2) {
+                            setPlotSubType(option);
+                          } else if (activeTab === 3) {
+                            setCommercialSubType(option);
+                          }
                           setSelected(option);
                           setIsOpen(false);
                         }}
@@ -268,7 +318,10 @@ export default function SearchBar() {
               </div>
             )}
             <FaLocationCrosshairs className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer" />
-            <button className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap">
+            <button
+              className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap"
+              onClick={() => handleNavigation()}
+            >
               Search
             </button>
           </div>

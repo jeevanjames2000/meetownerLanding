@@ -5,7 +5,7 @@ import { HiMenu, HiX } from "react-icons/hi";
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="w-full bg-white shadow-sm px-6">
+    <header className="w-full bg-white shadow-sm px-4">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <img

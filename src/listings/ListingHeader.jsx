@@ -4,8 +4,25 @@ import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
 import favicon from "../assets/Images/Favicon@10x.png";
 import { HiMenu, HiX } from "react-icons/hi";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setBHK,
+  setBudget,
+  setCity,
+  setLocation,
+  setOccupancy,
+  setPropertyIn,
+  setSubType,
+  setTab,
+} from "../../store/slices/searchSlice";
+import { IoCloseCircle } from "react-icons/io5";
 const Header = () => {
-  const [selectedCity, setSelectedCity] = useState("Hyderabad");
+  const dispatch = useDispatch();
+  const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
+  const [selectedCity, setSelectedCity] = useState(
+    searchData?.city || "Hyderabad"
+  );
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [dropdowns, setDropdowns] = useState({});
   const toggleDropdown = (key) => {
@@ -13,6 +30,18 @@ const Header = () => {
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const cities = ["Hyderabad", "Kondapur", "Telangana"];
+  const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
+  const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || "");
+  const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
+  const [selectedPropertyIn, setSelectedPropertyIn] = useState(
+    searchData.property_in || "Residential"
+  );
+  const [selectedSubType, setSelectedSubType] = useState(
+    searchData.sub_type || "Apartment"
+  );
+  const [selectedOccupancy, setSelectedOccupancy] = useState(
+    searchData.occupancy || "Ready to move"
+  );
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
     BHK: ["1 BHK", "2 BHK", "3 BHK"],
@@ -21,6 +50,47 @@ const Header = () => {
     Type: ["Apartment", "Villa", "Plot"],
     Status: ["Ready to Move", "Under Construction"],
   };
+  const labelToActionMap = {
+    Buy: setTab,
+    BHK: setBHK,
+    Budget: setBudget,
+    Residential: setPropertyIn,
+    Type: setSubType,
+    Status: setOccupancy,
+  };
+  const labelToLocalSetterMap = {
+    Buy: setSelectedTab,
+    BHK: setSelectedBHK,
+    Budget: setSelectedBudget,
+    Residential: setSelectedPropertyIn,
+    Type: setSelectedSubType,
+    Status: setSelectedOccupancy,
+  };
+  const [searchInput, setSearchInput] = useState(searchData.location || "");
+  console.log("searchInput: ", searchInput);
+  const handleClear = () => {
+    setSearchInput("");
+    dispatch(setLocation(""));
+  };
+  const getSelectedLabel = (label) => {
+    switch (label) {
+      case "Buy":
+        return selectedTab || label;
+      case "BHK":
+        return selectedBHK || label;
+      case "Budget":
+        return selectedBudget || label;
+      case "Residential":
+        return selectedPropertyIn || label;
+      case "Type":
+        return selectedSubType || label;
+      case "Status":
+        return selectedOccupancy || label;
+      default:
+        return label;
+    }
+  };
+
   return (
     <>
       <header className="w-full bg-white shadow-sm px-6">
@@ -74,10 +144,9 @@ const Header = () => {
       </header>
       <header className="bg-[#F5F5F5] shadow-lg py-3 px-4 flex items-center justify-center w-full">
         <div className="flex items-center rounded-full shadow-md w-full max-w-5xl bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
-          {}
           <div className="hidden md:flex items-center gap-4 shrink-0">
             <div
-              className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white"
+              className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
               onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             >
               <span className="hidden md:inline">{selectedCity}</span>
@@ -89,14 +158,18 @@ const Header = () => {
                   className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
                   onClick={() => toggleDropdown(label)}
                 >
-                  {label} <FaChevronDown />
+                  {getSelectedLabel(label)} <FaChevronDown />
                 </button>
                 {dropdowns[label] && (
                   <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
                     {options.map((option) => (
                       <div
                         key={option}
-                        onClick={() => toggleDropdown(label)}
+                        onClick={() => {
+                          dispatch(labelToActionMap[label](option));
+                          labelToLocalSetterMap[label](option);
+                          toggleDropdown(label);
+                        }}
                         className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
                       >
                         {option}
@@ -107,14 +180,24 @@ const Header = () => {
               </div>
             ))}
           </div>
-
           <div className="relative flex-grow min-w-0">
             <input
               type="text"
               placeholder="Search locality, city..."
-              className="w-full pl-3 py-4 pr-10 rounded-lg focus:outline-none focus:ring-0"
+              value={searchInput}
+              onChange={(e) => {
+                dispatch(setLocation(e.target.value));
+                setSearchInput(e.target.value);
+              }}
+              className="w-full pl-3 py-4 pr-10 rounded-lg focus:outline-none focus:ring-0 h-13"
             />
-            <div className="absolute right-3 top-3">
+            <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
+              {searchInput && (
+                <IoCloseCircle
+                  onClick={handleClear}
+                  className=" items-center justify-center  text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
+                />
+              )}
               <img
                 src={Searchhome}
                 alt="Search Home"
@@ -122,7 +205,6 @@ const Header = () => {
               />
             </div>
           </div>
-
           {isCityDropdownOpen && (
             <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
               <div className="border-b px-4 font-semibold text-[#1D3A76]">
@@ -133,6 +215,7 @@ const Header = () => {
                   key={city}
                   onClick={() => {
                     setSelectedCity(city);
+                    dispatch(setCity(city));
                     setIsCityDropdownOpen(false);
                   }}
                   className="px-4 hover:bg-gray-100 cursor-pointer"
