@@ -40,7 +40,7 @@ const PropertyBody = () => {
   const isLong = description.length > 320;
   const shortText = description.slice(0, 320);
   const [floorplan, setFloorPlan] = useState("");
-  console.log("floorplan: ", floorplan.image);
+  console.log("floorplan: ", floorplan);
   useEffect(() => {
     const fetchFloorPlans = async () => {
       try {
@@ -153,13 +153,17 @@ const PropertyBody = () => {
       </div>
       <div>
         <h2 className="text-xl text-left mb-2 font-normal text-indigo-800">
-          Floor price
+          Floor Plan
         </h2>
         <img
           src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
-          alt="Property"
+          alt="FloorPlan"
           crossOrigin="anonymous"
           className="rounded-lg shadow-md w-full object-cover h-full"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
+          }}
         />
       </div>
       <div>

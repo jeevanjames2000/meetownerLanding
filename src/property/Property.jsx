@@ -12,7 +12,7 @@ const Property = () => {
     <>
       <PropertyHeader />
 
-      <h1 className="text-blue-900 font-bold bg-[#F5F5F5] text-xl">
+      <h1 className="text-blue-900 font-bold bg-[#F5F5F5] text-2xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
 

@@ -90,7 +90,6 @@ const Header = () => {
         return label;
     }
   };
-
   return (
     <>
       <header className="w-full bg-white shadow-sm px-6">
@@ -143,7 +142,7 @@ const Header = () => {
         )}
       </header>
       <header className="bg-[#F5F5F5] shadow-lg py-3 px-4 flex items-center justify-center w-full">
-        <div className="flex items-center rounded-full shadow-md w-full max-w-5xl bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
+        <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
           <div className="hidden md:flex items-center gap-4 shrink-0">
             <div
               className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
@@ -152,34 +151,38 @@ const Header = () => {
               <span className="hidden md:inline">{selectedCity}</span>
               <FaFilter />
             </div>
-            {Object.entries(dropdownOptions).map(([label, options]) => (
-              <div key={label} className="relative">
-                <button
-                  className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
-                  onClick={() => toggleDropdown(label)}
-                >
-                  {getSelectedLabel(label)} <FaChevronDown />
-                </button>
-                {dropdowns[label] && (
-                  <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
-                    {options.map((option) => (
-                      <div
-                        key={option}
-                        onClick={() => {
-                          dispatch(labelToActionMap[label](option));
-                          labelToLocalSetterMap[label](option);
-                          toggleDropdown(label);
-                        }}
-                        className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
-                      >
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+
+            <div className="hidden lg:flex items-center gap-4">
+              {Object.entries(dropdownOptions).map(([label, options]) => (
+                <div key={label} className="relative">
+                  <button
+                    className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
+                    onClick={() => toggleDropdown(label)}
+                  >
+                    {getSelectedLabel(label)} <FaChevronDown />
+                  </button>
+                  {dropdowns[label] && (
+                    <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
+                      {options.map((option) => (
+                        <div
+                          key={option}
+                          onClick={() => {
+                            dispatch(labelToActionMap[label](option));
+                            labelToLocalSetterMap[label](option);
+                            toggleDropdown(label);
+                          }}
+                          className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+
           <div className="relative flex-grow min-w-0">
             <input
               type="text"
@@ -189,13 +192,13 @@ const Header = () => {
                 dispatch(setLocation(e.target.value));
                 setSearchInput(e.target.value);
               }}
-              className="w-full pl-3 py-4 pr-10 rounded-lg focus:outline-none focus:ring-0 h-13"
+              className="w-full pl-1 border-l border-gray-200 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
             />
             <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
               {searchInput && (
                 <IoCloseCircle
                   onClick={handleClear}
-                  className=" items-center justify-center  text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
+                  className="items-center justify-center text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
                 />
               )}
               <img
@@ -205,6 +208,7 @@ const Header = () => {
               />
             </div>
           </div>
+
           {isCityDropdownOpen && (
             <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
               <div className="border-b px-4 font-semibold text-[#1D3A76]">
