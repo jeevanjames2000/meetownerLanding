@@ -120,7 +120,6 @@ export default function SearchBar() {
   const options = ["Buy", "Rent"];
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
-
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(
@@ -143,7 +142,6 @@ export default function SearchBar() {
     dispatch,
   ]);
   const navigate = useNavigate();
-
   const handleNavigation = () => {
     navigate("/listings");
   };
@@ -197,7 +195,6 @@ export default function SearchBar() {
                 <span>{location}</span>
                 <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
               </button>
-
               {isLocationOpen && (
                 <ul
                   className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
@@ -233,7 +230,6 @@ export default function SearchBar() {
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
             <IoSearch className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
@@ -280,7 +276,6 @@ export default function SearchBar() {
             </div>
             <IoSearch className="w-6 h-6 text-gray-600 cursor-pointer md:hidden" />
           </div>
-
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>

@@ -17,7 +17,6 @@ const PropertyAds = () => {
             </p>
           </div>
         </div>
-
         <div className="py-3">
           <div className="grid grid-cols-2 gap-4 mb-8">
             {[1, 2].map((i) => (
@@ -46,7 +45,6 @@ const PropertyAds = () => {
               </div>
             ))}
           </div>
-
           <div className="border-t pt-6 text-left">
             <h3 className="text-lg font-semibold mb-4">
               More Properties By Meet Owner
@@ -80,5 +78,4 @@ const PropertyAds = () => {
     </>
   );
 };
-
 export default PropertyAds;

@@ -47,18 +47,11 @@
   color: #888;
 }
 
-/* Hide scrollbar for Chrome, Safari and Edge */
-::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-/* Hide scrollbar for Firefox */
-* {
-  scrollbar-width: 5px;
-}
-
-/* Hide scrollbar for IE, Edge, and older versions of Firefox */
-* {
+.hide-scrollbar {
   -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 

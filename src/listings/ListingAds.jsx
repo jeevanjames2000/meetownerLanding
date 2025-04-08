@@ -1,7 +1,7 @@
 const ListingAds = () => {
   return (
     <>
-      <div className="hidden lg:block md:block w-[22%] h-full bg-white relative p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden sticky right-0 top-35 lg:block md:block w-[22%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&h=400"
@@ -17,7 +17,6 @@ const ListingAds = () => {
             </p>
           </div>
         </div>
-
         <div className="py-3">
           <div className="grid grid-cols-2 gap-4 mb-8">
             {[1, 2].map((i) => (
@@ -46,7 +45,6 @@ const ListingAds = () => {
               </div>
             ))}
           </div>
-
           <div className="border-t pt-6 text-left">
             <h3 className="text-lg font-semibold mb-4">
               More Properties By Meet Owner
@@ -80,5 +78,4 @@ const ListingAds = () => {
     </>
   );
 };
-
 export default ListingAds;

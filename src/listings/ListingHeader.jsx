@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -90,9 +90,26 @@ const Header = () => {
         return label;
     }
   };
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+    const handleResize = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   return (
     <>
-      <header className="w-full bg-white shadow-sm px-6">
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 w-full bg-white shadow-sm px-6 z-20"
+      >
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <img
@@ -141,7 +158,10 @@ const Header = () => {
           </div>
         )}
       </header>
-      <header className="bg-[#F5F5F5] shadow-lg py-3 px-4 flex items-center justify-center w-full">
+      <header
+        className="fixed justify-center flex left-0 w-full bg-white items-center py-3 px-4 z-10"
+        style={{ top: `${headerHeight}px` }}
+      >
         <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
           <div className="hidden md:flex items-center gap-4 shrink-0">
             <div
@@ -151,7 +171,6 @@ const Header = () => {
               <span className="hidden md:inline">{selectedCity}</span>
               <FaFilter />
             </div>
-
             <div className="hidden lg:flex items-center gap-4">
               {Object.entries(dropdownOptions).map(([label, options]) => (
                 <div key={label} className="relative">
@@ -182,7 +201,6 @@ const Header = () => {
               ))}
             </div>
           </div>
-
           <div className="relative flex-grow min-w-0">
             <input
               type="text"
@@ -208,7 +226,6 @@ const Header = () => {
               />
             </div>
           </div>
-
           {isCityDropdownOpen && (
             <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
               <div className="border-b px-4 font-semibold text-[#1D3A76]">

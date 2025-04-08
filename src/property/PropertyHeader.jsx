@@ -156,7 +156,6 @@ const PropertyHeader = () => {
               <span className="hidden md:inline">{selectedCity}</span>
               <FaFilter />
             </div>
-
             <div className="hidden lg:flex items-center gap-4">
               {Object.entries(dropdownOptions).map(([label, options]) => (
                 <div key={label} className="relative">
@@ -187,7 +186,6 @@ const PropertyHeader = () => {
               ))}
             </div>
           </div>
-
           <div className="relative flex-grow min-w-0">
             <input
               type="text"
@@ -217,7 +215,6 @@ const PropertyHeader = () => {
               />
             </div>
           </div>
-
           {isCityDropdownOpen && (
             <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
               <div className="border-b px-4 font-semibold text-[#1D3A76]">

@@ -27,7 +27,13 @@ import { IoIosHeartEmpty } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { List, AutoSizer } from "react-virtualized";
+import {
+  List,
+  AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
+  WindowScroller,
+} from "react-virtualized";
 const PropertyCard = memo(
   ({
     property,
@@ -51,7 +57,7 @@ const PropertyCard = memo(
     return (
       <div
         key={`property-${index}`}
-        className="flex flex-col md:flex-row rounded-lg shadow-[4px_4px_6px_4px_rgba(0,_0,_0,_0.1)] gap-8 cursor-pointer"
+        className="flex flex-col md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
         onClick={() => handleNavigation(property)}
       >
         <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
@@ -296,7 +302,7 @@ const AdsCard = memo(() => {
     },
   ];
   return (
-    <div className="bg-white rounded-lg shadow-md mb-2 p-2 md:p-2 max-w-6xl mx-auto">
+    <div className="bg-white rounded-lg shadow-md relative p-2 mb-4 md:mb-4 max-w-6xl mx-auto mt-8">
       <h2 className="text-xl text-left md:text-2xl font-semibold text-[#1E2A53] mb-4">
         Featured Projects Based on your search
       </h2>
@@ -329,10 +335,7 @@ const AdsCard = memo(() => {
                 <img
                   src={project.image}
                   alt="Project"
-                  className="w-full h-70 object-cover rounded-md"
-                  onError={(e) =>
-                    (e.target.src = "https://placehold.co/600x400")
-                  }
+                  className="w-full h-[200px] object-cover rounded-md"
                 />
               </div>
               <div className="w-full md:w-1/2">
@@ -409,7 +412,11 @@ function App() {
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
   const [readMoreStates, setReadMoreStates] = useState({});
+  const [loading, setLoading] = useState(false);
+  console.log("loading: ", loading);
+  const [hasMore, setHasMore] = useState(true);
   const cardsContainerRef = useRef(null);
+  const bottomRef = useRef(null);
   const navigate = useNavigate();
   const options = [
     "Relevance",
@@ -419,6 +426,7 @@ function App() {
   ];
   const fetchProperties = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await fetch(
         `http://localhost:5000/listings/getAllPropertiesByType?page=${page}&property_for=${
           searchData?.tab === "Buy" ? "Sell" : "Rent"
@@ -427,16 +435,42 @@ function App() {
         }&search=${searchData?.location || ""}`
       );
       const res = await response.json();
-      setData((prev) =>
-        page === 1 ? res.properties : [...prev, ...res.properties]
-      );
+      if (res.properties?.length > 0) {
+        setData((prev) =>
+          page === 1 ? res.properties : [...prev, ...res.properties]
+        );
+      } else {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
     }
   }, [searchData, page]);
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
+  const loadMoreCards = () => {
+    if (!loading && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  };
+  useEffect(() => {
+    if (!bottomRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMoreCards();
+        }
+      },
+      { threshold: 1.0 }
+    );
+    observer.observe(bottomRef.current);
+    return () => {
+      if (bottomRef.current) observer.unobserve(bottomRef.current);
+    };
+  }, [bottomRef.current, hasMore, loading]);
   const toggleReadMore = useCallback((index) => {
     setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
@@ -454,37 +488,21 @@ function App() {
     },
     [navigate]
   );
-  const prepareCardsWithAds = useCallback(() => {
-    const cardsWithAds = [];
-    let cardCountSinceLastAd = 0;
-    const minInterval = 5;
-    const maxInterval = 10;
-    const getRandomInterval = () =>
-      Math.floor(Math.random() * (maxInterval - minInterval + 1)) + minInterval;
-    let nextAdInterval = getRandomInterval();
-    data.forEach((property, index) => {
-      cardsWithAds.push({
-        type: "property",
-        content: (
-          <PropertyCard
-            property={property}
-            index={index}
-            toggleReadMore={toggleReadMore}
-            toggleFacilities={toggleFacilities}
-            handleNavigation={handleNavigation}
-            readMoreStates={readMoreStates}
-            expandedCards={expandedCards}
-          />
-        ),
-      });
-      cardCountSinceLastAd++;
-      if (cardCountSinceLastAd >= nextAdInterval && index !== data.length - 1) {
-        cardsWithAds.push({ type: "ad", content: <AdsCard /> });
-        cardCountSinceLastAd = 0;
-        nextAdInterval = getRandomInterval();
-      }
-    });
-    return cardsWithAds;
+  const prepareCardsWithoutAds = useCallback(() => {
+    return data.map((property, index) => ({
+      type: "property",
+      content: (
+        <PropertyCard
+          property={property}
+          index={index}
+          toggleReadMore={toggleReadMore}
+          toggleFacilities={toggleFacilities}
+          handleNavigation={handleNavigation}
+          readMoreStates={readMoreStates}
+          expandedCards={expandedCards}
+        />
+      ),
+    }));
   }, [
     data,
     readMoreStates,
@@ -493,17 +511,24 @@ function App() {
     toggleFacilities,
     handleNavigation,
   ]);
-  const cardsWithAds = prepareCardsWithAds();
+  const cardsWithAds = prepareCardsWithoutAds();
   const rowRenderer = ({ index, key, style }) => {
     const item = cardsWithAds[index];
     return (
-      <div key={key} style={style} className="w-full">
+      <div
+        key={key}
+        style={{
+          ...style,
+          paddingBottom: window.innerWidth < 768 ? "24px" : "32px",
+        }}
+        className="w-full px-2"
+      >
         {item.content}
       </div>
     );
   };
   return (
-    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] bg-[#F5F5F5] p-1">
+    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%]  p-1 pt-[136px] relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-start md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0" />
@@ -546,42 +571,62 @@ function App() {
           )}
         </div>
       </div>
-      <div
-        ref={cardsContainerRef}
-        className="relative h-[150vh] overflow-y-auto pr-2 pb-2 scroll-smooth"
-      >
-        <AutoSizer>
-          {({ height, width }) => (
-            <List
-              height={height}
-              width={width}
-              rowCount={cardsWithAds.length}
-              rowHeight={400}
-              rowRenderer={rowRenderer}
+      <WindowScroller>
+        {({ height, isScrolling, scrollTop }) => (
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <List
+                autoHeight
+                height={height}
+                isScrolling={isScrolling}
+                scrollTop={scrollTop}
+                width={width}
+                rowCount={cardsWithAds.length}
+                rowHeight={window.innerWidth >= 768 ? 350 : 420}
+                rowRenderer={rowRenderer}
+                onScroll={({ scrollTop, clientHeight, scrollHeight }) => {
+                  if (scrollTop + clientHeight >= scrollHeight - 100) {
+                    loadMoreCards();
+                  }
+                }}
+              />
+            )}
+          </AutoSizer>
+        )}
+      </WindowScroller>
+      {loading && hasMore && (
+        <div className="w-full py-4 flex justify-center items-center gap-2">
+          <svg
+            className="animate-spin h-5 w-5 text-[#1D3A76]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
             />
-          )}
-        </AutoSizer>
-        <div
-          onClick={scrollToTop}
-          className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
-        >
-          <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          <span className="text-[#1D3A76] font-medium">
+            Loading more properties...
+          </span>
         </div>
-      </div>
-      <div className="flex items-center justify-center gap-4 mt-6">
-        <button
-          onClick={() => page > 1 && setPage((prev) => prev - 1)}
-          className="px-4 py-2 rounded-lg border-1 border-gray-300 cursor-pointer hover:bg-yellow-500 text-black font-medium"
-        >
-          Prev
-        </button>
-        <span className="text-sm text-gray-700 font-medium">Page {page}</span>
-        <button
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 rounded-lg border-1 border-gray-300 cursor-pointer hover:bg-yellow-500 text-black font-medium"
-        >
-          Next
-        </button>
+      )}
+      <div className="w-full h-[40px]" ref={bottomRef}></div>
+      <div
+        onClick={scrollToTop}
+        className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
+      >
+        <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
       </div>
     </div>
   );
