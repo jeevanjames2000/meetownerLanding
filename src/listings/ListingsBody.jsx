@@ -109,7 +109,9 @@ const PropertyCard = memo(
                       {property.price_negotiable && " (Negotiable)"}
                     </span>
                     <span className="text-[#A4A4A4] font-medium text-[15px] ml-2">
-                      {property?.loan_facility ? "EMI option Available" : ""}
+                      {property?.loan_facility === "Yes"
+                        ? "EMI option Available"
+                        : ""}
                     </span>
                   </p>
                 </div>
@@ -406,6 +408,8 @@ const AdsCard = memo(() => {
 });
 function App() {
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
+  const location = useSelector((state) => state.location);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const [page, setPage] = useState(1);
@@ -413,7 +417,6 @@ function App() {
   const [expandedCards, setExpandedCards] = useState({});
   const [readMoreStates, setReadMoreStates] = useState({});
   const [loading, setLoading] = useState(false);
-  console.log("loading: ", loading);
   const [hasMore, setHasMore] = useState(true);
   const cardsContainerRef = useRef(null);
   const bottomRef = useRef(null);
@@ -424,7 +427,7 @@ function App() {
     "Price: High to Low",
     "Newest First",
   ];
-  const fetchProperties = useCallback(async () => {
+  const fetchProperties = async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -432,7 +435,11 @@ function App() {
           searchData?.tab === "Buy" ? "Sell" : "Rent"
         }&property_in=${searchData?.property_in || ""}&sub_type=${
           searchData?.sub_type || ""
-        }&search=${searchData?.location || ""}`,
+        }&search=${searchData.location || ""}&bhk=${
+          searchData?.bhk || ""
+        }&property_cost=${
+          searchData?.budget || ""
+        }&priceFilter=${encodeURIComponent(selected)}`,
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
@@ -440,22 +447,34 @@ function App() {
         }
       );
       const res = await response.json();
+
       if (res.properties?.length > 0) {
-        setData((prev) =>
-          page === 1 ? res.properties : [...prev, ...res.properties]
-        );
+        setData(res.properties);
+        setHasMore(true);
       } else {
+        setData([]); // ✅ Clear stale data
         setHasMore(false);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
+      setData([]); // ✅ Clear data in case of error as well
     } finally {
       setLoading(false);
     }
-  }, [searchData, page]);
+  };
+
   useEffect(() => {
+    setPage(1);
     fetchProperties();
-  }, [fetchProperties]);
+  }, [
+    selected,
+    searchData.location,
+    searchData?.bhk,
+    searchData.property_in,
+    searchData.sub_type,
+    searchData?.budget,
+  ]);
+
   const loadMoreCards = () => {
     if (!loading && hasMore) {
       setPage((prev) => prev + 1);
@@ -532,14 +551,15 @@ function App() {
       </div>
     );
   };
+
   return (
-    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%]  p-1 pt-[136px] relative z-0">
+    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%]  p-1 pt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-start md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0" />
           <p className="text-xl text-left font-normal text-[#1D3A76]">
             Flats For {searchData?.tab === "Buy" ? "Sale" : "Rent"} In{" "}
-            {searchData?.location || "Kondapur, Hyderabad"}
+            {searchData?.location || "Hyderabad"}
           </p>
         </div>
         <div className="relative inline-block text-left">
@@ -576,29 +596,35 @@ function App() {
           )}
         </div>
       </div>
-      <WindowScroller>
-        {({ height, isScrolling, scrollTop }) => (
-          <AutoSizer disableHeight>
-            {({ width }) => (
-              <List
-                autoHeight
-                height={height}
-                isScrolling={isScrolling}
-                scrollTop={scrollTop}
-                width={width}
-                rowCount={cardsWithAds.length}
-                rowHeight={window.innerWidth >= 768 ? 350 : 420}
-                rowRenderer={rowRenderer}
-                onScroll={({ scrollTop, clientHeight, scrollHeight }) => {
-                  if (scrollTop + clientHeight >= scrollHeight - 100) {
-                    loadMoreCards();
-                  }
-                }}
-              />
-            )}
-          </AutoSizer>
-        )}
-      </WindowScroller>
+      {data.length > 0 ? (
+        <WindowScroller>
+          {({ height, isScrolling, scrollTop }) => (
+            <AutoSizer disableHeight>
+              {({ width }) => (
+                <List
+                  autoHeight
+                  height={height}
+                  isScrolling={isScrolling}
+                  scrollTop={scrollTop}
+                  width={width}
+                  rowCount={cardsWithAds.length}
+                  rowHeight={window.innerWidth >= 768 ? 350 : 420}
+                  rowRenderer={rowRenderer}
+                  onScroll={({ scrollTop, clientHeight, scrollHeight }) => {
+                    if (scrollTop + clientHeight >= scrollHeight - 100) {
+                      loadMoreCards();
+                    }
+                  }}
+                />
+              )}
+            </AutoSizer>
+          )}
+        </WindowScroller>
+      ) : (
+        <div>
+          <h1>No Properties Found!</h1>
+        </div>
+      )}
       {loading && hasMore && (
         <div className="w-full py-4 flex justify-center items-center gap-2">
           <svg

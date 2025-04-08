@@ -19,7 +19,6 @@ import { IoCloseCircle } from "react-icons/io5";
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
   const [selectedCity, setSelectedCity] = useState(
     searchData?.city || "Hyderabad"
   );
@@ -31,7 +30,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const cities = ["Hyderabad", "Kondapur", "Telangana"];
   const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
-  const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || "");
+  const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
   const [selectedPropertyIn, setSelectedPropertyIn] = useState(
     searchData.property_in || "Residential"
@@ -44,8 +43,12 @@ const Header = () => {
   );
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
-    BHK: ["1 BHK", "2 BHK", "3 BHK"],
-    Budget: ["50 Lakhs", "50-75 Lakhs", "75 Lakhs+"],
+    BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
+    Budget: [
+      { label: "Up to 50 Lakhs", value: "50" },
+      { label: "50-75 Lakhs", value: "50-75" },
+      { label: "75 Lakhs+", value: "75+" },
+    ],
     Residential: ["Residential", "Commercial"],
     Type: ["Apartment", "Villa", "Plot"],
     Status: ["Ready to Move", "Under Construction"],
@@ -67,29 +70,29 @@ const Header = () => {
     Status: setSelectedOccupancy,
   };
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-  console.log("searchInput: ", searchInput);
   const handleClear = () => {
     setSearchInput("");
     dispatch(setLocation(""));
   };
   const getSelectedLabel = (label) => {
-    switch (label) {
-      case "Buy":
-        return selectedTab || label;
-      case "BHK":
-        return selectedBHK || label;
-      case "Budget":
-        return selectedBudget || label;
-      case "Residential":
-        return selectedPropertyIn || label;
-      case "Type":
-        return selectedSubType || label;
-      case "Status":
-        return selectedOccupancy || label;
-      default:
-        return label;
-    }
+    const selectedValue = {
+      Buy: selectedTab,
+      BHK: selectedBHK,
+      Budget: selectedBudget,
+      Residential: selectedPropertyIn,
+      Type: selectedSubType,
+      Status: selectedOccupancy,
+    }[label];
+
+    const options = dropdownOptions[label];
+    const match = options.find((opt) => {
+      if (typeof opt === "object") return opt.value === selectedValue;
+      return opt === selectedValue;
+    });
+
+    return typeof match === "object" ? match.label : match || label;
   };
+
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -104,6 +107,15 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      dispatch(setLocation(searchInput));
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [searchInput]);
+  const handleValueChange = (e) => {
+    setSearchInput(e.target.value);
+  };
   return (
     <>
       <header
@@ -120,153 +132,118 @@ const Header = () => {
             <img src={favicon} alt="Meet Owner" className="w-8 h-8 md:hidden" />
           </div>
           <div className="flex items-center space-x-4">
-            <button className="hidden md:flex border border-[#F0AA00] px-5 py-1 rounded-full text-gray-800 font-sm hover:bg-[#F0AA00] transition-all items-center">
-              <img src={favicon} alt="Download" className="w-5 h-5 mr-2" />
-              Download App
-            </button>
-            <button className="hidden md:flex border border-[#F0AA00] px-5 py-1 rounded-full text-black font-sm hover:bg-[#F0AA00] hover:text-black transition-all group">
-              Add Property
-              <span className="ml-1 text-[#F0AA00] group-hover:text-black">
-                | Free
-              </span>
-            </button>
-            <button className="border border-[#F0AA00] px-6 py-1 rounded-full font-medium cursor-pointer">
-              Login
-            </button>
-            <button
-              className="md:hidden text-gray-800 focus:outline-none"
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              {menuOpen ? <HiX size={28} /> : <HiMenu size={28} />}
-            </button>
-          </div>
-        </div>
-        {menuOpen && (
-          <div className="md:hidden bg-white shadow-md absolute z-1000 top-14 right-0 w-52 py-3 px-6">
-            <nav className="flex flex-col space-y-1">
-              {["Buy", "Rent", "Sell", "Download App", "Add Property"].map(
-                (label) => (
-                  <button
-                    key={label}
-                    className="text-gray-800 font-medium text-left py-2 border-b border-gray-200"
-                  >
-                    {label}
-                  </button>
-                )
-              )}
-            </nav>
-          </div>
-        )}
-      </header>
-      <header
-        className="fixed justify-center flex left-0 w-full bg-white items-center py-3 px-4 z-10"
-        style={{ top: `${headerHeight}px` }}
-      >
-        <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
-          <div className="hidden md:flex items-center gap-4 shrink-0">
-            <div
-              className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
-              onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-            >
-              <span className="hidden md:inline">{selectedCity}</span>
-              <FaFilter />
-            </div>
-            <div className="hidden lg:flex items-center gap-4">
-              {Object.entries(dropdownOptions).map(([label, options]) => (
-                <div key={label} className="relative">
-                  <button
-                    className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
-                    onClick={() => toggleDropdown(label)}
-                  >
-                    {getSelectedLabel(label)} <FaChevronDown />
-                  </button>
-                  {dropdowns[label] && (
-                    <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
-                      {options.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            dispatch(labelToActionMap[label](option));
-                            labelToLocalSetterMap[label](option);
-                            toggleDropdown(label);
-                          }}
-                          className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
-                        >
-                          {option}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="relative flex-grow min-w-0">
-            <input
-              type="text"
-              placeholder="Search locality, city..."
-              value={searchInput}
-              onChange={(e) => {
-                dispatch(setLocation(e.target.value));
-                setSearchInput(e.target.value);
-              }}
-              className="w-full pl-1 border-l border-gray-200 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
-            />
-            <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
-              {searchInput && (
-                <IoCloseCircle
-                  onClick={handleClear}
-                  className="items-center justify-center text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
-                />
-              )}
-              <img
-                src={Searchhome}
-                alt="Search Home"
-                className="w-[34px] h-[34px]"
-              />
-            </div>
-          </div>
-          {isCityDropdownOpen && (
-            <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
-              <div className="border-b px-4 font-semibold text-[#1D3A76]">
-                Select City
-              </div>
-              {cities.map((city) => (
+            <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
+              <div className="hidden md:flex items-center gap-4 shrink-0">
                 <div
-                  key={city}
-                  onClick={() => {
-                    setSelectedCity(city);
-                    dispatch(setCity(city));
-                    setIsCityDropdownOpen(false);
-                  }}
-                  className="px-4 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
+                  onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
                 >
-                  {city}
+                  <span className="hidden md:inline">{selectedCity}</span>
+                  <FaFilter />
                 </div>
-              ))}
-              <div className="border-t px-4 py-2 font-semibold text-[#1D3A76]">
-                Filters
-              </div>
-              <div className="flex flex-col items-start px-4 gap-2">
-                {Object.entries(dropdownOptions).map(([label, options]) => (
-                  <div key={label} className="w-full">
-                    <div className="font-medium text-sm mb-1">{label}</div>
-                    <div className="flex flex-wrap gap-2">
-                      {options.map((option) => (
-                        <span
-                          key={option}
-                          onClick={() => setIsCityDropdownOpen(false)}
-                          className="bg-[#F3F3F3] px-3 py-1 rounded text-xs cursor-pointer hover:bg-[#e0e0e0]"
-                        >
-                          {option}
-                        </span>
-                      ))}
+                <div className="hidden lg:flex items-center gap-4">
+                  {Object.entries(dropdownOptions).map(([label, options]) => (
+                    <div key={label} className="relative">
+                      <button
+                        className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
+                        onClick={() => toggleDropdown(label)}
+                      >
+                        {getSelectedLabel(label)} <FaChevronDown />
+                      </button>
+                      {dropdowns[label] && (
+                        <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
+                          {options.map((option) => {
+                            const isObject = typeof option === "object";
+                            const value = isObject ? option.value : option;
+                            const display = isObject ? option.label : option;
+
+                            return (
+                              <div
+                                key={value}
+                                onClick={() => {
+                                  dispatch(labelToActionMap[label](value));
+                                  labelToLocalSetterMap[label](value);
+                                  toggleDropdown(label);
+                                }}
+                                className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
+                              >
+                                {display}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+              <div className="relative flex-grow min-w-0">
+                <input
+                  type="text"
+                  placeholder="Search locality, city..."
+                  value={searchInput}
+                  onChange={(e) => {
+                    handleValueChange(e);
+                  }}
+                  className="w-full pl-1 border-l border-gray-200 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
+                />
+                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
+                  {searchInput && (
+                    <IoCloseCircle
+                      onClick={handleClear}
+                      className="items-center justify-center text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
+                    />
+                  )}
+                  <img
+                    src={Searchhome}
+                    alt="Search Home"
+                    className="w-[34px] h-[34px]"
+                  />
+                </div>
+              </div>
+              {isCityDropdownOpen && (
+                <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
+                  <div className="border-b px-4 font-semibold text-[#1D3A76]">
+                    Select City
+                  </div>
+                  {cities.map((city) => (
+                    <div
+                      key={city}
+                      onClick={() => {
+                        setSelectedCity(city);
+                        dispatch(setCity(city));
+                        setIsCityDropdownOpen(false);
+                      }}
+                      className="px-4 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {city}
+                    </div>
+                  ))}
+                  <div className="border-t px-4 py-2 font-semibold text-[#1D3A76]">
+                    Filters
+                  </div>
+                  <div className="flex flex-col items-start px-4 gap-2">
+                    {Object.entries(dropdownOptions).map(([label, options]) => (
+                      <div key={label} className="w-full">
+                        <div className="font-medium text-sm mb-1">{label}</div>
+                        <div className="flex flex-wrap gap-2">
+                          {options.map((option) => (
+                            <span
+                              key={option}
+                              onClick={() => setIsCityDropdownOpen(false)}
+                              className="bg-[#F3F3F3] px-3 py-1 rounded text-xs cursor-pointer hover:bg-[#e0e0e0]"
+                            >
+                              {option}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </header>
     </>

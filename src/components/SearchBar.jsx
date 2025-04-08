@@ -15,27 +15,12 @@ import {
   mumbaiLocalities,
   puneLocalities,
 } from "../components/customCities";
-import {
-  setCity,
-  setTab,
-  setPropertyFor,
-  setPropertyIn,
-  setBHK,
-  setBudget,
-  setSubType,
-  setOccupancy,
-  setLocation,
-  setUserCity,
-  setLoading,
-  setError,
-  setSearchData,
-} from "../../store/slices/searchSlice";
+import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 export default function SearchBar() {
   const searchData = useSelector((state) => state.search.city);
   const Data = useSelector((state) => state.search.tab);
-  console.log("searchData: ", searchData, Data);
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
     Visakhapatanam: vizagLocalities,
@@ -141,9 +126,59 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
+  useEffect(() => {
+    if (searchInput.trim() === "") {
+      setLocalities([]);
+      return;
+    }
+    const fetchLocalities = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/search?query=${searchInput}&city=${location}`
+        );
+        const data = await response.json();
+        setLocalities(data);
+      } catch (err) {
+        console.error("Failed to fetch localities:", err);
+      }
+    };
+    fetchLocalities();
+  }, [searchInput, location]);
   const navigate = useNavigate();
   const handleNavigation = () => {
     navigate("/listings");
+  };
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
+        const data = await response.json();
+        console.log("data: ", data);
+        const location = `${data.city}, ${data.principalSubdivision}, ${data.countryName}`;
+        console.log("Location:", location);
+      },
+      (error) => {
+        console.error("Location error:", error);
+        alert("Please enable location services.");
+      }
+    );
+  };
+  const [localites, setLocalities] = useState([]);
+  console.log("localites: ", localites);
+  const fetchLocalities = async () => {
+    const response = await fetch(
+      `http://localhost:5000/api/search?query=${searchInput}&city=${location}`
+    );
+    console.log(response);
+    const data = await response.json();
+    setLocalities(data);
   };
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
@@ -242,30 +277,51 @@ export default function SearchBar() {
                 }
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
-              {isSearchDropdownOpen && currentLocalities.length > 0 && (
+              {isSearchDropdownOpen && (
                 <ul className="absolute z-50 left-0 top-10 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
-                  {filteredLocalities.length > 0 ? (
-                    filteredLocalities.map((locality) => {
-                      const isDisabled = locality === "Most Searched";
-                      return (
-                        <li
-                          key={locality}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setSearchInput(locality);
-                              setIsSearchDropdownOpen(false);
-                            }
-                          }}
-                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                            isDisabled
-                              ? "text-gray-400 cursor-default"
-                              : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                          }`}
-                        >
-                          {locality}
-                        </li>
-                      );
-                    })
+                  {searchInput.trim() === "" ? (
+                    // Show default localities when input is empty
+                    filteredLocalities.length > 0 ? (
+                      filteredLocalities.map((locality) => {
+                        const isDisabled = locality === "Most Searched";
+                        return (
+                          <li
+                            key={locality}
+                            onClick={() => {
+                              if (!isDisabled) {
+                                setSearchInput(locality);
+                                setIsSearchDropdownOpen(false);
+                              }
+                            }}
+                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                              isDisabled
+                                ? "text-gray-400 cursor-default"
+                                : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
+                            }`}
+                          >
+                            {locality}
+                          </li>
+                        );
+                      })
+                    ) : (
+                      <li className="px-3 py-1 text-gray-500">
+                        No matching localities
+                      </li>
+                    )
+                  ) : // Show API results when input is not empty
+                  localites.length > 0 ? (
+                    localites.map((item) => (
+                      <li
+                        key={item.locality}
+                        onClick={() => {
+                          setSearchInput(item.locality);
+                          setIsSearchDropdownOpen(false);
+                        }}
+                        className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
+                      >
+                        {item.locality}
+                      </li>
+                    ))
                   ) : (
                     <li className="px-3 py-1 text-gray-500">
                       No matching localities
@@ -312,7 +368,10 @@ export default function SearchBar() {
                 )}
               </div>
             )}
-            <FaLocationCrosshairs className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer" />
+            <FaLocationCrosshairs
+              onClick={getCurrentLocation}
+              className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer"
+            />
             <button
               className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap"
               onClick={() => handleNavigation()}

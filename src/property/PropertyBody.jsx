@@ -65,11 +65,15 @@ const PropertyBody = () => {
     }
   }, [property?.unique_property_id]);
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h2 className="text-xl text-left font-normal text-indigo-800">
-        Property Description
-      </h2>
+    <div className="p-6 w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
+      <h1 className="text-blue-900 font-bold uppercase text-3xl">
+        {property.property_name} PROPERTY DETAILS
+      </h1>
+
       <p className="text-gray-700 text-left">
+        <h2 className="text-xl mb-2 text-left font-bold text-gray-400">
+          Property Description
+        </h2>
         {isExpanded || !isLong ? description : `${shortText}... `}
         {isLong && (
           <span

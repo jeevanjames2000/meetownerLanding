@@ -1,7 +1,7 @@
 const ListingAds = () => {
   return (
     <>
-      <div className="hidden sticky right-0 top-35 lg:block md:block w-[22%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden sticky right-0 top-20 lg:block md:block w-[22%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&h=400"

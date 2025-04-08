@@ -12,11 +12,7 @@ const Property = () => {
     <>
       <PropertyHeader />
 
-      <h1 className="text-blue-900 font-bold bg-[#F5F5F5] text-2xl">
-        {property.property_name} PROPERTY DETAILS
-      </h1>
-
-      <div className="flex w-full justify-between h-auto p-5 pt-0 bg-[#F5F5F5]">
+      <div className="flex w-full justify-between h-auto p-5 pt-2 bg-[#F5F5F5]">
         <PropertyBody />
         <PropertyAds />
       </div>
