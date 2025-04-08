@@ -428,11 +428,16 @@ function App() {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5000/listings/getAllPropertiesByType?page=${page}&property_for=${
+        `https://6605-115-98-88-60.ngrok-free.app/listings/getAllPropertiesByType?page=${page}&property_for=${
           searchData?.tab === "Buy" ? "Sell" : "Rent"
         }&property_in=${searchData?.property_in || ""}&sub_type=${
           searchData?.sub_type || ""
-        }&search=${searchData?.location || ""}`
+        }&search=${searchData?.location || ""}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
       );
       const res = await response.json();
       if (res.properties?.length > 0) {

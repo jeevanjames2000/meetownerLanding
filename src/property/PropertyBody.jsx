@@ -45,7 +45,12 @@ const PropertyBody = () => {
     const fetchFloorPlans = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/listings/getAllFloorPlans/${property?.unique_property_id}`
+          `https://6605-115-98-88-60.ngrok-free.app/listings/getAllFloorPlans/${property?.unique_property_id}`,
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
         );
         const data = await response.json();
         console.log("response: ", response);
