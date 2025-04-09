@@ -88,9 +88,10 @@ const PropertyCard = memo(
               <div className="mb-3 text-left">
                 <div className="flex justify-between items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
-                    {property.bedrooms} BHK {property.property_type} for{" "}
-                    {property.property_for} in {property.locality_name},{" "}
-                    {property.google_address}
+                    {property.sub_type === "Apartment"
+                      ? `${property.bedrooms} BHK ${property.property_type} for ${property.property_for}`
+                      : `${property.sub_type} for ${property.property_for}`}{" "}
+                    in {property.locality_name}, {property.google_address}
                   </p>
                   <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
                     <IoIosHeartEmpty className="text-xl" />
@@ -141,10 +142,14 @@ const PropertyCard = memo(
                     ? [
                         {
                           icon: <Ruler className="w-4 h-4" />,
-                          title: "Built-up Area",
-                          value: `${property?.builtup_area || "N/A"} ${
-                            property?.area_units || ""
-                          }`,
+                          title: property?.builtup_area
+                            ? "Built-up Area"
+                            : "Built-up Units",
+                          value: `${
+                            property?.builtup_area ||
+                            property?.builtup_unit ||
+                            "N/A"
+                          } ${property?.area_units || ""}`,
                         },
                         {
                           icon: <Home className="w-4 h-4" />,
@@ -178,10 +183,14 @@ const PropertyCard = memo(
                     : [
                         {
                           icon: <Ruler className="w-4 h-4" />,
-                          title: "Built-up Area",
-                          value: `${property?.builtup_area || "N/A"} ${
-                            property?.area_units || ""
-                          }`,
+                          title: property?.builtup_area
+                            ? "Built-up Area"
+                            : "Built-up Units",
+                          value: `${
+                            property?.builtup_area ||
+                            property?.builtup_unit ||
+                            "N/A"
+                          } ${property?.area_units || ""}`,
                         },
                         {
                           icon: <Home className="w-4 h-4" />,
@@ -305,7 +314,7 @@ const AdsCard = memo(() => {
   ];
   return (
     <div className="bg-white rounded-lg shadow-md relative p-2 mb-4 md:mb-4 max-w-6xl mx-auto mt-8">
-      <h2 className="text-xl text-left md:text-2xl font-semibold text-[#1E2A53] mb-4">
+      <h2 className="text-xl text-left md:text-xl font-semibold text-[#1E2A53] mb-4">
         Featured Projects Based on your search
       </h2>
       <Swiper
@@ -408,8 +417,6 @@ const AdsCard = memo(() => {
 });
 function App() {
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
-  const location = useSelector((state) => state.location);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const [page, setPage] = useState(1);
@@ -431,15 +438,25 @@ function App() {
     try {
       setLoading(true);
       const response = await fetch(
-        `https://6605-115-98-88-60.ngrok-free.app/listings/getAllPropertiesByType?page=${page}&property_for=${
-          searchData?.tab === "Buy" ? "Sell" : "Rent"
+        `https://4a42-115-98-88-60.ngrok-free.app/listings/getAllPropertiesByType?page=${page}&property_for=${
+          searchData?.tab === "Latest"
+            ? "Sell"
+            : searchData.tab === "Buy"
+            ? "Sell"
+            : searchData?.tab === "Rent"
+            ? "Rent"
+            : searchData?.tab === "Plot"
+            ? "Plot"
+            : "Commercial"
         }&property_in=${searchData?.property_in || ""}&sub_type=${
-          searchData?.sub_type || ""
-        }&search=${searchData.location || ""}&bhk=${
+          searchData?.sub_type === "Others" ? "" : searchData?.sub_type
+        }&search=${searchData.location || ""}&bedrooms=${
           searchData?.bhk || ""
         }&property_cost=${
           searchData?.budget || ""
-        }&priceFilter=${encodeURIComponent(selected)}`,
+        }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
+          searchData?.occupancy
+        }&property_status=1`,
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
@@ -447,34 +464,48 @@ function App() {
         }
       );
       const res = await response.json();
-
+      const newData = res.properties || [];
       if (res.properties?.length > 0) {
-        setData(res.properties);
+        setData((prevData) =>
+          page === 1 ? newData : [...prevData, ...newData]
+        );
         setHasMore(true);
       } else {
-        setData([]); // ✅ Clear stale data
+        setData([]);
         setHasMore(false);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
-      setData([]); // ✅ Clear data in case of error as well
+      setData([]);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 3000);
     }
   };
-
+  const locationRef = useRef(searchData.location);
   useEffect(() => {
-    setPage(1);
-    fetchProperties();
+    window.scrollTo(0, 0);
+  }, []);
+  useEffect(() => {
+    if (locationRef.current !== searchData.location) {
+      locationRef.current = searchData.location;
+      setPage(1);
+      fetchProperties();
+    }
   }, [
     selected,
     searchData.location,
     searchData?.bhk,
     searchData.property_in,
+    searchData.property_for,
+    searchData.occupancy,
     searchData.sub_type,
     searchData?.budget,
   ]);
-
+  useEffect(() => {
+    fetchProperties();
+  }, [page]);
   const loadMoreCards = () => {
     if (!loading && hasMore) {
       setPage((prev) => prev + 1);
@@ -551,15 +582,24 @@ function App() {
       </div>
     );
   };
-
   return (
     <div className="min-h-screen w-full md:w-[75%] sm:w-[100%]  p-1 pt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-start md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0" />
           <p className="text-xl text-left font-normal text-[#1D3A76]">
-            Flats For {searchData?.tab === "Buy" ? "Sale" : "Rent"} In{" "}
-            {searchData?.location || "Hyderabad"}
+            {searchData?.property_in === "Commercial"
+              ? "Commercial"
+              : searchData?.property_in === "Plot"
+              ? "Plot"
+              : "Residential"}{" "}
+            {searchData.sub_type} For{" "}
+            {searchData?.tab === "Buy"
+              ? "Sell"
+              : searchData?.tab === "Rent"
+              ? "Rent"
+              : "Sell"}{" "}
+            In {searchData?.location || "Hyderabad"}
           </p>
         </div>
         <div className="relative inline-block text-left">
@@ -622,7 +662,10 @@ function App() {
         </WindowScroller>
       ) : (
         <div>
-          <h1>No Properties Found!</h1>
+          <h1 className="text-2xl text-gray-500 font-bold">
+            No Properties Found!
+          </h1>
+          <AdsCard />
         </div>
       )}
       {loading && hasMore && (

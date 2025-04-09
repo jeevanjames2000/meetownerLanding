@@ -24,8 +24,9 @@ const Header = () => {
   );
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [dropdowns, setDropdowns] = useState({});
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const toggleDropdown = (key) => {
-    setDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+    setActiveDropdown((prev) => (prev === key ? null : key));
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const cities = ["Hyderabad", "Kondapur", "Telangana"];
@@ -33,10 +34,10 @@ const Header = () => {
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
   const [selectedPropertyIn, setSelectedPropertyIn] = useState(
-    searchData.property_in || "Residential"
+    searchData.property_in || ""
   );
   const [selectedSubType, setSelectedSubType] = useState(
-    searchData.sub_type || "Apartment"
+    searchData.sub_type || ""
   );
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
@@ -49,15 +50,39 @@ const Header = () => {
       { label: "50-75 Lakhs", value: "50-75" },
       { label: "75 Lakhs+", value: "75+" },
     ],
-    Residential: ["Residential", "Commercial"],
-    Type: ["Apartment", "Villa", "Plot"],
-    Status: ["Ready to Move", "Under Construction"],
+    "Property In": ["Property In", "Residential", "Commercial"],
+    Status: ["Status", "Ready to Move", "Under Construction"],
+  };
+  const getTypeOptions = () => {
+    if (selectedPropertyIn === "Commercial") {
+      return [
+        "Type",
+        "Office",
+        "Retail shop",
+        "Show room",
+        "Warehouse",
+        "Plot",
+        "Others",
+      ];
+    } else if (selectedPropertyIn === "Residential") {
+      return [
+        "Type",
+        "Apartment",
+        "Independent House",
+        "Indepenedent Villa",
+        "Plot",
+        "Land",
+        "Others",
+      ];
+    } else {
+      return ["Type"];
+    }
   };
   const labelToActionMap = {
     Buy: setTab,
     BHK: setBHK,
     Budget: setBudget,
-    Residential: setPropertyIn,
+    "Property In": setPropertyIn,
     Type: setSubType,
     Status: setOccupancy,
   };
@@ -65,9 +90,17 @@ const Header = () => {
     Buy: setSelectedTab,
     BHK: setSelectedBHK,
     Budget: setSelectedBudget,
-    Residential: setSelectedPropertyIn,
+    "Property In": setSelectedPropertyIn,
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
+  };
+  const labelToStoreKeyMap = {
+    Buy: "tab",
+    BHK: "bhk",
+    Budget: "budget",
+    "Property In": "property_in",
+    Type: "sub_type",
+    Status: "occupancy",
   };
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const handleClear = () => {
@@ -75,24 +108,17 @@ const Header = () => {
     dispatch(setLocation(""));
   };
   const getSelectedLabel = (label) => {
-    const selectedValue = {
-      Buy: selectedTab,
-      BHK: selectedBHK,
-      Budget: selectedBudget,
-      Residential: selectedPropertyIn,
-      Type: selectedSubType,
-      Status: selectedOccupancy,
-    }[label];
-
-    const options = dropdownOptions[label];
+    const key = labelToStoreKeyMap[label];
+    const selectedValue = searchData[key];
+    const options =
+      label === "Type" ? getTypeOptions() : dropdownOptions[label];
+    if (!options) return label;
     const match = options.find((opt) => {
       if (typeof opt === "object") return opt.value === selectedValue;
       return opt === selectedValue;
     });
-
     return typeof match === "object" ? match.label : match || label;
   };
-
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -107,15 +133,23 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const [isUserInput, setIsUserInput] = useState(false);
+
+  const handleValueChange = (e) => {
+    setIsUserInput(true);
+    setSearchInput(e.target.value);
+  };
+
   useEffect(() => {
+    if (!isUserInput) return;
+
     const delayDebounce = setTimeout(() => {
       dispatch(setLocation(searchInput));
     }, 500);
+
     return () => clearTimeout(delayDebounce);
-  }, [searchInput]);
-  const handleValueChange = (e) => {
-    setSearchInput(e.target.value);
-  };
+  }, [searchInput, isUserInput]);
+
   return (
     <>
       <header
@@ -142,7 +176,10 @@ const Header = () => {
                   <FaFilter />
                 </div>
                 <div className="hidden lg:flex items-center gap-4">
-                  {Object.entries(dropdownOptions).map(([label, options]) => (
+                  {[
+                    ...Object.entries(dropdownOptions),
+                    ["Type", getTypeOptions()],
+                  ].map(([label, options]) => (
                     <div key={label} className="relative">
                       <button
                         className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
@@ -150,20 +187,29 @@ const Header = () => {
                       >
                         {getSelectedLabel(label)} <FaChevronDown />
                       </button>
-                      {dropdowns[label] && (
+                      {activeDropdown === label && (
                         <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
-                          {options.map((option) => {
+                          {options.map((option, index) => {
                             const isObject = typeof option === "object";
                             const value = isObject ? option.value : option;
                             const display = isObject ? option.label : option;
-
+                            if (
+                              (label === "Type" ||
+                                label === "Property In" ||
+                                label === "Status" ||
+                                label === "BHK") &&
+                              index === 0
+                            ) {
+                              return null;
+                            }
                             return (
                               <div
                                 key={value}
                                 onClick={() => {
+                                  const key = labelToStoreKeyMap[label];
                                   dispatch(labelToActionMap[label](value));
                                   labelToLocalSetterMap[label](value);
-                                  toggleDropdown(label);
+                                  setActiveDropdown(null);
                                 }}
                                 className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
                               >
@@ -189,10 +235,12 @@ const Header = () => {
                 />
                 <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
                   {searchInput && (
-                    <IoCloseCircle
+                    <button
+                      className=" text-gray-400 hover:text-gray-600 focus:outline-none"
                       onClick={handleClear}
-                      className="items-center justify-center text-gray-500 hover:text-red-500 cursor-pointer w-[20px] h-[20px]"
-                    />
+                    >
+                      &times;
+                    </button>
                   )}
                   <img
                     src={Searchhome}

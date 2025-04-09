@@ -1,15 +1,61 @@
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 const ListingAds = () => {
+  const [property, setProperty] = useState([]);
+  console.log("property: ", property);
+  const fetchLatestProperties = async () => {
+    setProperty([]);
+    try {
+      const response = await fetch(
+        `https://4a42-115-98-88-60.ngrok-free.app/listings/getRandomPropertiesAds`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+      const data = await response.json();
+      setProperty(data.results);
+    } catch (err) {
+      console.error("Failed to fetch properties:", err);
+    }
+  };
+  useEffect(() => {
+    fetchLatestProperties();
+  }, []);
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
+  const formatToIndianCurrency = (value) => {
+    if (!value || isNaN(value)) return "N/A";
+    const numValue = parseFloat(value);
+    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+    return numValue.toString();
+  };
   return (
     <>
-      <div className="hidden sticky right-0 top-20 lg:block md:block w-[22%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden relative right-0 top-20 lg:block md:block w-[24%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
-            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&h=400"
+            src={`https://api.meetowner.in/uploads/${property[2]?.image}`}
             alt="Featured Property"
-            className="w-full h-64 object-cover rounded-md"
+            crossOrigin="anonymous"
+            className="w-full h-44 object-cover rounded-md"
           />
           <div className="absolute bottom-2 right-2 flex gap-2">
-            <p className="bg-inherit text-[#fff] font-normal hover:bg-white cursor-pointer hover:text-black px-2 rounded-lg border-1 border-[#ffffff] transition">
+            <p
+              onClick={() => {
+                handleNavigation(property[2]);
+              }}
+              className="bg-inherit text-[#fff] font-normal hover:bg-white cursor-pointer hover:text-black px-2 rounded-lg border-1 border-[#ffffff] transition"
+            >
               View Details
             </p>
             <p className="bg-inherit text-[#fff] font-normal px-2 hover:bg-white hover:text-black cursor-pointer rounded-lg border-1 border-[#ffffff] transition">
@@ -19,59 +65,39 @@ const ListingAds = () => {
         </div>
         <div className="py-3">
           <div className="grid grid-cols-2 gap-4 mb-8">
-            {[1, 2].map((i) => (
+            {property.slice(0, 2).map((item, i) => (
               <div
-                key={i}
+                key={item.id || i}
                 className="relative rounded-xl shadow-lg overflow-hidden"
+                onClick={() => {
+                  handleNavigation(item);
+                }}
               >
-                <div className="bg-[#1D3A76] text-white text-sm font-medium py-2 px-4 text-center">
+                <div className="bg-[#1D3A76] text-white text-xs font-medium py-2 px-4 text-center">
                   Latest Property
                 </div>
                 <div className="bg-gray-50 rounded-b-lg overflow-hidden">
                   <img
-                    src={`https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&h=200&q=${i}`}
-                    alt={`Property ${i}`}
+                    src={
+                      item.image
+                        ? `https://api.meetowner.in/uploads/${item.image}`
+                        : `https://via.placeholder.com/400x200?text=No+Image`
+                    }
+                    crossOrigin="anonymous"
+                    alt={item.property_name || `Property ${i + 1}`}
                     className="w-full h-32 object-cover"
                   />
                   <div className="p-4 text-left">
-                    <p className="font-bold text-gray-900">₹1.5 Cr</p>
-                    <h4 className="font-semibold">Lake View Apartment</h4>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      Modern 3BHK apartment with premium amenities and lake
-                      view.
+                    <p className="font-bold text-gray-900">
+                      ₹{formatToIndianCurrency(item.property_cost || 0)}
                     </p>
+                    <h4 className="font-normal text-md">
+                      {item.property_name || "Unnamed Property"}
+                    </h4>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-          <div className="border-t pt-6 text-left">
-            <h3 className="text-lg font-semibold mb-4">
-              More Properties By Meet Owner
-            </h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="flex gap-2 border-1 border-gray-400 rounded-lg"
-                >
-                  <img
-                    src={`https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&h=100&q=${
-                      i + 2
-                    }`}
-                    alt={`Property ${i}`}
-                    className="w-14 h-14 rounded object-cover"
-                  />
-                  <div className="flex flex-col items-center justify-center">
-                    <p className="font-bold text-sm text-gray-900">₹1.8 Cr</p>
-                    <p className="text-sm text-gray-600">3 BHK</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="w-full bg-gray-100 text-blue-600 py-2 rounded-lg hover:bg-gray-200 transition">
-              View All Properties
-            </button>
           </div>
         </div>
       </div>

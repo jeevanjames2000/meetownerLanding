@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Footer from "../components/Footer";
 import PropertyHeader from "./PropertyHeader";
@@ -8,6 +8,9 @@ import { useLocation } from "react-router-dom";
 
 const Property = () => {
   const { state: property } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <>
       <PropertyHeader />

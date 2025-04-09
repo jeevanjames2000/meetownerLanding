@@ -15,9 +15,12 @@ import {
 import React, { useEffect, useState } from "react";
 import { BiBasketball } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 const PropertyBody = () => {
   const { state: property } = useLocation();
-  console.log("property: ", property);
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
@@ -40,12 +43,26 @@ const PropertyBody = () => {
   const isLong = description.length > 320;
   const shortText = description.slice(0, 320);
   const [floorplan, setFloorPlan] = useState("");
-  console.log("floorplan: ", floorplan);
+  const [images, setImages] = useState([]);
+  const [mainImage, setMainImage] = useState("");
+  const fetchPropertyimages = async () => {
+    setImages([]);
+    try {
+      const response = await fetch(
+        `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property?.unique_property_id}`
+      );
+      const data = await response.json();
+      setMainImage(data.images[0].url);
+      setImages(data.images);
+    } catch (err) {
+      console.error("Failed to fetch properties:", err);
+    }
+  };
   useEffect(() => {
     const fetchFloorPlans = async () => {
       try {
         const response = await fetch(
-          `https://6605-115-98-88-60.ngrok-free.app/listings/getAllFloorPlans/${property?.unique_property_id}`,
+          `https://4a42-115-98-88-60.ngrok-free.app/listings/getAllFloorPlans/${property?.unique_property_id}`,
           {
             headers: {
               "ngrok-skip-browser-warning": "true",
@@ -53,8 +70,6 @@ const PropertyBody = () => {
           }
         );
         const data = await response.json();
-        console.log("response: ", response);
-        console.log("data: ", data);
         setFloorPlan(data[0]);
       } catch (error) {
         console.error("Failed to fetch floor plans:", error);
@@ -62,14 +77,22 @@ const PropertyBody = () => {
     };
     if (property?.unique_property_id) {
       fetchFloorPlans();
+      fetchPropertyimages();
     }
   }, [property?.unique_property_id]);
+  const formatToIndianCurrency = (value) => {
+    if (!value || isNaN(value)) return "N/A";
+    const numValue = parseFloat(value);
+    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+    return numValue.toString();
+  };
   return (
     <div className="p-6 w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
-
       <p className="text-gray-700 text-left">
         <h2 className="text-xl mb-2 text-left font-bold text-gray-400">
           Property Description
@@ -90,8 +113,11 @@ const PropertyBody = () => {
             {property?.property_name}
           </h3>
           <div className="text-right flex items-center gap-2">
-            <p className="text-lg font-bold text-[#4B1D1D]">
-              ₹ {parseInt(property?.property_cost)?.toLocaleString()}
+            <p className="text-lg font-bold text-indigo-900">
+              ₹{" "}
+              {formatToIndianCurrency(
+                property?.property_cost
+              )?.toLocaleString()}
             </p>
             <p className="text-sm text-gray-700">
               - ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /sq.ft
@@ -142,26 +168,42 @@ const PropertyBody = () => {
       </div>
       <div className="mt-6">
         <img
-          src={
-            property.image
-              ? `https://api.meetowner.in/uploads/${property.image}`
-              : `https://placehold.co/600x400?text=${
-                  property?.property_name || "No Image Found"
-                }`
-          }
-          alt="Property"
+          src={mainImage}
+          alt="Main"
+          className="w-full h-[400px] object-cover rounded-2xl shadow-md"
           crossOrigin="anonymous"
-          className="w-full h-70 object-fit rounded-md"
           onError={(e) => {
-            e.target.onerror = null;
             e.target.src = `https://placehold.co/600x400?text=${
               property?.property_name || "No Image Found"
             }`;
           }}
         />
+        {images.length > 1 && (
+          <div className="mt-4">
+            <Swiper
+              modules={[Navigation]}
+              slidesPerView={4}
+              spaceBetween={16}
+              navigation
+              className="mySwiper"
+            >
+              {images.map((img, index) => (
+                <SwiperSlide key={index}>
+                  <img
+                    src={`${img.url}`}
+                    alt={`Thumbnail ${index + 1}`}
+                    crossOrigin="anonymous"
+                    className="w-full h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-all"
+                    onClick={() => setMainImage(`${img.url}`)}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        )}
       </div>
       <div>
-        <h2 className="text-xl text-left mb-2 font-normal text-indigo-800">
+        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
           Floor Plan
         </h2>
         <img
@@ -176,7 +218,7 @@ const PropertyBody = () => {
         />
       </div>
       <div>
-        <h2 className="text-xl text-left font-normal space-2 mb-2 text-indigo-800">
+        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
           Amenities
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2  border-1 border-gray-500 rounded-lg">

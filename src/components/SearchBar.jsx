@@ -19,7 +19,7 @@ import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 export default function SearchBar() {
-  const searchData = useSelector((state) => state.search.city);
+  const searchData = useSelector((state) => state.search);
   const Data = useSelector((state) => state.search.tab);
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
@@ -107,11 +107,18 @@ export default function SearchBar() {
   const [commercialSubType, setCommercialSubType] = useState("Buy");
   const dispatch = useDispatch();
   useEffect(() => {
+    const selectedTab = tabs[activeTab];
     dispatch(
       setSearchData({
         city: location,
-        tab: tabs[activeTab],
-        property_for: selected,
+        tab: selectedTab,
+        property_for: selectedTab === "Buy" ? "Sell" : "Rent",
+        property_in:
+          selectedTab === "Commercial"
+            ? "Commercial"
+            : selectedTab === "Plot"
+            ? "Plot"
+            : "Residential",
         location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
@@ -160,9 +167,7 @@ export default function SearchBar() {
           `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
         );
         const data = await response.json();
-        console.log("data: ", data);
         const location = `${data.city}, ${data.principalSubdivision}, ${data.countryName}`;
-        console.log("Location:", location);
       },
       (error) => {
         console.error("Location error:", error);
@@ -171,15 +176,6 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-  console.log("localites: ", localites);
-  const fetchLocalities = async () => {
-    const response = await fetch(
-      `http://localhost:5000/api/search?query=${searchInput}&city=${location}`
-    );
-    console.log(response);
-    const data = await response.json();
-    setLocalities(data);
-  };
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
       <Slider {...settings} ref={sliderRef}>
@@ -277,10 +273,17 @@ export default function SearchBar() {
                 }
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
+              {searchInput && (
+                <button
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  onClick={() => setSearchInput("")}
+                >
+                  &times;
+                </button>
+              )}
               {isSearchDropdownOpen && (
                 <ul className="absolute z-50 left-0 top-10 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
                   {searchInput.trim() === "" ? (
-                    // Show default localities when input is empty
                     filteredLocalities.length > 0 ? (
                       filteredLocalities.map((locality) => {
                         const isDisabled = locality === "Most Searched";
@@ -299,7 +302,18 @@ export default function SearchBar() {
                                 : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
                             }`}
                           >
-                            {locality}
+                            <div className="flex justify-between">
+                              <div>{locality}</div>
+                              <p
+                                className="text-sm text-gray-300 "
+                                style={{
+                                  display:
+                                    locality === "Most Searched" ? "none" : "",
+                                }}
+                              >
+                                Locality
+                              </p>
+                            </div>
                           </li>
                         );
                       })
@@ -308,8 +322,7 @@ export default function SearchBar() {
                         No matching localities
                       </li>
                     )
-                  ) : // Show API results when input is not empty
-                  localites.length > 0 ? (
+                  ) : localites.length > 0 ? (
                     localites.map((item) => (
                       <li
                         key={item.locality}

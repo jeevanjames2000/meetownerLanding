@@ -19,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
   const [selectedCity, setSelectedCity] = useState(
     searchData?.city || "Hyderabad"
   );
@@ -28,7 +27,6 @@ const PropertyHeader = () => {
   const toggleDropdown = (key) => {
     setDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
   const cities = ["Hyderabad", "Kondapur", "Telangana"];
   const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || "Bhk");
@@ -67,7 +65,6 @@ const PropertyHeader = () => {
     Status: setSelectedOccupancy,
   };
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-  console.log("searchInput: ", searchInput);
   const handleClear = () => {
     setSearchInput("");
     dispatch(setLocation(""));
