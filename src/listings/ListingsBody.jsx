@@ -34,6 +34,7 @@ import {
   CellMeasurerCache,
   WindowScroller,
 } from "react-virtualized";
+import config from "../../config";
 const PropertyCard = memo(
   ({
     property,
@@ -89,7 +90,11 @@ const PropertyCard = memo(
                 <div className="flex justify-between items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
                     {property.sub_type === "Apartment"
-                      ? `${property.bedrooms} BHK ${property.property_type} for ${property.property_for}`
+                      ? `${property.bedrooms} BHK ${
+                          property.property_type
+                            ? property.property_type
+                            : property.sub_type || ""
+                        } for ${property.property_for}`
                       : `${property.sub_type} for ${property.property_for}`}{" "}
                     in {property.locality_name}, {property.google_address}
                   </p>
@@ -417,6 +422,7 @@ const AdsCard = memo(() => {
 });
 function App() {
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const [page, setPage] = useState(1);
@@ -438,7 +444,9 @@ function App() {
     try {
       setLoading(true);
       const response = await fetch(
-        `https://4a42-115-98-88-60.ngrok-free.app/listings/getAllPropertiesByType?page=${page}&property_for=${
+        `${
+          config.ngrok_url
+        }/listings/getAllPropertiesByType?page=${page}&property_for=${
           searchData?.tab === "Latest"
             ? "Sell"
             : searchData.tab === "Buy"
@@ -483,16 +491,12 @@ function App() {
       }, 3000);
     }
   };
-  const locationRef = useRef(searchData.location);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   useEffect(() => {
-    if (locationRef.current !== searchData.location) {
-      locationRef.current = searchData.location;
-      setPage(1);
-      fetchProperties();
-    }
+    setPage(1);
   }, [
     selected,
     searchData.location,
@@ -505,7 +509,33 @@ function App() {
   ]);
   useEffect(() => {
     fetchProperties();
-  }, [page]);
+  }, [
+    page,
+    selected,
+    searchData.location,
+    searchData?.bhk,
+    searchData.property_in,
+    searchData.property_for,
+    searchData.occupancy,
+    searchData.sub_type,
+    searchData?.budget,
+  ]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchProperties();
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [
+    page,
+    selected,
+    searchData.location,
+    searchData?.bhk,
+    searchData.property_in,
+    searchData.property_for,
+    searchData.occupancy,
+    searchData.sub_type,
+    searchData?.budget,
+  ]);
   const loadMoreCards = () => {
     if (!loading && hasMore) {
       setPage((prev) => prev + 1);

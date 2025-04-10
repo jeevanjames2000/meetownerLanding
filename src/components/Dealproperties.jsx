@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaHeart,
   FaShareAlt,
@@ -10,6 +10,7 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Pagination } from "swiper/modules";
+import config from "../../config";
 const dealProperties = [
   {
     id: 1,
@@ -63,6 +64,28 @@ const formatPrice = (price) => {
   return price.toLocaleString();
 };
 const DealProperties = () => {
+  const [property, setProperty] = useState([]);
+
+  useEffect(() => {
+    const fetchLatestProperties = async () => {
+      setProperty([]);
+      try {
+        const response = await fetch(
+          `${config.ngrok_url}/listings/getBestDeals`,
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+        const data = await response.json();
+        setProperty(data.results);
+      } catch (err) {
+        console.error("Failed to fetch properties:", err);
+      }
+    };
+    fetchLatestProperties();
+  }, []);
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">
@@ -101,36 +124,49 @@ const DealProperties = () => {
         }}
         className="pb-10 overflow-hidden h-[500px] lg:h-[300px]"
       >
-        {dealProperties.map((property) => (
-          <SwiperSlide key={property.id}>
+        {property.map((property) => (
+          <SwiperSlide key={property?.unique_property_id}>
             <div className="bg-white rounded-lg shadow-lg border-1 border-gray-300 overflow-hidden flex flex-col lg:flex-row">
               <img
-                src={property.image}
-                alt={property.title}
+                src={
+                  property.image
+                    ? `https://api.meetowner.in/uploads/${property.image}`
+                    : `https://placehold.co/600x400?text=${
+                        property?.property_name || "No Image Found"
+                      }`
+                }
+                alt="Property"
+                crossOrigin="anonymous"
                 className="w-full lg:w-60 h-64 object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `https://placehold.co/600x400?text=${
+                    property?.property_name || "No Image Found"
+                  }`;
+                }}
               />
               <div className="p-4 w-full lg:w-2/2 flex flex-col justify-between">
                 <h3 className="text-start text-xl font-semibold mb-2">
-                  {property.title}
+                  {property.property_name}
                 </h3>
                 <div className="flex items-center text-gray-500 mb-2">
                   <FaMapMarkerAlt className="mr-2 text-gray-600" />
-                  <span>{property.location}</span>
+                  <span>{property.location_id}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                   <div className="flex items-center">
-                    <FaCompass className="mr-2" /> {property.facing}
+                    <FaCompass className="mr-2" /> {property?.facing}
                   </div>
                   <div className="flex items-center">
-                    <FaParking className="mr-2" /> Parking
+                    <FaParking className="mr-2" /> {property?.parking} Parking
                   </div>
                   <div className="flex items-center">
-                    <FaBath className="mr-2" /> {property.bathrooms} Bathrooms
+                    <FaBath className="mr-2" /> {property?.bedrooms} Bedrooms
                   </div>
                 </div>
                 <div className="flex justify-between items-center mt-4">
                   <div className="text-xl font-bold text-[#1D3A76]">
-                    ₹{formatPrice(property.price)}
+                    ₹{formatPrice(property.property_cost)}
                   </div>
                   <button className="bg-[#1D3A76] text-white px-4 py-2 rounded-full">
                     Enquire Now

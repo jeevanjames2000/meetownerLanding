@@ -18,6 +18,7 @@ import {
 import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import config from "../../config";
 export default function SearchBar() {
   const searchData = useSelector((state) => state.search);
   const Data = useSelector((state) => state.search.tab);
@@ -141,8 +142,14 @@ export default function SearchBar() {
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/search?query=${searchInput}&city=${location}`
+          `${config.ngrok_url}/api/search?query=${searchInput}&city=${location}`,
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
         );
+        console.log("response: ", response);
         const data = await response.json();
         setLocalities(data);
       } catch (err) {
@@ -330,9 +337,10 @@ export default function SearchBar() {
                           setSearchInput(item.locality);
                           setIsSearchDropdownOpen(false);
                         }}
-                        className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
+                        className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
                       >
-                        {item.locality}
+                        {item.locality}{" "}
+                        <p className="text-sm text-gray-300 ">Locality</p>
                       </li>
                     ))
                   ) : (

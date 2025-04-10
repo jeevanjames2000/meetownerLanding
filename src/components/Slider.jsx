@@ -10,6 +10,7 @@ import "swiper/css/pagination";
 import "swiper/css";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
+import config from "../../config";
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
@@ -36,7 +37,7 @@ const PropertyListing = () => {
         const isSellTab = activeTab === "Latest" || activeTab === "Sell";
         const propertyFor = isSellTab ? "Sell" : "Rent";
         const response = await fetch(
-          `https://4a42-115-98-88-60.ngrok-free.app/listings/getLatestProperties?property_for=${propertyFor}`,
+          `${config.ngrok_url}/listings/getLatestProperties?property_for=${propertyFor}`,
           {
             headers: {
               "ngrok-skip-browser-warning": "true",

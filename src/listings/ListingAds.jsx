@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import config from "../../config";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
@@ -8,7 +9,7 @@ const ListingAds = () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `https://4a42-115-98-88-60.ngrok-free.app/listings/getRandomPropertiesAds`,
+        `${config.ngrok_url}/listings/getRandomPropertiesAds`,
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
