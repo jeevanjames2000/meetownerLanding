@@ -11,15 +11,11 @@ const App = () => {
       setSellers([]);
       try {
         const response = await fetch(
-          `${config.ngrok_url}/listings/getRecomendedSellers`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/listings/getMostPropertiesSeller`
         );
         const data = await response.json();
-        setSellers(data.results);
+        console.log("data: ", data);
+        setSellers(data.sellers);
       } catch (err) {
         console.error("Failed to fetch properties:", err);
       }
@@ -58,8 +54,8 @@ const App = () => {
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                   <img
                     src={
-                      seller.image
-                        ? `https://api.meetowner.in/uploads/${seller.image}`
+                      seller.photo
+                        ? `https://api.meetowner.in/uploads/${seller.photo}`
                         : `https://placehold.co/600x400?text=${
                             seller?.name || "No Image Found"
                           }`
@@ -80,7 +76,7 @@ const App = () => {
                         {seller.name}
                       </p>
                       <p className="text-xs text-gray-600">
-                        Properties - {seller.id}
+                        Properties - {seller.property_count}
                       </p>
                     </div>
                     <div className="text-right border-l border-gray-500 pl-3">

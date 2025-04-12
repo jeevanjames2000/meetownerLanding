@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
+import config from "../../config";
 const PropertyAds = () => {
   const { state: property } = useLocation();
   const [videos, setVideos] = useState([]);
@@ -45,12 +46,7 @@ const PropertyAds = () => {
     setProperties([]);
     try {
       const response = await fetch(
-        `https://4a42-115-98-88-60.ngrok-free.app/listings/getPropertiesByUserID?user_id=${property?.user_id}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
+        `${config.awsApiUrl}/listings/getPropertiesByUserID?user_id=${property?.user_id}`
       );
       const data = await response.json();
       setProperties(data);

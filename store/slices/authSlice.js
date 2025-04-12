@@ -4,6 +4,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     userDetails: null,
+    accessToken: null,
     loggedIn: null,
     userImage: null,
     location: "",
@@ -32,6 +33,12 @@ const authSlice = createSlice({
     setCityId: (state, action) => {
       state.city_Id = action.payload;
     },
+    setAuthData: (state, action) => {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
   },
 });
 export const {
@@ -41,5 +48,6 @@ export const {
   setUserImage,
   setSubscriptionDetails,
   setCityId,
+  setAuthData,
 } = authSlice.actions;
 export default authSlice.reducer;

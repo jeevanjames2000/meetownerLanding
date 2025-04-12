@@ -37,12 +37,7 @@ const PropertyListing = () => {
         const isSellTab = activeTab === "Latest" || activeTab === "Sell";
         const propertyFor = isSellTab ? "Sell" : "Rent";
         const response = await fetch(
-          `${config.ngrok_url}/listings/getLatestProperties?property_for=${propertyFor}`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/listings/getLatestProperties?property_for=${propertyFor}`
         );
         const data = await response.json();
         setProperty(data.properties);
@@ -182,13 +177,13 @@ const PropertyListing = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  {/* <h3 className="text-xl text-[#1D3A76] text-left font-semibold mb-2">
-                  {property.description}
-                </h3> */}
                   <div className="flex items-center text-gray-500 mb-3">
                     <FaMapMarkerAlt className="mr-2 text-gray-700" />
                     <span>{property.location_id}</span>
                   </div>
+                  <h3 className="text-xl font-bold text-[#1D3A76] text-left  mb-2">
+                    {property.property_name}
+                  </h3>
                   <div className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700">
                     <div className="flex items-center">
                       <FaBed className="mr-2" /> {property.bedrooms} Beds

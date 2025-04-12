@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import config from "../../config";
+import { useNavigate } from "react-router-dom";
 const properties = [
   {
     id: 1,
@@ -63,12 +64,7 @@ const HousingPicks = () => {
       setProperty([]);
       try {
         const response = await fetch(
-          `${config.ngrok_url}/listings/getBestMeetowner`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/listings/getBestMeetowner`
         );
         const data = await response.json();
         setProperty(data.results);
@@ -78,6 +74,13 @@ const HousingPicks = () => {
     };
     fetchLatestProperties();
   }, []);
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -116,6 +119,7 @@ const HousingPicks = () => {
                         property?.property_name || "No Image Found"
                       }`
                 }
+                onClick={() => handleNavigation(property)}
                 alt={property?.property_name}
                 crossOrigin="anonymous"
                 className="w-full h-full object-cover"

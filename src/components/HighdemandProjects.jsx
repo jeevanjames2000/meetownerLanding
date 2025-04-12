@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FaMapMarkerAlt,
   FaRulerCombined,
@@ -13,6 +13,8 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useNavigate } from "react-router-dom";
+import config from "../../config";
 const App = () => {
   const projects = [
     {
@@ -88,6 +90,30 @@ const App = () => {
         "https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
     },
   ];
+  const [property, setProperty] = useState([]);
+
+  useEffect(() => {
+    const fetchLatestProperties = async () => {
+      setProperty([]);
+      try {
+        const response = await fetch(
+          `${config.awsApiUrl}/listings/getHighDemandProjects`
+        );
+        const data = await response.json();
+        setProperty(data.results);
+      } catch (err) {
+        console.error("Failed to fetch properties:", err);
+      }
+    };
+    fetchLatestProperties();
+  }, []);
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="relative">
@@ -125,17 +151,33 @@ const App = () => {
         }}
         className="mt-6"
       >
-        {projects.map((project, index) => (
+        {property.map((project, index) => (
           <SwiperSlide key={index}>
             <div className="relative bg-white shadow-lg rounded-lg overflow-hidden group">
               <img
-                src={project.image}
-                alt={project.title}
+                src={
+                  project.image
+                    ? `https://api.meetowner.in/uploads/${project.image}`
+                    : `https://placehold.co/600x400?text=${
+                        project?.property_name || "No Image Found"
+                      }`
+                }
+                onClick={() => handleNavigation(project)}
+                alt={project?.property_name}
+                crossOrigin="anonymous"
                 className="w-full h-40 object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `https://placehold.co/600x400?text=${
+                    project?.property_name || "No Image Found"
+                  }`;
+                }}
               />
-
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="bg-white text-[#1D3A76] px-4 py-2 rounded-full font-semibold shadow-md hover:bg-[#1D3A76] hover:text-white transition-all">
+                <button
+                  onClick={() => handleNavigation(project)}
+                  className="bg-white text-[#1D3A76] px-4 py-2 rounded-full font-semibold shadow-md hover:bg-[#1D3A76] hover:text-white transition-all"
+                >
                   View Details
                 </button>
               </div>

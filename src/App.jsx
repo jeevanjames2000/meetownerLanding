@@ -13,6 +13,7 @@ import Listings from "./listings/Listings";
 import { Provider } from "react-redux";
 import store from "../store/store";
 import Property from "./property/Property";
+import LoginWrapper from "./auth/LoginWrapper";
 function Home() {
   return (
     <>
@@ -35,6 +36,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginWrapper />} />
           <Route path="/listings" element={<Listings />} />
           <Route path="/property" element={<Property />} />
         </Routes>

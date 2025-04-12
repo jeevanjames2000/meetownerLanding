@@ -4,8 +4,6 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { IoChevronDownOutline, IoSearch } from "react-icons/io5";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
-import video1 from "../assets/Images/Bannercorousal1.mp4";
-import video2 from "../assets/Images/Bannercorousal2.mp4";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import {
   vizagLocalities,
@@ -19,8 +17,8 @@ import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
+import MeetOwner from "../assets/Images/WhatsApp Image 2025-04-12 at 3.44.38 PM.jpeg";
 export default function SearchBar() {
-  const searchData = useSelector((state) => state.search);
   const Data = useSelector((state) => state.search.tab);
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
@@ -39,7 +37,6 @@ export default function SearchBar() {
   const videoRefs = useRef([]);
   const sliderRef = useRef(null);
   const tabs = ["Buy", "Rent", "Plot", "Commercial"];
-  const videos = [video1, video2];
   const CustomPrevArrow = ({ onClick }) => (
     <FaAngleLeft
       onClick={onClick}
@@ -93,7 +90,6 @@ export default function SearchBar() {
     "Coimbatore",
     "Ahmedabad",
     "Visakhapatanam",
-    "Anakapalli",
     "Vijayawada",
     "Guntur",
     "Rajamundry",
@@ -142,19 +138,11 @@ export default function SearchBar() {
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.ngrok_url}/api/search?query=${searchInput}&city=${location}`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/api/search?query=${searchInput}&city=${location}`
         );
-        console.log("response: ", response);
         const data = await response.json();
         setLocalities(data);
-      } catch (err) {
-        console.error("Failed to fetch localities:", err);
-      }
+      } catch (err) {}
     };
     fetchLocalities();
   }, [searchInput, location]);
@@ -177,12 +165,29 @@ export default function SearchBar() {
         const location = `${data.city}, ${data.principalSubdivision}, ${data.countryName}`;
       },
       (error) => {
-        console.error("Location error:", error);
         alert("Please enable location services.");
       }
     );
   };
   const [localites, setLocalities] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [isError, setIsError] = useState(false);
+  useEffect(() => {
+    const fetchLatestAds = async () => {
+      setVideos([]);
+      try {
+        const response = await fetch(
+          `${config.awsApiUrl}/awsS3/getAllAdVideos`
+        );
+        const data = await response.json();
+        setVideos(data.results);
+      } catch (err) {
+        setIsError(true);
+        console.error("Failed to fetch properties:", err);
+      }
+    };
+    fetchLatestAds();
+  }, []);
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
       <Slider {...settings} ref={sliderRef}>
@@ -196,7 +201,7 @@ export default function SearchBar() {
                 muted={isMuted}
                 className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
               >
-                <source src={video} type="video/mp4" />
+                <source src={video.video_url} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -204,6 +209,16 @@ export default function SearchBar() {
           </div>
         ))}
       </Slider>
+      {isError && (
+        <div className="relative">
+          <img
+            src={MeetOwner}
+            alt="Property"
+            crossOrigin="anonymous"
+            className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
+          />
+        </div>
+      )}
       <div
         className="relative bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3 
                    bg-white/30 backdrop-blur-lg rounded-lg shadow-xl p-3 sm:p-4 border border-white/20 z-10"
@@ -233,6 +248,36 @@ export default function SearchBar() {
                 <span>{location}</span>
                 <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
               </button>
+              {isLocationOpen && (
+                <ul
+                  className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {locations.map((option) => {
+                    const isDisabled = option === "Top Cities";
+                    return (
+                      <li
+                        key={option}
+                        onClick={() => {
+                          if (!isDisabled) {
+                            setLocation(option);
+                            setIsLocationOpen(false);
+                            setSearchInput("");
+                            setIsSearchDropdownOpen(false);
+                          }
+                        }}
+                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                          isDisabled
+                            ? "text-gray-400 cursor-default"
+                            : "hover:bg-[#1D3A76] hover:text-white cursor-default"
+                        }`}
+                      >
+                        {option}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}{" "}
               {isLocationOpen && (
                 <ul
                   className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"

@@ -11,50 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Pagination } from "swiper/modules";
 import config from "../../config";
-const dealProperties = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    title: "Elegant Studio Flat",
-    location: "Hyderabad, Telangana, India",
-    price: "31988000",
-    sqft: "1,200",
-    facing: "East Facing",
-    type: "BHK",
-    parking: true,
-    bathrooms: true,
-    tag: "For Sale",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    title: "Elegant Studio Flat",
-    location: "Hyderabad, Telangana, India",
-    price: "310000",
-    sqft: "1,200",
-    facing: "East Facing",
-    type: "BHK",
-    parking: true,
-    bathrooms: true,
-    tag: "For Sale",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    title: "Elegant Studio Flat",
-    location: "Hyderabad, Telangana, India",
-    price: "310000",
-    sqft: "1,200",
-    facing: "East Facing",
-    type: "BHK",
-    parking: true,
-    bathrooms: true,
-    tag: "For Sale",
-  },
-];
+
 const formatPrice = (price) => {
   if (price >= 10000000) {
     return (price / 10000000).toFixed(2) + " Cr";
@@ -71,12 +28,7 @@ const DealProperties = () => {
       setProperty([]);
       try {
         const response = await fetch(
-          `${config.ngrok_url}/listings/getBestDeals`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/listings/getBestDeals`
         );
         const data = await response.json();
         setProperty(data.results);

@@ -19,6 +19,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import config from "../../config";
 const PropertyBody = () => {
   const { state: property } = useLocation();
   const facilityIconMap = {
@@ -62,12 +63,7 @@ const PropertyBody = () => {
     const fetchFloorPlans = async () => {
       try {
         const response = await fetch(
-          `https://4a42-115-98-88-60.ngrok-free.app/listings/getAllFloorPlans/${property?.unique_property_id}`,
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
+          `${config.awsApiUrl}/listings/getAllFloorPlans/${property?.unique_property_id}`
         );
         const data = await response.json();
         setFloorPlan(data[0]);

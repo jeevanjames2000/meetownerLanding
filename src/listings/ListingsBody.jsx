@@ -109,7 +109,7 @@ const PropertyCard = memo(
                     {property.property_name}
                   </p>
                   <p className="text-[#1D3A76] font-semibold text-[18px]">
-                    {property.project_name || property.listing_title}{" "}
+                    {property.project_name || ""}{" "}
                     <span className="text-[#A4A4A4] font-medium text-[15px]">
                       Rs: {formatToIndianCurrency(property.property_cost)}{" "}
                       {property.price_negotiable && " (Negotiable)"}
@@ -422,7 +422,6 @@ const AdsCard = memo(() => {
 });
 function App() {
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const [page, setPage] = useState(1);
@@ -445,7 +444,7 @@ function App() {
       setLoading(true);
       const response = await fetch(
         `${
-          config.ngrok_url
+          config.awsApiUrl
         }/listings/getAllPropertiesByType?page=${page}&property_for=${
           searchData?.tab === "Latest"
             ? "Sell"
@@ -464,12 +463,7 @@ function App() {
           searchData?.budget || ""
         }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
           searchData?.occupancy
-        }&property_status=1`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
+        }&property_status=1`
       );
       const res = await response.json();
       const newData = res.properties || [];
@@ -483,7 +477,6 @@ function App() {
         setHasMore(false);
       }
     } catch (error) {
-      console.error("Error fetching properties:", error);
       setData([]);
     } finally {
       setTimeout(() => {
@@ -633,12 +626,12 @@ function App() {
           </p>
         </div>
         <div className="relative inline-block text-left">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          <div className="flex items-center gap-2 ">
             <p className="text-[#000000] whitespace-nowrap">Sort by :</p>
-            <div className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg px-4 py-2 pr-8 flex items-center min-w-[160px]">
+            <div
+              className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg cursor-pointer px-4 py-2 pr-8 flex items-center min-w-[160px]"
+              onClick={() => setIsOpen(!isOpen)}
+            >
               <span className="text-sm text-gray-800">{selected}</span>
               <ChevronDown
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"

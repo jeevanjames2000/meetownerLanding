@@ -1,50 +1,38 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+import config from "../../config";
+
 const App = () => {
-  const images = [
-    [
-      {
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-    ],
-    [
-      {
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-      {
-        image:
-          "https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-      },
-    ],
-  ];
-  const flatImages = images.flat();
+  const [property, setProperty] = useState([]);
+
+  useEffect(() => {
+    const fetchMeetownerExclusive = async () => {
+      setProperty([]);
+      try {
+        const response = await fetch(
+          `${config.awsApiUrl}/listings/getMeetOwnerExclusive`
+        );
+        const data = await response.json();
+        setProperty(data.results);
+      } catch (err) {
+        console.error("Failed to fetch properties:", err);
+      }
+    };
+    fetchMeetownerExclusive();
+  }, []);
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="relative">
@@ -82,17 +70,33 @@ const App = () => {
         }}
         className="mt-6"
       >
-        {flatImages.map((item, index) => (
+        {property.map((property, index) => (
           <SwiperSlide key={index}>
             <div className="relative bg-white shadow-lg rounded-lg overflow-hidden group">
               <img
-                src={item.image}
-                alt={`Slide ${index + 1}`}
+                src={
+                  property.image
+                    ? `https://api.meetowner.in/uploads/${property.image}`
+                    : `https://placehold.co/600x400?text=${
+                        property?.property_name || "No Image Found"
+                      }`
+                }
+                alt={property?.property_name}
+                crossOrigin="anonymous"
                 className="w-full h-40 object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `https://placehold.co/600x400?text=${
+                    property?.property_name || "No Image Found"
+                  }`;
+                }}
               />
 
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="bg-white text-[#1D3A76] px-4 py-2 rounded-full font-semibold shadow-md hover:bg-[#1D3A76] hover:text-white transition-all">
+                <button
+                  className="bg-white text-[#1D3A76] px-4 py-2 rounded-full font-semibold shadow-md hover:bg-[#1D3A76] hover:text-white transition-all"
+                  onClick={() => handleNavigation(property)}
+                >
                   View Details
                 </button>
               </div>

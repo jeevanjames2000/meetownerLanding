@@ -9,12 +9,7 @@ const ListingAds = () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.ngrok_url}/listings/getRandomPropertiesAds`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
+        `${config.awsApiUrl}/listings/getRandomPropertiesAds`
       );
       const data = await response.json();
       setProperty(data.results);
