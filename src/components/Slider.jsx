@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaParking, FaBed, FaBath } from "react-icons/fa";
-import { IoIosHeartEmpty } from "react-icons/io";
+import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -11,6 +11,7 @@ import "swiper/css";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
 import config from "../../config";
+import axios from "axios";
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
@@ -49,6 +50,28 @@ const PropertyListing = () => {
     };
     fetchLatestProperties();
   }, [activeTab, searchData.property_for]);
+  const [likedProperties, setLikedProperties] = useState([]);
+  useEffect(() => {
+    const fetchLikedProperties = async () => {
+      const data = localStorage.getItem("user");
+      if (!data) return;
+      const { userDetails } = JSON.parse(data);
+      try {
+        const response = await axios.get(
+          `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+        );
+        const data = await response.data;
+        const liked = data.favourites;
+        if (liked && Array.isArray(liked)) {
+          const likedIds = liked.map((fav) => fav.property_id);
+          setLikedProperties(likedIds);
+        }
+      } catch (error) {
+        console.error("Failed to fetch liked properties:", error);
+      }
+    };
+    fetchLikedProperties();
+  }, []);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(
@@ -63,6 +86,62 @@ const PropertyListing = () => {
       })
     );
   }, [activeTab, dispatch]);
+  const handleEnquireNow = async (property) => {
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        alert("User not logged in!");
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        name: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+        interested_status: 4,
+        property_user_id: property.user_id,
+      };
+      const res = await axios.post(
+        `${config.awsApiUrl}/enquiry/postEnquiry`,
+        payload
+      );
+      console.log("Enquiry Response:", res.data);
+      alert("Enquiry submitted successfully");
+    } catch (err) {
+      console.error("Enquiry Failed:", err);
+      alert("Something went wrong while submitting enquiry");
+    }
+  };
+  const handleLike = async (property) => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      alert("User not logged in!");
+      return;
+    }
+    const { userDetails } = JSON.parse(data);
+    const isAlreadyLiked = likedProperties.includes(
+      property.unique_property_id
+    );
+    setLikedProperties((prev) =>
+      isAlreadyLiked
+        ? prev.filter((id) => id !== property.unique_property_id)
+        : [...prev, property.unique_property_id]
+    );
+    const payload = {
+      property_id: property.unique_property_id,
+      user_id: userDetails.user_id,
+      property_name: property.property_name,
+      property_cost: property.property_cost,
+      status: isAlreadyLiked ? 1 : 0,
+    };
+    try {
+      await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+    } catch (err) {
+      console.error("Error updating interest:", err);
+    }
+  };
   return (
     <div className="max-w-7xl z-auto mx-auto px-4 py-1">
       <div className="mb-8">
@@ -136,7 +215,7 @@ const PropertyListing = () => {
           768: { slidesPerView: 2 },
           1024: { slidesPerView: 3 },
         }}
-        className="pb-10 overflow-hidden h-[480px]"
+        className="pb-10 overflow-hidden h-[500px]"
       >
         {loading ? (
           <div className="text-center py-10 text-[#1D3A76] font-semibold">
@@ -172,8 +251,18 @@ const PropertyListing = () => {
                     </span>
                   </div>
                   <div className="absolute top-4 right-4 flex space-x-2">
-                    <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500" />
-                    <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500" />
+                    {likedProperties.includes(property.unique_property_id) ? (
+                      <IoIosHeart
+                        onClick={() => handleLike(property)}
+                        className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 cursor-pointer"
+                      />
+                    ) : (
+                      <IoIosHeartEmpty
+                        onClick={() => handleLike(property)}
+                        className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 cursor-pointer"
+                      />
+                    )}
+                    <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500 cursor-pointer" />
                   </div>
                 </div>
                 <div className="p-4">
@@ -212,7 +301,10 @@ const PropertyListing = () => {
                         ? " / month"
                         : ""}
                     </div>
-                    <button className="bg-[#1D3A76] text-white px-6 py-2 rounded-full hover:bg-yellow-500 hover:text-black">
+                    <button
+                      onClick={() => handleEnquireNow(property)}
+                      className="bg-[#1D3A76] text-white px-6 py-2 rounded-full hover:bg-yellow-500 hover:text-black"
+                    >
                       Enquire Now
                     </button>
                   </div>

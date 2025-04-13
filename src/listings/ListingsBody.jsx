@@ -23,10 +23,10 @@ import {
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { IoIosHeartEmpty } from "react-icons/io";
+import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   List,
   AutoSizer,
@@ -35,267 +35,8 @@ import {
   WindowScroller,
 } from "react-virtualized";
 import config from "../../config";
-const PropertyCard = memo(
-  ({
-    property,
-    index,
-    toggleReadMore,
-    toggleFacilities,
-    handleNavigation,
-    readMoreStates,
-    expandedCards,
-  }) => {
-    const showReadMore = readMoreStates[index];
-    const shortDescription = property.description?.slice(0, 180);
-    const formatToIndianCurrency = (value) => {
-      if (!value || isNaN(value)) return "N/A";
-      const numValue = parseFloat(value);
-      if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
-      if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
-      if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
-      return numValue.toString();
-    };
-    return (
-      <div
-        key={`property-${index}`}
-        className="flex flex-col md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
-        onClick={() => handleNavigation(property)}
-      >
-        <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          <div className="flex flex-col md:flex-row gap-5">
-            <div className="w-full md:w-[300px]">
-              <div className="rounded-lg overflow-hidden mb-4 relative">
-                <img
-                  src={
-                    property.image
-                      ? `https://api.meetowner.in/uploads/${property.image}`
-                      : `https://placehold.co/600x400?text=${
-                          property?.property_name || "No Image Found"
-                        }`
-                  }
-                  alt="Property"
-                  crossOrigin="anonymous"
-                  className="w-full h-70 object-cover rounded-md"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://placehold.co/600x400?text=${
-                      property?.property_name || "No Image Found"
-                    }`;
-                  }}
-                />
-              </div>
-            </div>
-            <div className="flex-1 max-w-full md:max-w-[550px]">
-              <div className="mb-3 text-left">
-                <div className="flex justify-between items-center">
-                  <p className="text-[#1D3A76] font-bold text-[15px]">
-                    {property.sub_type === "Apartment"
-                      ? `${property.bedrooms} BHK ${
-                          property.property_type
-                            ? property.property_type
-                            : property.sub_type || ""
-                        } for ${property.property_for}`
-                      : `${property.sub_type} for ${property.property_for}`}{" "}
-                    in {property.locality_name}, {property.google_address}
-                  </p>
-                  <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
-                    <IoIosHeartEmpty className="text-xl" />
-                    <MdOutlineVerified className="text-xl text-green-500" />
-                    <p>Verified</p>
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <p className="text-[#A4A4A4] font-semibold text-[18px]">
-                    {property.property_name}
-                  </p>
-                  <p className="text-[#1D3A76] font-semibold text-[18px]">
-                    {property.project_name || ""}{" "}
-                    <span className="text-[#A4A4A4] font-medium text-[15px]">
-                      Rs: {formatToIndianCurrency(property.property_cost)}{" "}
-                      {property.price_negotiable && " (Negotiable)"}
-                    </span>
-                    <span className="text-[#A4A4A4] font-medium text-[15px] ml-2">
-                      {property?.loan_facility === "Yes"
-                        ? "EMI option Available"
-                        : ""}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <div className="mb-4 relative">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-[#A4A4A4] font-medium text-[15px]">
-                    Property Details
-                  </h4>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFacilities(index);
-                    }}
-                    className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-sm flex items-center gap-1"
-                  >
-                    {expandedCards[index] ? "Show Less" : "Show All"}
-                    {expandedCards[index] ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full">
-                  {(expandedCards[index]
-                    ? [
-                        {
-                          icon: <Ruler className="w-4 h-4" />,
-                          title: property?.builtup_area
-                            ? "Built-up Area"
-                            : "Built-up Units",
-                          value: `${
-                            property?.builtup_area ||
-                            property?.builtup_unit ||
-                            "N/A"
-                          } ${property?.area_units || ""}`,
-                        },
-                        {
-                          icon: <Home className="w-4 h-4" />,
-                          title: "Facing",
-                          value: property?.facing || "N/A",
-                        },
-                        {
-                          icon: <Key className="w-4 h-4" />,
-                          title: "Property In",
-                          value: property?.property_in || "N/A",
-                        },
-                        {
-                          icon: <Building className="w-4 h-4" />,
-                          title: "Sub Type",
-                          value: property?.sub_type || "N/A",
-                        },
-                        {
-                          icon: <CreditCard className="w-4 h-4" />,
-                          title: "Loan Facility",
-                          value:
-                            property?.loan_facility === "Yes"
-                              ? "Available"
-                              : "Not Available",
-                        },
-                        {
-                          icon: <ShieldCheck className="w-4 h-4" />,
-                          title: "Furnishing Status",
-                          value: property?.furnished_status || "N/A",
-                        },
-                      ]
-                    : [
-                        {
-                          icon: <Ruler className="w-4 h-4" />,
-                          title: property?.builtup_area
-                            ? "Built-up Area"
-                            : "Built-up Units",
-                          value: `${
-                            property?.builtup_area ||
-                            property?.builtup_unit ||
-                            "N/A"
-                          } ${property?.area_units || ""}`,
-                        },
-                        {
-                          icon: <Home className="w-4 h-4" />,
-                          title: "Facing",
-                          value: property?.facing || "N/A",
-                        },
-                        {
-                          icon: <Key className="w-4 h-4" />,
-                          title: "Property In",
-                          value: property?.property_in || "N/A",
-                        },
-                        {
-                          icon: <Building2 className="w-4 h-4" />,
-                          title: "Sub Type",
-                          value: property?.sub_type || "N/A",
-                        },
-                        {
-                          icon: <CreditCard className="w-4 h-4" />,
-                          title: "Loan Facility",
-                          value:
-                            property?.loan_facility === "Yes"
-                              ? "Available"
-                              : "Not Available",
-                        },
-                        {
-                          icon: <ShieldCheck className="w-4 h-4" />,
-                          title: "Furnishing Status",
-                          value: property?.furnished_status || "N/A",
-                        },
-                      ].slice(0, 3)
-                  ).map((detail, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-inherit w-full p-2 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col sm:basis-1/3"
-                    >
-                      <span className="text-[11px] text-[#A4A4A4] mb-[2px]">
-                        {detail.title}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {detail.icon}
-                        <span className="text-sm text-[#1D3A76]">
-                          {detail.value}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="mb-4">
-                <p className="text-[#A4A4A4] text-sm text-left">
-                  {showReadMore
-                    ? property.description
-                    : `${shortDescription}... `}
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleReadMore(index);
-                    }}
-                    className="text-[#1D3A76] font-normal cursor-pointer"
-                  >
-                    {showReadMore ? "Read Less..." : "Read More..."}
-                  </span>
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert("Schedule Visit clicked");
-                  }}
-                  className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Schedule Visit
-                </p>
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert("Contact Seller clicked");
-                  }}
-                  className="sm:flex-1 transition text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Contact Seller
-                </p>
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert("Interest clicked");
-                  }}
-                  className="sm:flex-1 transition text-[15px] bg-[#E28B6D] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Interest
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
+import axios from "axios";
+import ScheduleFormModal from "../utilities/ScheduleForm";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -420,26 +161,292 @@ const AdsCard = memo(() => {
     </div>
   );
 });
+const PropertyCard = memo(
+  ({
+    property,
+    index,
+    toggleReadMore,
+    toggleFacilities,
+    handleNavigation,
+    readMoreStates,
+    expandedCards,
+    likedProperties,
+    handleLike,
+    handleScheduleVisit,
+    handleContactSeller,
+  }) => {
+    const showReadMore = readMoreStates[index];
+    const shortDescription = property.description?.slice(0, 180);
+    const formatToIndianCurrency = (value) => {
+      if (!value || isNaN(value)) return "N/A";
+      const numValue = parseFloat(value);
+      if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+      if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+      if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+      return numValue.toString();
+    };
+    return (
+      <div
+        key={`property-${index}`}
+        className="flex flex-col md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+        onClick={() => handleNavigation(property)}
+      >
+        <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="flex flex-col md:flex-row gap-5">
+            <div className="w-full md:w-[300px]">
+              <div className="rounded-lg overflow-hidden mb-4 relative">
+                <img
+                  src={
+                    property.image
+                      ? `https://api.meetowner.in/uploads/${property.image}`
+                      : `https://placehold.co/600x400?text=${
+                          property?.property_name || "No Image Found"
+                        }`
+                  }
+                  alt="Property"
+                  crossOrigin="anonymous"
+                  className="w-full h-70 object-cover rounded-md"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://placehold.co/600x400?text=${
+                      property?.property_name || "No Image Found"
+                    }`;
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex-1 max-w-full md:max-w-[550px]">
+              <div className="mb-3 text-left">
+                <div className="flex justify-between items-center">
+                  <p className="text-[#1D3A76] font-bold text-[15px]">
+                    {property.sub_type === "Apartment"
+                      ? `${property.bedrooms} BHK ${
+                          property.property_type
+                            ? property.property_type
+                            : property.sub_type || ""
+                        } for ${property.property_for}`
+                      : `${property.sub_type} for ${property.property_for}`}{" "}
+                    in {property.locality_name}, {property.google_address}
+                  </p>
+                  <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
+                    {likedProperties.includes(property.unique_property_id) ? (
+                      <IoIosHeart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(property);
+                        }}
+                        className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 cursor-pointer"
+                      />
+                    ) : (
+                      <IoIosHeartEmpty
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(property);
+                        }}
+                        className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 cursor-pointer"
+                      />
+                    )}
+                    <MdOutlineVerified className="text-xl text-green-500" />
+                    <p>Verified</p>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-[#A4A4A4] font-semibold text-[18px]">
+                    {property.property_name}
+                  </p>
+                  <p className="text-[#1D3A76] font-semibold text-[18px]">
+                    {property.project_name || ""}{" "}
+                    <span className="text-[#A4A4A4] font-medium text-[15px]">
+                      Rs: {formatToIndianCurrency(property.property_cost)}{" "}
+                      {property.price_negotiable && " (Negotiable)"}
+                    </span>
+                    <span className="text-[#A4A4A4] font-medium text-[15px] ml-2">
+                      {property?.loan_facility === "Yes"
+                        ? "EMI option Available"
+                        : ""}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4 relative">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-[#A4A4A4] font-medium text-[15px]">
+                    Property Details
+                  </h4>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFacilities(index);
+                    }}
+                    className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-sm flex items-center gap-1"
+                  >
+                    {expandedCards[index] ? "Show Less" : "Show All"}
+                    {expandedCards[index] ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full">
+                  {(expandedCards[index]
+                    ? [
+                        {
+                          icon: <Ruler className="w-4 h-4" />,
+                          title: property?.builtup_area
+                            ? "Built-up Area"
+                            : "Built-up Units",
+                          value: `${
+                            property?.builtup_area ||
+                            property?.builtup_unit ||
+                            "N/A"
+                          } ${property?.area_units || ""}`,
+                        },
+                        {
+                          icon: <Home className="w-4 h-4" />,
+                          title: "Facing",
+                          value: property?.facing || "N/A",
+                        },
+                        {
+                          icon: <Key className="w-4 h-4" />,
+                          title: "Property In",
+                          value: property?.property_in || "N/A",
+                        },
+                        {
+                          icon: <Building className="w-4 h-4" />,
+                          title: "Sub Type",
+                          value: property?.sub_type || "N/A",
+                        },
+                        {
+                          icon: <CreditCard className="w-4 h-4" />,
+                          title: "Loan Facility",
+                          value:
+                            property?.loan_facility === "Yes"
+                              ? "Available"
+                              : "Not Available",
+                        },
+                        {
+                          icon: <ShieldCheck className="w-4 h-4" />,
+                          title: "Furnishing Status",
+                          value: property?.furnished_status || "N/A",
+                        },
+                      ]
+                    : [
+                        {
+                          icon: <Ruler className="w-4 h-4" />,
+                          title: property?.builtup_area
+                            ? "Built-up Area"
+                            : "Built-up Units",
+                          value: `${
+                            property?.builtup_area ||
+                            property?.builtup_unit ||
+                            "N/A"
+                          } ${property?.area_units || ""}`,
+                        },
+                        {
+                          icon: <Home className="w-4 h-4" />,
+                          title: "Facing",
+                          value: property?.facing || "N/A",
+                        },
+                        {
+                          icon: <Key className="w-4 h-4" />,
+                          title: "Property In",
+                          value: property?.property_in || "N/A",
+                        },
+                      ]
+                  ).map((detail, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-inherit w-full p-2 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col sm:basis-1/3"
+                    >
+                      <span className="text-[11px] text-[#A4A4A4] mb-[2px]">
+                        {detail.title}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {detail.icon}
+                        <span className="text-sm text-[#1D3A76]">
+                          {detail.value}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="text-[#A4A4A4] text-sm text-left">
+                  {showReadMore
+                    ? property.description
+                    : `${shortDescription}... `}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleReadMore(index);
+                    }}
+                    className="text-[#1D3A76] font-normal cursor-pointer"
+                  >
+                    {showReadMore ? "Read Less..." : "Read More..."}
+                  </span>
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <p
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleScheduleVisit(property);
+                  }}
+                  className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                >
+                  Schedule Visit
+                </p>
+                <p
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContactSeller(property);
+                  }}
+                  className="sm:flex-1 transition text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                >
+                  Contact Seller
+                </p>
+                <p
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(property);
+                  }}
+                  className="sm:flex-1 transition text-[15px] bg-[#E28B6D] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                >
+                  Interest
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
 function App() {
+  const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("Relevance");
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
   const [readMoreStates, setReadMoreStates] = useState({});
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [likedProperties, setLikedProperties] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState("Relevance");
   const cardsContainerRef = useRef(null);
   const bottomRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const options = [
     "Relevance",
     "Price: Low to High",
     "Price: High to Low",
     "Newest First",
   ];
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -467,106 +474,174 @@ function App() {
       );
       const res = await response.json();
       const newData = res.properties || [];
-      if (res.properties?.length > 0) {
-        setData((prevData) =>
-          page === 1 ? newData : [...prevData, ...newData]
-        );
-        setHasMore(true);
-      } else {
-        setData([]);
-        setHasMore(false);
-      }
+      setData((prevData) => (page === 1 ? newData : [...prevData, ...newData]));
+      setHasMore(newData.length > 0);
     } catch (error) {
       setData([]);
+      setHasMore(false);
     } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 3000);
+      setLoading(false);
     }
-  };
-
+  }, [
+    page,
+    searchData.location,
+    searchData?.bhk,
+    searchData.property_in,
+    searchData.tab,
+    searchData.occupancy,
+    searchData.sub_type,
+    searchData?.budget,
+    selected,
+  ]);
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const fetchLikedProperties = async () => {
+      const data = localStorage.getItem("user");
+      if (!data) return;
+      const { userDetails } = JSON.parse(data);
+      try {
+        const response = await axios.get(
+          `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+        );
+        const liked = response.data.favourites || [];
+        const likedIds = liked.map((fav) => fav.property_id);
+        setLikedProperties(likedIds);
+      } catch (error) {
+        console.error("Failed to fetch liked properties:", error);
+      }
+    };
+    fetchLikedProperties();
   }, []);
   useEffect(() => {
-    setPage(1);
-  }, [
-    selected,
-    searchData.location,
-    searchData?.bhk,
-    searchData.property_in,
-    searchData.property_for,
-    searchData.occupancy,
-    searchData.sub_type,
-    searchData?.budget,
-  ]);
-  useEffect(() => {
-    fetchProperties();
-  }, [
-    page,
-    selected,
-    searchData.location,
-    searchData?.bhk,
-    searchData.property_in,
-    searchData.property_for,
-    searchData.occupancy,
-    searchData.sub_type,
-    searchData?.budget,
-  ]);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchProperties();
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [
-    page,
-    selected,
-    searchData.location,
-    searchData?.bhk,
-    searchData.property_in,
-    searchData.property_for,
-    searchData.occupancy,
-    searchData.sub_type,
-    searchData?.budget,
-  ]);
-  const loadMoreCards = () => {
-    if (!loading && hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  };
-  useEffect(() => {
-    if (!bottomRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          loadMoreCards();
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prev) => prev + 1);
         }
       },
       { threshold: 1.0 }
     );
-    observer.observe(bottomRef.current);
+    if (bottomRef.current) {
+      observer.observe(bottomRef.current);
+    }
     return () => {
       if (bottomRef.current) observer.unobserve(bottomRef.current);
     };
-  }, [bottomRef.current, hasMore, loading]);
+  }, [hasMore, loading]);
+  useEffect(() => {
+    setPage(1);
+    fetchProperties();
+  }, [
+    fetchProperties,
+    searchData.location,
+    searchData?.bhk,
+    searchData.property_in,
+    searchData.tab,
+    searchData.occupancy,
+    searchData.sub_type,
+    searchData?.budget,
+    selected,
+  ]);
   const toggleReadMore = useCallback((index) => {
     setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
   const toggleFacilities = useCallback((index) => {
     setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
-  const scrollToTop = () => {
-    if (cardsContainerRef.current) {
-      cardsContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
   const handleNavigation = useCallback(
     (property) => {
       navigate("/property", { state: property });
     },
     [navigate]
   );
-  const prepareCardsWithoutAds = useCallback(() => {
+  const handleLike = useCallback(
+    async (property) => {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        alert("User not logged in!");
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const isAlreadyLiked = likedProperties.includes(
+        property.unique_property_id
+      );
+      setLikedProperties((prev) =>
+        isAlreadyLiked
+          ? prev.filter((id) => id !== property.unique_property_id)
+          : [...prev, property.unique_property_id]
+      );
+      const payload = {
+        property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        property_name: property.property_name,
+        property_cost: property.property_cost,
+        status: isAlreadyLiked ? 1 : 0,
+      };
+      try {
+        await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+      } catch (err) {
+        console.error("Error updating interest:", err);
+        setLikedProperties((prev) =>
+          isAlreadyLiked
+            ? [...prev, property.unique_property_id]
+            : prev.filter((id) => id !== property.unique_property_id)
+        );
+      }
+    },
+    [likedProperties]
+  );
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const handleScheduleVisit = (property) => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      alert("User not logged in!");
+      return;
+    }
+    setSelectedProperty(property);
+    setModalOpen(true);
+  };
+  const handleModalSubmit = async (formData) => {
+    try {
+      const { userDetails } = JSON.parse(localStorage.getItem("user"));
+      const payload = {
+        property_id: selectedProperty.unique_property_id,
+        user_id: userDetails.user_id,
+        name: formData.name,
+        mobile: formData.phone,
+        email: formData.email,
+        property_user_id: selectedProperty.user_id,
+        shedule_date: formData.date,
+        shedule_time: formData.time,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
+      alert("Enquiry submitted successfully");
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Enquiry Failed:", err);
+      alert("Something went wrong while submitting enquiry");
+    }
+  };
+  const handleContactSeller = async (property) => {
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        alert("User not logged in!");
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        unique_property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        fullname: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      alert("Enquiry submitted successfully");
+    } catch (err) {
+      console.error("Enquiry Failed:", err);
+    }
+  };
+  const prepareCards = useCallback(() => {
     return data.map((property, index) => ({
       type: "property",
       content: (
@@ -578,6 +653,10 @@ function App() {
           handleNavigation={handleNavigation}
           readMoreStates={readMoreStates}
           expandedCards={expandedCards}
+          likedProperties={likedProperties}
+          handleLike={handleLike}
+          handleScheduleVisit={handleScheduleVisit}
+          handleContactSeller={handleContactSeller}
         />
       ),
     }));
@@ -588,10 +667,12 @@ function App() {
     toggleReadMore,
     toggleFacilities,
     handleNavigation,
+    likedProperties,
+    handleLike,
   ]);
-  const cardsWithAds = prepareCardsWithoutAds();
+  const cards = prepareCards();
   const rowRenderer = ({ index, key, style }) => {
-    const item = cardsWithAds[index];
+    const item = cards[index];
     return (
       <div
         key={key}
@@ -605,8 +686,13 @@ function App() {
       </div>
     );
   };
+  const scrollToTop = () => {
+    if (cardsContainerRef.current) {
+      cardsContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   return (
-    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%]  p-1 pt-20 relative z-0">
+    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] p-1 pt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-start md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0" />
@@ -626,7 +712,7 @@ function App() {
           </p>
         </div>
         <div className="relative inline-block text-left">
-          <div className="flex items-center gap-2 ">
+          <div className="flex items-center gap-2">
             <p className="text-[#000000] whitespace-nowrap">Sort by :</p>
             <div
               className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg cursor-pointer px-4 py-2 pr-8 flex items-center min-w-[160px]"
@@ -670,14 +756,9 @@ function App() {
                   isScrolling={isScrolling}
                   scrollTop={scrollTop}
                   width={width}
-                  rowCount={cardsWithAds.length}
+                  rowCount={cards.length}
                   rowHeight={window.innerWidth >= 768 ? 350 : 420}
                   rowRenderer={rowRenderer}
-                  onScroll={({ scrollTop, clientHeight, scrollHeight }) => {
-                    if (scrollTop + clientHeight >= scrollHeight - 100) {
-                      loadMoreCards();
-                    }
-                  }}
                 />
               )}
             </AutoSizer>
@@ -719,6 +800,11 @@ function App() {
         </div>
       )}
       <div className="w-full h-[40px]" ref={bottomRef}></div>
+      <ScheduleFormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleModalSubmit}
+      />
       <div
         onClick={scrollToTop}
         className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
