@@ -21,6 +21,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.4.1",
     "react-slick": "^0.30.3",
+    "react-toastify": "^11.0.5",
     "react-virtualized": "^9.22.6",
     "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1",

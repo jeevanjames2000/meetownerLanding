@@ -1,11 +1,9 @@
 import { useState } from "react";
-export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
+export default function ContactSeller({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    date: "",
-    time: "",
   });
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,28 +49,6 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
             placeholder="Phone"
             className="w-full border border-gray-300 rounded px-3 py-2"
             value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="date" className="block w-full text-left">
-            Schedule Date
-          </label>
-          <input
-            type="date"
-            name="date"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="time" className="block w-full text-left">
-            Schedule Time
-          </label>
-          <input
-            type="time"
-            name="time"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={formData.time}
             onChange={handleChange}
             required
           />

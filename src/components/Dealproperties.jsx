@@ -11,6 +11,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Pagination } from "swiper/modules";
 import config from "../../config";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const formatPrice = (price) => {
   if (price >= 10000000) {
@@ -38,6 +40,35 @@ const DealProperties = () => {
     };
     fetchLatestProperties();
   }, []);
+  const handleEnquireNow = async (property) => {
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.error("Please Login to Contact!");
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        name: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+        interested_status: 4,
+        property_user_id: property.user_id,
+      };
+      const res = await axios.post(
+        `${config.awsApiUrl}/enquiry/postEnquiry`,
+        payload
+      );
+      console.log("Enquiry Response:", res.data);
+
+      toast.success("Enquiry submitted successfully!");
+    } catch (err) {
+      console.error("Enquiry Failed:", err);
+      toast.error("Something went wrong while submitting enquiry");
+    }
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">
@@ -120,7 +151,10 @@ const DealProperties = () => {
                   <div className="text-xl font-bold text-[#1D3A76]">
                     ₹{formatPrice(property.property_cost)}
                   </div>
-                  <button className="bg-[#1D3A76] text-white px-4 py-2 rounded-full">
+                  <button
+                    className="bg-[#1D3A76] text-white px-4 py-2 rounded-full"
+                    onClick={() => handleEnquireNow(property)}
+                  >
                     Enquire Now
                   </button>
                 </div>

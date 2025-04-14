@@ -8,7 +8,7 @@ import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
 
-const App = () => {
+const ExclussiveCards = () => {
   const [property, setProperty] = useState([]);
 
   useEffect(() => {
@@ -134,4 +134,4 @@ const App = () => {
     </div>
   );
 };
-export default App;
+export default ExclussiveCards;

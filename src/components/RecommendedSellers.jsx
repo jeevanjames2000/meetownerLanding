@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import config from "../../config";
 
-const App = () => {
+const RecommendedSellers = () => {
   const [sellers, setSellers] = useState([]);
 
   useEffect(() => {
@@ -101,4 +101,4 @@ const App = () => {
     </div>
   );
 };
-export default App;
+export default RecommendedSellers;

@@ -15,81 +15,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
-const App = () => {
-  const projects = [
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "630 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "120 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "80 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "60 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "200 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-    {
-      title: "Moonglade",
-      location: "Hyderabad, Telangana, India",
-      size: "350 SQ.YD",
-      facing: "East Facing",
-      type: "BHK",
-      parking: "Parking",
-      bathrooms: "Bathrooms",
-      price: "₹ 31.11L",
-      image:
-        "https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=150&q=80",
-    },
-  ];
+const HighDemandProjects = () => {
   const [property, setProperty] = useState([]);
 
   useEffect(() => {
@@ -215,4 +141,4 @@ const App = () => {
     </div>
   );
 };
-export default App;
+export default HighDemandProjects;

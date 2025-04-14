@@ -37,6 +37,7 @@ import {
 import config from "../../config";
 import axios from "axios";
 import ScheduleFormModal from "../utilities/ScheduleForm";
+import { toast } from "react-toastify";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -424,7 +425,7 @@ const PropertyCard = memo(
     );
   }
 );
-function App() {
+function ListingsBody() {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
   const [page, setPage] = useState(1);
@@ -555,9 +556,10 @@ function App() {
   );
   const handleLike = useCallback(
     async (property) => {
+      console.log("property: ", property.image, property);
       const data = localStorage.getItem("user");
       if (!data) {
-        alert("User not logged in!");
+        toast.error("Please Login to Contact!");
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -573,6 +575,7 @@ function App() {
         property_id: property.unique_property_id,
         user_id: userDetails.user_id,
         property_name: property.property_name,
+        property_image: property.image,
         property_cost: property.property_cost,
         status: isAlreadyLiked ? 1 : 0,
       };
@@ -593,7 +596,7 @@ function App() {
   const handleScheduleVisit = (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
-      alert("User not logged in!");
+      toast.error("Please Login to Contact!");
       return;
     }
     setSelectedProperty(property);
@@ -613,18 +616,19 @@ function App() {
         shedule_time: formData.time,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
-      alert("Enquiry submitted successfully");
+      toast.success("Enquiry submitted successfully");
       setModalOpen(false);
     } catch (err) {
       console.error("Enquiry Failed:", err);
-      alert("Something went wrong while submitting enquiry");
+      toast.error("Something went wrong while submitting enquiry");
     }
   };
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");
       if (!data) {
-        alert("User not logged in!");
+        toast.error("Please Login to Contact!");
+
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -636,9 +640,9 @@ function App() {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
-      alert("Enquiry submitted successfully");
+      toast.success("Details submitted successfully");
     } catch (err) {
-      console.error("Enquiry Failed:", err);
+      toast.error("Something went wrong while submitting enquiry");
     }
   };
   const prepareCards = useCallback(() => {
@@ -686,10 +690,18 @@ function App() {
       </div>
     );
   };
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const scrollToTop = () => {
-    if (cardsContainerRef.current) {
-      cardsContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
     <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] p-1 pt-20 relative z-0">
@@ -805,13 +817,15 @@ function App() {
         onClose={() => setModalOpen(false)}
         onSubmit={handleModalSubmit}
       />
-      <div
-        onClick={scrollToTop}
-        className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
-      >
-        <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
-      </div>
+      {showScrollTop && (
+        <div
+          onClick={scrollToTop}
+          className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
+        >
+          <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
+        </div>
+      )}
     </div>
   );
 }
-export default App;
+export default ListingsBody;

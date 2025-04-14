@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
 import config from "../../config";
 import axios from "axios";
+import { toast } from "react-toastify";
+
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
@@ -107,14 +109,15 @@ const PropertyListing = () => {
         `${config.awsApiUrl}/enquiry/postEnquiry`,
         payload
       );
-      console.log("Enquiry Response:", res.data);
-      alert("Enquiry submitted successfully");
+      toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);
       alert("Something went wrong while submitting enquiry");
     }
   };
   const handleLike = async (property) => {
+    console.log("property: ", property.image, property);
+
     const data = localStorage.getItem("user");
     if (!data) {
       alert("User not logged in!");
@@ -133,6 +136,7 @@ const PropertyListing = () => {
       property_id: property.unique_property_id,
       user_id: userDetails.user_id,
       property_name: property.property_name,
+      property_image: property.image,
       property_cost: property.property_cost,
       status: isAlreadyLiked ? 1 : 0,
     };

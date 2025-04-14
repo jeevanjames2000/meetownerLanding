@@ -1,45 +1,98 @@
 import React, { useState, useRef, useEffect } from "react";
 import logoImage from "../assets/Images/Untitled-22.png";
 import favicon from "../assets/Images/Favicon@10x.png";
-import { HiMenu, HiX } from "react-icons/hi";
+import { HiMenu } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import Login from "../auth/Login";
-import { useSelector } from "react-redux";
 import useAuthStatus from "../auth/useAuthStatus";
 import { useNavigate } from "react-router-dom";
+import DownloadApp from "../utilities/DownloadApp";
+import Sidebar from "../utilities/SideBar";
+import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
+import axios from "axios";
+import config from "../../config";
 const Header = () => {
-  const { isLoggedIn, user } = useAuthStatus();
-  console.log("user: ", user);
+  const Data = useSelector((state) => state.auth.loggedIn);
+  const user = useSelector((state) => state.auth.userDetails);
+  console.log("sData: ", user);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const modalRef = useRef(null);
-  const searchData = useSelector((state) => state.auth);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.token) {
+      dispatch(
+        setAuthData({
+          userDetails: user.userDetails,
+          accessToken: user.token,
+          loggedIn: true,
+        })
+      );
+    }
+  }, [Data]);
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const modalRef = useRef(null);
+  const downloadRef = useRef(null);
+  const navigate = useNavigate();
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         setShowLoginModal(false);
       }
     };
-
     if (showLoginModal) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showLoginModal]);
-
   const handleClose = () => {
     setShowLoginModal(false);
   };
-  const navigate = useNavigate();
+  const handleDownloadClose = () => {
+    setShowDownloadModal(false);
+  };
+  const dispatch = useDispatch();
   const handleLogout = () => {
+    dispatch(
+      setAuthData({
+        userDetails: null,
+        accessToken: null,
+        loggedIn: false,
+      })
+    );
+    dispatch(setLoggedIn(false));
     localStorage.clear();
     navigate("/");
   };
+  const handleLike = async (property) => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      alert("User not logged in!");
+      return;
+    }
+    const { userDetails } = JSON.parse(data);
 
+    const payload = {
+      property_id: property.unique_property_id,
+      user_id: userDetails.user_id,
+      property_name: property.property_name,
+      property_image: property.image,
+      property_cost: property.property_cost,
+      status: 1,
+    };
+    try {
+      await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+    } catch (err) {
+      console.error("Error updating interest:", err);
+    }
+  };
+  const handleFavRoute = () => {
+    navigate("/favourites");
+  };
   return (
     <>
       <header className="w-full bg-white shadow-sm px-4 relative z-10">
@@ -58,10 +111,7 @@ const Header = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => {
-                window.location.href =
-                  "https://play.google.com/store/apps/details?id=com.meetowner.app";
-              }}
+              onClick={() => setShowDownloadModal(true)}
               className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-gray-800 font-medium hover:bg-[#F0AA00] transition-all items-center"
             >
               <img src={favicon} alt="Download" className="w-5 h-5 mr-2" />
@@ -78,56 +128,31 @@ const Header = () => {
                 | Free
               </span>
             </button>
-            {isLoggedIn && (
-              <p className="font-bold items-center">{user.userDetails.name}</p>
-            )}
-
-            {!isLoggedIn ? (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="border border-[#F0AA00] px-6 py-1 rounded-full font-medium cursor-pointer"
-              >
-                Login
-              </button>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="border border-[#F0AA00] px-6 py-1 rounded-full font-medium cursor-pointer"
-              >
-                Log out
-              </button>
-            )}
-
+            <div className="flex cursor-pointer" onClick={handleFavRoute}>
+              <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 " />
+              <p>Favourites</p>
+            </div>
             <button
-              className="md:hidden text-gray-800 focus:outline-none"
-              onClick={() => setMenuOpen(!menuOpen)}
+              className=" text-gray-800 focus:outline-none"
+              onClick={() => setMenuOpen(true)}
             >
-              {menuOpen ? <HiX size={28} /> : <HiMenu size={28} />}
+              <HiMenu size={26} />
             </button>
           </div>
         </div>
-
-        {menuOpen && (
-          <div className="md:hidden bg-white shadow-md absolute z-10 top-14 right-0 w-52 py-3 px-6">
-            <nav className="flex flex-col space-y-1">
-              {["Buy", "Rent", "Sell", "Download App", "Add Property"].map(
-                (label) => (
-                  <button
-                    key={label}
-                    className="text-gray-800 font-medium text-left py-2 border-b border-gray-200"
-                  >
-                    {label}
-                  </button>
-                )
-              )}
-            </nav>
-          </div>
-        )}
       </header>
+      <Sidebar
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        isLoggedIn={Data}
+        user={user}
+        setShowLoginModal={setShowLoginModal}
+        handleLogout={handleLogout}
+      />
 
       {showLoginModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
-          <div ref={modalRef} className="relative  w-[90%] max-w-sm">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
             <Login
               setShowLoginModal={setShowLoginModal}
               showLoginModal={showLoginModal}
@@ -137,8 +162,19 @@ const Header = () => {
           </div>
         </div>
       )}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={downloadRef} className="relative w-[90%] max-w-sm">
+            <DownloadApp
+              setShowDownloadModal={setShowDownloadModal}
+              showDownloadModal={showDownloadModal}
+              onClose={handleDownloadClose}
+              downloadRef={downloadRef}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
-
 export default Header;

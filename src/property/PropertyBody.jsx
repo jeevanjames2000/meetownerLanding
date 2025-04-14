@@ -1,5 +1,6 @@
 import {
   Building,
+  ChevronUp,
   Droplet,
   Dumbbell,
   Landmark,
@@ -20,6 +21,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
+import { FaBasketball } from "react-icons/fa6";
 const PropertyBody = () => {
   const { state: property } = useLocation();
   const facilityIconMap = {
@@ -35,7 +37,7 @@ const PropertyBody = () => {
     "Regular Water": <Droplet />,
     "Community Hall": <Landmark />,
     "Pet Allowed": <PawPrint />,
-    "Half Basket Ball Court": <BiBasketball />,
+    "Half Basket Ball Court": <FaBasketball />,
   };
   const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
   const [isExpanded, setIsExpanded] = useState(false);
@@ -83,6 +85,19 @@ const PropertyBody = () => {
     if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
     if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
     return numValue.toString();
+  };
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
     <div className="p-6 w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
@@ -249,6 +264,14 @@ const PropertyBody = () => {
           ></iframe>
         </div>
       </div>
+      {showScrollTop && (
+        <div
+          onClick={scrollToTop}
+          className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
+        >
+          <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
+        </div>
+      )}
     </div>
   );
 };

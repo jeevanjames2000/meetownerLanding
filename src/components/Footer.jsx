@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   FaGooglePlay,
   FaApple,
@@ -12,7 +12,16 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import favicon from "../assets/Images/Favicon@10x.png";
-const App = () => {
+import { useNavigate } from "react-router-dom";
+import QR from "../assets/Images/qrcode_193007135_71c6cda8449bb038d4fc90072469a021.png";
+const Footer = () => {
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (route) => {
+      navigate(`/${route}`);
+    },
+    [navigate]
+  );
   return (
     <footer
       className="relative py-10 overflow-x-hidden"
@@ -32,6 +41,11 @@ const App = () => {
                 <h3 className="text-lg font-bold mb-4">MEET OWNER</h3>
               </div>
               <div className="flex flex-col space-y-3">
+                <img
+                  src={QR}
+                  alt="Android QR"
+                  className="w-full h-full mx-auto"
+                />
                 <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaGooglePlay className="h-5 w-5" />
                   <div className="flex flex-col">
@@ -39,6 +53,7 @@ const App = () => {
                     <span className="text-xs">Google Play</span>
                   </div>
                 </div>
+
                 <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaApple className="h-6 w-6" />
                   <div className="flex flex-col">
@@ -53,18 +68,27 @@ const App = () => {
               <h3 className="text-lg font-bold mb-4">About</h3>
               <ul className="space-y-2 md:text-sm text-xs">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a
+                    onClick={() => handleNavigation("about")}
+                    className="hover:underline"
+                  >
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a
+                    onClick={() => handleNavigation("services")}
+                    className="hover:underline"
+                  >
                     Services
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a
+                    onClick={() => handleNavigation("careers")}
+                    className="hover:underline"
+                  >
                     Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:underline">
-                    Help
                   </a>
                 </li>
               </ul>
@@ -74,20 +98,26 @@ const App = () => {
               <h3 className="text-lg font-bold mb-4">Legal</h3>
               <ul className="space-y-2 md:text-sm text-xs">
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a
+                    onClick={() => handleNavigation("terms")}
+                    className="hover:underline"
+                  >
                     Terms and Conditions
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:underline">
+                  <a
+                    onClick={() => handleNavigation("privacy")}
+                    className="hover:underline"
+                  >
                     Privacy and Policy
                   </a>
                 </li>
-                <li>
+                {/* <li>
                   <a href="#" className="hover:underline">
                     Refund/Cancellation Policy
                   </a>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -143,7 +173,7 @@ const App = () => {
 
         <div className="flex justify-center space-x-4 mt-8 flex-wrap">
           <a
-            href="https://www.linkedin.com"
+            href="https://www.linkedin.com/company/meetownerofficial"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -151,7 +181,7 @@ const App = () => {
             <FaLinkedin className="h-5 w-5" />
           </a>
           <a
-            href="https://www.facebook.com"
+            // href="https://www.facebook.com"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -159,7 +189,7 @@ const App = () => {
             <FaFacebook className="h-5 w-5" />
           </a>
           <a
-            href="https://www.instagram.com"
+            // href="https://www.instagram.com"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -167,7 +197,7 @@ const App = () => {
             <FaInstagram className="h-5 w-5 text-red-500" />
           </a>
           <a
-            href="https://www.youtube.com"
+            // href="https://www.youtube.com"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -179,4 +209,4 @@ const App = () => {
     </footer>
   );
 };
-export default App;
+export default Footer;

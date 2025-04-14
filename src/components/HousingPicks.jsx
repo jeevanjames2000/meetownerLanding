@@ -6,30 +6,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import config from "../../config";
 import { useNavigate } from "react-router-dom";
-const properties = [
-  {
-    id: 1,
-    name: "Sunshine Vihaan",
-    location: "Manikonda, Hyderabad",
-    priceRange: "2000000",
-    priceRange2: "4000000",
-    type: "2, 3, 4 BHK Apartments",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    logo: "https://via.placeholder.com/150x50",
-  },
-  {
-    id: 2,
-    name: "Sunshine Destino",
-    location: "Manikonda, Hyderabad",
-    priceRange: "32000000",
-    priceRange2: "50000000",
-    type: "2, 3, 4 BHK Apartments",
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    logo: "https://via.placeholder.com/150x50",
-  },
-];
+import axios from "axios";
+import { toast } from "react-toastify";
+
 const HousingPicks = () => {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -81,6 +60,27 @@ const HousingPicks = () => {
     },
     [navigate]
   );
+  const handleContactSeller = async (property) => {
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.error("Please Login to Contact!");
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        unique_property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        fullname: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      toast.success("Details submitted successfully!");
+    } catch (err) {
+      toast.error("Something went wrong! Please try again");
+    }
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -172,7 +172,10 @@ const HousingPicks = () => {
                         <p className="text-white/80">{property.sub_type}</p>
                       </div>
                     </div>
-                    <button className="mt-4 !bg-[#fff] text-black px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black">
+                    <button
+                      className="mt-4 !bg-[#fff] text-black px-6 py-2 rounded-full hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black"
+                      onClick={() => handleContactSeller(property)}
+                    >
                       Contact
                     </button>
                   </div>

@@ -166,6 +166,11 @@ const Header = () => {
   };
   const handleClear = () => {
     setSearchInput("");
+    dispatch(
+      setSearchData({
+        location: "",
+      })
+    );
   };
   const getSelectedLabel = (label) => {
     const key = labelToStoreKeyMap[label];
@@ -236,43 +241,47 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
               <div className="hidden md:flex items-center gap-4 shrink-0">
-                <div
-                  className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
-                  onClick={() => setIsLocationOpen(!isLocationOpen)}
-                >
-                  <span className="hidden md:inline">{location}</span>
-                  <FaFilter />
-                </div>
-                {isLocationOpen && (
-                  <ul
-                    className="absolute z-50 left-72 top-18 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
-                    onWheel={(e) => e.stopPropagation()}
+                <div className="relative inline-block">
+                  <div
+                    className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
+                    onClick={() => setIsLocationOpen(!isLocationOpen)}
                   >
-                    {locations.map((option) => {
-                      const isDisabled = option === "Top Cities";
-                      return (
-                        <li
-                          key={option}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setLocation(option);
-                              setIsLocationOpen(false);
-                              setSearchInput("");
-                              setIsSearchDropdownOpen(false);
-                            }
-                          }}
-                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                            isDisabled
-                              ? "text-gray-400 cursor-default"
-                              : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                          }`}
-                        >
-                          {option}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                    <span className="hidden md:inline">{location}</span>
+                    <FaFilter />
+                  </div>
+
+                  {isLocationOpen && (
+                    <ul
+                      className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      {locations.map((option) => {
+                        const isDisabled = option === "Top Cities";
+                        return (
+                          <li
+                            key={option}
+                            onClick={() => {
+                              if (!isDisabled) {
+                                setLocation(option);
+                                setIsLocationOpen(false);
+                                setSearchInput("");
+                                setIsSearchDropdownOpen(false);
+                              }
+                            }}
+                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                              isDisabled
+                                ? "text-gray-400 cursor-default"
+                                : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
+                            }`}
+                          >
+                            {option}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
                 <div className="hidden lg:flex items-center gap-4">
                   {[
                     ...Object.entries(dropdownOptions),
@@ -348,75 +357,78 @@ const Header = () => {
                     className="w-[34px] h-[34px]"
                   />
                 </div>
-              </div>
 
-              {isSearchDropdownOpen && (
-                <ul className="absolute z-50 right-15 top-16 w-50 bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
-                  {searchInput.trim() === "" ? (
-                    filteredLocalities.length > 0 ? (
-                      filteredLocalities.map((locality) => {
-                        const isDisabled = locality === "Most Searched";
-                        return (
-                          <li
-                            key={locality}
-                            onClick={() => {
-                              if (!isDisabled) {
-                                setSearchInput(locality);
-                                dispatch(
-                                  setSearchData({
-                                    location: locality,
-                                  })
-                                );
-                                setIsSearchDropdownOpen(false);
-                              }
-                            }}
-                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                              isDisabled
-                                ? "text-gray-400 cursor-default"
-                                : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
-                            }`}
-                          >
-                            <div className="flex justify-between">
-                              <div>{locality}</div>
-                              <p
-                                className="text-sm text-gray-300 "
-                                style={{
-                                  display:
-                                    locality === "Most Searched" ? "none" : "",
-                                }}
-                              >
-                                Locality
-                              </p>
-                            </div>
-                          </li>
-                        );
-                      })
+                {isSearchDropdownOpen && (
+                  <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto z-50">
+                    {searchInput.trim() === "" ? (
+                      filteredLocalities.length > 0 ? (
+                        filteredLocalities.map((locality) => {
+                          const isDisabled = locality === "Most Searched";
+                          return (
+                            <li
+                              key={locality}
+                              onClick={() => {
+                                if (!isDisabled) {
+                                  setSearchInput(locality);
+                                  dispatch(
+                                    setSearchData({
+                                      location: locality,
+                                    })
+                                  );
+                                  setIsSearchDropdownOpen(false);
+                                }
+                              }}
+                              className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                                isDisabled
+                                  ? "text-gray-400 cursor-default"
+                                  : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
+                              }`}
+                            >
+                              <div className="flex justify-between">
+                                <div>{locality}</div>
+                                <p
+                                  className="text-sm text-gray-300"
+                                  style={{
+                                    display:
+                                      locality === "Most Searched"
+                                        ? "none"
+                                        : "",
+                                  }}
+                                >
+                                  Locality
+                                </p>
+                              </div>
+                            </li>
+                          );
+                        })
+                      ) : (
+                        <li className="px-3 py-1 text-gray-500">
+                          No matching localities
+                        </li>
+                      )
+                    ) : localites.length > 0 ? (
+                      localites.map((item) => (
+                        <li
+                          key={item.locality}
+                          onClick={() => {
+                            setSearchInput(item.locality);
+                            setIsSearchDropdownOpen(false);
+                          }}
+                          className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
+                        >
+                          {item.locality}
+                          <p className="text-sm text-gray-300">Locality</p>
+                        </li>
+                      ))
                     ) : (
                       <li className="px-3 py-1 text-gray-500">
                         No matching localities
                       </li>
-                    )
-                  ) : localites.length > 0 ? (
-                    localites.map((item) => (
-                      <li
-                        key={item.locality}
-                        onClick={() => {
-                          setSearchInput(item.locality);
-                          setIsSearchDropdownOpen(false);
-                        }}
-                        className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
-                      >
-                        {item.locality}{" "}
-                        <p className="text-sm text-gray-300 ">Locality</p>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-3 py-1 text-gray-500">
-                      No matching localities
-                    </li>
-                  )}
-                </ul>
-              )}
+                    )}
+                  </ul>
+                )}
+              </div>
+
               {isCityDropdownOpen && (
                 <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
                   <div className="border-b px-4 font-semibold text-[#1D3A76]">

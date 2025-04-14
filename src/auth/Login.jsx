@@ -1,11 +1,13 @@
 import axios from "axios";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
-const Login = ({ onClose, setShowLoginModal, showLoginModal, modalRef }) => {
-  const [mobile, setMobile] = useState("");
+import config from "../../config";
+import { toast } from "react-toastify";
+const Login = ({ onClose }) => {
+  const [mobile, setMobile] = useState("6302816551");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -13,9 +15,10 @@ const Login = ({ onClose, setShowLoginModal, showLoginModal, modalRef }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState(null);
+  console.log("loginData: ", loginData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const OTP_LENGTH = 6;
+  const OTP_LENGTH = 4;
   const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
   const checkUserExists = useCallback(async () => {
     try {
@@ -45,17 +48,15 @@ const Login = ({ onClose, setShowLoginModal, showLoginModal, modalRef }) => {
           { headers: { "Content-Type": "application/json" } }
         );
         if (response.data.status === "success") {
-          const { user_details, accessToken } = response.data;
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              mobile,
-              userDetails: user_details,
-              token: accessToken,
-            })
-          );
-          dispatch(setLoggedIn(true));
-          onClose();
+          const userData = await checkUserExists();
+          console.log("userData: ", userData);
+
+          setLoginData(userData);
+          if (type === 0) {
+            sendOTP();
+          } else {
+            sendWhatsAppMessage();
+          }
           return true;
         }
         return false;
@@ -67,47 +68,35 @@ const Login = ({ onClose, setShowLoginModal, showLoginModal, modalRef }) => {
     [mobile, dispatch, onClose]
   );
   const sendWhatsAppMessage = async () => {
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000);
-    console.log("generatedOtp: ", generatedOtp);
-    setOtp(generatedOtp);
-    setEnteredOtp(new Array(OTP_LENGTH).fill(""));
-    const url = "https://server.gallabox.com/devapi/messages/whatsapp";
-    const payload = {
-      channelId: "67a9e14542596631a8cfc87b",
-      channelType: "whatsapp",
-      recipient: { name: "Hello", phone: `91${mobile}` },
-      whatsapp: {
-        type: "template",
-        template: {
-          templateName: "login_otp",
-          bodyValues: { otp: generatedOtp },
-        },
-      },
-    };
-    const headers = {
-      apiKey: "67e3a37bfa6fbc8b1aa2edcf",
-      apiSecret: "a9fe1160c20f491eb00389683b29ec6b",
-      "Content-Type": "application/json",
-    };
+    setEnteredOtp("");
     try {
-      const response = await axios.post(url, payload, { headers });
+      const res = await axios.post(
+        `${config.awsApiUrl}/auth/v1/sendGallaboxOTP`,
+        {
+          mobile,
+        }
+      );
+      console.log("res.data: ", res);
+      setOtp(parseInt(res.data.otp));
       setMessage(`WhatsApp OTP sent successfully to +91 ${mobile}`);
+      setOtpSent(true);
       setError("");
-      return response.data;
-    } catch (error) {
+    } catch (err) {
+      console.log("err: ", err);
       setError("Failed to send OTP via WhatsApp. Please try again!");
       setMessage("");
-      throw error;
     }
   };
+
   const sendOTP = useCallback(async () => {
     setIsLoading(true);
     setError("");
     try {
       const response = await axios.get(
-        `https://api.meetowner.in/auth/sendOtp?mobile=${mobile}`
+        `${config.awsApiUrl}/auth/v1/sendOtp?mobile=${mobile}`
       );
       if (response.data.status === "success") {
+        console.log("response.data.otp: ", response.data.otp);
         setOtp(response.data.otp);
         setMessage(`OTP sent successfully to +91${mobile}`);
         setOtpSent(true);
@@ -174,14 +163,17 @@ const Login = ({ onClose, setShowLoginModal, showLoginModal, modalRef }) => {
           })
         );
         dispatch(setLoggedIn(true));
+        toast.success("Login successful!");
         setMessage("Login successful!");
         navigate("/");
         setError("");
         onClose();
       } else {
+        toast.error("Something went wrong. Please try again.");
         setError("User data not found. Please try again.");
       }
     } catch (err) {
+      toast.error("Something went wrong. Please try again.");
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
