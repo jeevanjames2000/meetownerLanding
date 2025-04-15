@@ -10,6 +10,7 @@ import axios from "axios";
 import config from "../../config";
 import { toast } from "react-toastify";
 import { LogOutIcon, User2Icon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -198,7 +199,10 @@ const Sidebar = ({
       name: user,
     });
   }, [isLoggedIn, user, Data]);
-
+  const navigate = useNavigate();
+  const handleRoute = () => {
+    navigate("/profile");
+  };
   return (
     <div
       className={`fixed top-0 right-0 h-full pb-30 w-64 bg-white z-50 shadow-lg transform transition-transform duration-300 ${
@@ -250,7 +254,10 @@ const Sidebar = ({
           </div>
         ))}
         <button className="w-full mt-6 bg-[#F0AA00]  hover:text-white text-white px-4 py-2 rounded-full font-medium mb-4">
-          <div className="flex flex-row justify-center gap-3 cursor-pointer items-center">
+          <div
+            className="flex flex-row justify-center gap-3 cursor-pointer items-center"
+            onClick={handleRoute}
+          >
             Profile
             <User2Icon />
           </div>

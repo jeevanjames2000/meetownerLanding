@@ -170,40 +170,54 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-  const [videos, setVideos] = useState([]);
+  const [mediaList, setMediaList] = useState([]);
   const [isError, setIsError] = useState(false);
+
   useEffect(() => {
     const fetchLatestAds = async () => {
-      setVideos([]);
+      setMediaList([]);
       try {
         const response = await fetch(
           `${config.awsApiUrl}/awsS3/getAllAdVideos`
         );
         const data = await response.json();
-        setVideos(data.results);
+        setMediaList(data.results || []);
       } catch (err) {
         setIsError(true);
-        console.error("Failed to fetch properties:", err);
+        console.error("Failed to fetch media:", err);
       }
     };
     fetchLatestAds();
   }, []);
+
+  // Utility to check file type
+  const isVideo = (url) => {
+    return url?.match(/\.(mp4|webm|ogg)$/i);
+  };
   return (
     <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
       <Slider {...settings} ref={sliderRef}>
-        {videos.map((video, index) => (
+        {mediaList.map((item, index) => (
           <div key={index} className="relative">
             <div className="relative">
-              <video
-                ref={(el) => (videoRefs.current[index] = el)}
-                autoPlay
-                loop
-                muted={isMuted}
-                className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
-              >
-                <source src={video.video_url} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              {isVideo(item.video_url) ? (
+                <video
+                  ref={(el) => (videoRefs.current[index] = el)}
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                  className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
+                >
+                  <source src={item.video_url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img
+                  src={item.video_url}
+                  alt={`media-${index}`}
+                  className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </div>
           </div>

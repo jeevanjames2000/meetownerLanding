@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   FaHeart,
   FaShareAlt,
@@ -14,6 +14,7 @@ import config from "../../config";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
+import { useNavigate } from "react-router-dom";
 
 const formatPrice = (price) => {
   if (price >= 10000000) {
@@ -79,6 +80,13 @@ const DealProperties = () => {
   const handleClose = () => {
     setShowLoginModal(false);
   };
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">
@@ -138,7 +146,10 @@ const DealProperties = () => {
                   }`;
                 }}
               />
-              <div className="p-4 w-full lg:w-2/2 flex flex-col justify-between">
+              <div
+                className="p-4 w-full lg:w-2/2 flex flex-col justify-between cursor-pointer"
+                onClick={() => handleNavigation(property)}
+              >
                 <h3 className="text-start text-xl font-semibold mb-2">
                   {property.property_name}
                 </h3>

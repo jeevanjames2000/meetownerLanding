@@ -22,10 +22,12 @@ const useWhatsappHook = (selectedPropertyId) => {
   const getOwnerDetails = async () => {
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${selectedPropertyId?.unique_property_id}`
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${selectedPropertyId?.property_id}`
       );
       const data = await response.json();
+      console.log("data: ", data);
       const propertydata = data.property_details;
+      console.log("propertydata: ", propertydata);
       const sellerdata = propertydata.seller_details;
 
       if (response.status === 200) {

@@ -24,6 +24,8 @@ import PrivacyAndPolicies from "./legal/privacy";
 import { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import Favourites from "./components/favourites";
+import Profile from "./utilities/Profile";
+import ProfileWrapper from "./profile/ProfileWrapper";
 
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -89,9 +91,9 @@ function App() {
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<PrivacyAndPolicies />} />
+          <Route path="/profile" element={<ProfileWrapper />} />
         </Routes>
       </Router>
-      
     </Provider>
   );
 }

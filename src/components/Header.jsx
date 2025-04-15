@@ -83,20 +83,25 @@ const Header = () => {
     }
     navigate("/favourites");
   };
+  const handleRoute = () => {
+    navigate("/");
+  };
   return (
     <>
       <header className="w-full bg-white shadow-sm px-4 relative z-10">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <img
+              onClick={handleRoute}
               src={logoImage}
               alt="Meet Owner Logo"
-              className="h-10 hidden md:block"
+              className="h-10 hidden md:block cursor-pointer"
             />
             <img
               src={favicon}
+              onClick={handleRoute}
               alt="Meet Owner"
-              className="w-10 h-10 md:hidden"
+              className="w-10 h-10 md:hidden cursor-pointer"
             />
           </div>
           <div className="flex items-center space-x-4">

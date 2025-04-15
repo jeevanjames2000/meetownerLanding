@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaMapMarkerAlt, FaParking, FaBed, FaBath } from "react-icons/fa";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { IoShareSocialOutline } from "react-icons/io5";
@@ -168,6 +168,12 @@ const PropertyListing = () => {
   const handleClose = () => {
     setShowLoginModal(false);
   };
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
   return (
     <div className="max-w-7xl z-auto mx-auto px-4 py-1">
       <div className="mb-8">
@@ -291,7 +297,10 @@ const PropertyListing = () => {
                     <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500 cursor-pointer" />
                   </div>
                 </div>
-                <div className="p-4">
+                <div
+                  className="p-4 cursor-pointer"
+                  onClick={() => handleNavigation(property)}
+                >
                   <div className="flex items-center text-gray-500 mb-3">
                     <FaMapMarkerAlt className="mr-2 text-gray-700" />
                     <span>{property.location_id}</span>

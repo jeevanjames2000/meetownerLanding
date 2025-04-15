@@ -137,8 +137,8 @@ const PropertyBody = () => {
     }
   };
   return (
-    <div className="p-6 w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h1 className="text-blue-900 font-bold uppercase text-3xl">
+    <div className="p-6 w-full  lg:w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
+      <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
       <p className="text-gray-700 text-left">
@@ -155,7 +155,7 @@ const PropertyBody = () => {
           </span>
         )}
       </p>
-      <div className="flex flex-col border-b pb-1">
+      <div className="flex flex-col border-b pb-2 mb-2">
         <div className="flex justify-between items-center w-full flex-wrap gap-4">
           <h3 className="text-2xl font-bold text-indigo-900">
             {property?.property_name}
@@ -172,7 +172,7 @@ const PropertyBody = () => {
             </p>
           </div>
         </div>
-        <div className="flex justify-between items-start gap-4 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
           <div>
             <p className="text-xs text-left text-gray-400 uppercase tracking-wide mt-1">
               Construction Pvt Ltd...
@@ -181,14 +181,14 @@ const PropertyBody = () => {
               {property?.location_id}
             </p>
           </div>
-          <div className="text-sm text-indigo-600 text-right">
+          <div className="text-sm text-indigo-600 text-left md:text-right">
             EMI starts at ₹{" "}
             {(parseInt(property?.property_cost) / 2400).toFixed(2)} K
             <br />
             <span className="text-xs text-gray-400">All Inclusive Price</span>
           </div>
         </div>
-        <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row justify-between">
           <div className="flex flex-wrap items-center gap-3 text-sm text-blue-800 font-medium mt-3">
             <span>{property?.bedrooms} BHK Apartment</span>
             <span className="border-l h-4 border-gray-300"></span>
@@ -219,11 +219,12 @@ const PropertyBody = () => {
           </button>
         </div>
       </div>
+      {/* slider  */}
       <div className="mt-6">
         <img
           src={mainImage}
           alt="Main"
-          className="w-full h-[400px] object-cover rounded-2xl shadow-md"
+          className="w-full h-auto md:h-[400px] object-cover rounded-2xl shadow-md"
           crossOrigin="anonymous"
           onError={(e) => {
             e.target.src = `https://placehold.co/600x400?text=${
@@ -246,7 +247,7 @@ const PropertyBody = () => {
                     src={`${img.url}`}
                     alt={`Thumbnail ${index + 1}`}
                     crossOrigin="anonymous"
-                    className="w-full h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-all"
+                    className="w-full h-16 md:h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-all"
                     onClick={() => setMainImage(`${img.url}`)}
                   />
                 </SwiperSlide>
@@ -278,12 +279,14 @@ const PropertyBody = () => {
           {facilitiesList?.map((facility, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 p-4 text-[#4B1D1D]"
+              className="flex flex-col md:flex-row items-center gap-2 p-4 text-[#4B1D1D]"
             >
               <div className="w-6 h-6">
                 {facilityIconMap[facility] || <Building />}
               </div>
-              <span className="text-sm">{facility}</span>
+              <span className="text-sm text-center md:text-left">
+                {facility}
+              </span>
             </div>
           ))}
         </div>

@@ -177,6 +177,7 @@ const PropertyCard = memo(
     handleLike,
     handleScheduleVisit,
     handleContactSeller,
+    handleRoute,
   }) => {
     const showReadMore = readMoreStates[index];
     const shortDescription = property.description?.slice(0, 180);
@@ -729,6 +730,7 @@ function ListingsBody() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   return (
     <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] p-1 pt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
