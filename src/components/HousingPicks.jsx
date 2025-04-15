@@ -8,6 +8,7 @@ import config from "../../config";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Login from "../auth/Login";
 
 const HousingPicks = () => {
   const [progress, setProgress] = useState(0);
@@ -64,7 +65,11 @@ const HousingPicks = () => {
     try {
       const data = localStorage.getItem("user");
       if (!data) {
-        toast.error("Please Login to Contact!");
+        toast.info("Please Login to Enquire Property!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setShowLoginModal(true);
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -80,6 +85,11 @@ const HousingPicks = () => {
     } catch (err) {
       toast.error("Something went wrong! Please try again");
     }
+  };
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
   };
   return (
     <div className="max-w-7xl mx-auto px-4 py-2">
@@ -214,6 +224,18 @@ const HousingPicks = () => {
           </Swiper>
         </div>
       </div>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

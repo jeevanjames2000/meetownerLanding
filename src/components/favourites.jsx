@@ -24,8 +24,6 @@ import "swiper/css/pagination";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
 import config from "../../config";
 import axios from "axios";
 import ScheduleFormModal from "../utilities/ScheduleForm";
@@ -34,9 +32,10 @@ import Header from "./Header";
 import Footer from "./Footer";
 import ListingAds from "../listings/ListingAds";
 import DynamicAds from "../utilities/DynamicAds";
+import useWhatsappHook from "../utilities/useWhatsappHook";
+import Login from "../auth/Login";
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
-  console.log("likedProperties: ", likedProperties);
   const [loading, setLoading] = useState(true);
   const [readMoreStates, setReadMoreStates] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
@@ -65,9 +64,20 @@ const Favourites = () => {
   const toggleFacilities = (index) => {
     setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
   };
-  const handleNavigation = (property) => {
-    console.log("Navigate to:", property);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
   };
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  console.log("selectedProperty: ", selectedProperty);
+  const { handleAPI, error } = useWhatsappHook(selectedProperty);
+  useEffect(() => {
+    if (selectedProperty) {
+      handleAPI();
+    }
+  }, [selectedProperty, handleAPI]);
+  const handleNavigation = (property) => {};
   const handleLike = useCallback(
     async (property) => {
       const data = localStorage.getItem("user");
@@ -91,10 +101,32 @@ const Favourites = () => {
     [likedProperties]
   );
   const handleScheduleVisit = (property) => {
-    console.log("Schedule visit for:", property);
+    setSelectedProperty(property);
   };
-  const handleContactSeller = (property) => {
-    console.log("Contact seller for:", property);
+  const handleContactSeller = async (property) => {
+    console.log("property: ", property);
+    setSelectedProperty(property);
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.info("Please Login to Contact!");
+        setShowLoginModal(true);
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        unique_property_id: property.property_id,
+        user_id: userDetails.user_id,
+        fullname: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await handleAPI(property);
+      toast.success("Details submitted successfully");
+    } catch (err) {
+      toast.error("Something went wrong while submitting enquiry");
+    }
   };
   const PropertyCard = memo(
     ({
@@ -124,7 +156,7 @@ const Favourites = () => {
       return (
         <div
           key={`property-${index}`}
-          className="flex flex-col md:flex-row w-4xl max-h-[300px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+          className="flex flex-col md:flex-row w-full max-h-[300px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
           onClick={() => handleNavigation(property)}
         >
           <div className="bg-[#F3F3F3] rounded-[20px] p-4 h-full w-[100%]  overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
@@ -158,23 +190,14 @@ const Favourites = () => {
                       {property.property_name}
                     </p>
                     <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
-                      {likedProperties.includes(property.unique_property_id) ? (
-                        <IoIosHeart
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(property);
-                          }}
-                          className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 cursor-pointer"
-                        />
-                      ) : (
-                        <IoIosHeartEmpty
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(property);
-                          }}
-                          className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 cursor-pointer"
-                        />
-                      )}
+                      <IoIosHeart
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(property);
+                        }}
+                        className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 cursor-pointer"
+                      />
+
                       <MdOutlineVerified className="text-xl text-green-500" />
                       <p>Verified</p>
                     </div>
@@ -371,19 +394,14 @@ const Favourites = () => {
             <AutoSizer>
               {({ height, width }) => (
                 <List
+                  width={width}
                   height={height}
-                  itemCount={likedProperties.length}
-                  itemSize={320}
-                  width={width - 300}
-                  className="pr-4"
-                >
-                  {({ index, style }) => {
+                  rowCount={likedProperties.length}
+                  rowHeight={300}
+                  rowRenderer={({ index, key, style }) => {
                     const property = likedProperties[index];
                     return (
-                      <div
-                        style={style}
-                        key={`fav-${property.unique_property_id}-${index}`}
-                      >
+                      <div style={style} key={key}>
                         <PropertyCard
                           property={property}
                           index={index}
@@ -392,9 +410,7 @@ const Favourites = () => {
                           handleNavigation={handleNavigation}
                           readMoreStates={readMoreStates}
                           expandedCards={expandedCards}
-                          likedProperties={likedProperties.map(
-                            (p) => p.unique_property_id
-                          )}
+                          likedProperties={likedProperties}
                           handleLike={handleLike}
                           handleScheduleVisit={handleScheduleVisit}
                           handleContactSeller={handleContactSeller}
@@ -402,13 +418,25 @@ const Favourites = () => {
                       </div>
                     );
                   }}
-                </List>
+                />
               )}
             </AutoSizer>
           </div>
         </div>
         <DynamicAds />
       </div>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );

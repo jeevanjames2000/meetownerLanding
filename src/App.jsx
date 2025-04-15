@@ -91,6 +91,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyAndPolicies />} />
         </Routes>
       </Router>
+      
     </Provider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaMapMarkerAlt, FaParking, FaBed, FaBath } from "react-icons/fa";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { IoShareSocialOutline } from "react-icons/io5";
@@ -13,6 +13,7 @@ import { setSearchData } from "../../store/slices/searchSlice";
 import config from "../../config";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Login from "../auth/Login";
 
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
@@ -92,7 +93,11 @@ const PropertyListing = () => {
     try {
       const data = localStorage.getItem("user");
       if (!data) {
-        alert("User not logged in!");
+        toast.info("Please Login to Enquire Property!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setShowLoginModal(true);
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -116,11 +121,12 @@ const PropertyListing = () => {
     }
   };
   const handleLike = async (property) => {
-    console.log("property: ", property.image, property);
-
     const data = localStorage.getItem("user");
     if (!data) {
-      alert("User not logged in!");
+      toast.info("Please Login to Save Property!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
     const { userDetails } = JSON.parse(data);
@@ -156,6 +162,11 @@ const PropertyListing = () => {
     } catch (err) {
       console.error("Error updating interest:", err);
     }
+  };
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
   };
   return (
     <div className="max-w-7xl z-auto mx-auto px-4 py-1">
@@ -352,6 +363,18 @@ const PropertyListing = () => {
           }
         `}</style>
       </Swiper>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -13,7 +13,7 @@ import {
   Users,
   Waves,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BiBasketball } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,6 +22,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
 import { FaBasketball } from "react-icons/fa6";
+import Login from "../auth/Login";
+import { toast } from "react-toastify";
+import axios from "axios";
+import useWhatsappHook from "../utilities/useWhatsappHook";
 const PropertyBody = () => {
   const { state: property } = useLocation();
   const facilityIconMap = {
@@ -48,6 +52,11 @@ const PropertyBody = () => {
   const [floorplan, setFloorPlan] = useState("");
   const [images, setImages] = useState([]);
   const [mainImage, setMainImage] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
+  };
   const fetchPropertyimages = async () => {
     setImages([]);
     try {
@@ -98,6 +107,34 @@ const PropertyBody = () => {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const { handleAPI, error } = useWhatsappHook(property);
+  console.log("error: ", error);
+
+  const handleContactSeller = async () => {
+    console.log("property: ", property);
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.info("Please Login to Contact!");
+        setShowLoginModal(true);
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        unique_property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        fullname: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      handleAPI();
+      toast.success("Details submitted successfully");
+    } catch (err) {
+      console.log("err: ", err);
+      toast.error("Something went wrong while submitting enquiry");
+    }
   };
   return (
     <div className="p-6 w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
@@ -172,7 +209,12 @@ const PropertyBody = () => {
               )}
             </span>
           </div>
-          <button className="bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-4 py-2 rounded-lg mt-2">
+          <button
+            onClick={() => {
+              handleContactSeller();
+            }}
+            className="bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-4 py-2 rounded-lg mt-2"
+          >
             Contact Developer
           </button>
         </div>
@@ -270,6 +312,18 @@ const PropertyBody = () => {
           className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
         >
           <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
+        </div>
+      )}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
         </div>
       )}
     </div>

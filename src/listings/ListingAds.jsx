@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
+import axios from "axios";
+import { toast } from "react-toastify";
+import Login from "../auth/Login";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
@@ -27,6 +30,11 @@ const ListingAds = () => {
     },
     [navigate]
   );
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
+  };
   const formatToIndianCurrency = (value) => {
     if (!value || isNaN(value)) return "N/A";
     const numValue = parseFloat(value);
@@ -34,6 +42,28 @@ const ListingAds = () => {
     if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
     if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
     return numValue.toString();
+  };
+  const handleContactSeller = async (property) => {
+    try {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.info("Please Login to Contact!");
+        setShowLoginModal(true);
+        return;
+      }
+      const { userDetails } = JSON.parse(data);
+      const payload = {
+        unique_property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        fullname: userDetails.name,
+        mobile: userDetails.mobile,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      toast.success("Details submitted successfully");
+    } catch (err) {
+      toast.error("Something went wrong while submitting enquiry");
+    }
   };
   return (
     <>
@@ -54,7 +84,12 @@ const ListingAds = () => {
             >
               View Details
             </p>
-            <p className="bg-inherit text-[#fff] font-normal px-2 hover:bg-white hover:text-black cursor-pointer rounded-lg border-1 border-[#ffffff] transition">
+            <p
+              onClick={() => {
+                handleContactSeller(property[2]);
+              }}
+              className="bg-inherit text-[#fff] font-normal px-2 hover:bg-white hover:text-black cursor-pointer rounded-lg border-1 border-[#ffffff] transition"
+            >
               Contact
             </p>
           </div>
@@ -95,6 +130,18 @@ const ListingAds = () => {
               </div>
             ))}
           </div>
+          {showLoginModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+              <div ref={modalRef} className="relative w-[90%] max-w-sm">
+                <Login
+                  setShowLoginModal={setShowLoginModal}
+                  showLoginModal={showLoginModal}
+                  onClose={handleClose}
+                  modalRef={modalRef}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

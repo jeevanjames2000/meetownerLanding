@@ -37,7 +37,7 @@ const DynamicAds = () => {
   };
   return (
     <>
-      <div className="hidden absolute right-0 top-20 lg:block md:block w-[24%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden relative right-0 top-0 lg:block md:block w-[24%] h-auto bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
             src={`https://api.meetowner.in/uploads/${property[2]?.image}`}

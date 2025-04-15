@@ -265,7 +265,9 @@ const Sidebar = ({
             }
             setMenuOpen(false);
           }}
-          className="w-full bg-red-500  hover:text-black text-white px-4 py-2 rounded-full font-medium mb-4"
+          className={`w-full ${
+            isLoggedIn ? "bg-red-500" : "bg-green-500"
+          } hover:text-black text-white px-4 py-2 rounded-full font-medium mb-4`}
         >
           <div className="flex flex-row justify-center gap-3 cursor-pointer items-center">
             {isLoggedIn ? "Logout" : "Login"}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FaHeart,
   FaShareAlt,
@@ -13,6 +13,7 @@ import { Pagination } from "swiper/modules";
 import config from "../../config";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Login from "../auth/Login";
 
 const formatPrice = (price) => {
   if (price >= 10000000) {
@@ -44,7 +45,11 @@ const DealProperties = () => {
     try {
       const data = localStorage.getItem("user");
       if (!data) {
-        toast.error("Please Login to Contact!");
+        toast.info("Please Login to Enquire Property!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setShowLoginModal(true);
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -68,6 +73,11 @@ const DealProperties = () => {
       console.error("Enquiry Failed:", err);
       toast.error("Something went wrong while submitting enquiry");
     }
+  };
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
   };
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -183,6 +193,18 @@ const DealProperties = () => {
           }
         `}</style>
       </Swiper>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

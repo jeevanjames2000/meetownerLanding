@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import axios from "axios";
 import config from "../../config";
+import { toast } from "react-toastify";
+import { LogInIcon } from "lucide-react";
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
@@ -32,8 +34,8 @@ const Header = () => {
   }, [Data]);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const modalRef = useRef(null);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const downloadRef = useRef(null);
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,29 +70,17 @@ const Header = () => {
     localStorage.clear();
     navigate("/");
   };
-  const handleLike = async (property) => {
+
+  const handleFavRoute = () => {
     const data = localStorage.getItem("user");
     if (!data) {
-      alert("User not logged in!");
+      toast.success("Login to get personalised feed!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setShowLoginModal(true);
       return;
     }
-    const { userDetails } = JSON.parse(data);
-
-    const payload = {
-      property_id: property.unique_property_id,
-      user_id: userDetails.user_id,
-      property_name: property.property_name,
-      property_image: property.image,
-      property_cost: property.property_cost,
-      status: 1,
-    };
-    try {
-      await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
-    } catch (err) {
-      console.error("Error updating interest:", err);
-    }
-  };
-  const handleFavRoute = () => {
     navigate("/favourites");
   };
   return (
@@ -128,10 +118,24 @@ const Header = () => {
                 | Free
               </span>
             </button>
-            <div className="flex cursor-pointer" onClick={handleFavRoute}>
+            <div
+              className="flex cursor-pointer border border-[#F0AA00] px-4 py-1 rounded-full"
+              onClick={handleFavRoute}
+            >
               <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 " />
               <p>Favourites</p>
             </div>
+            {!Data && (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="hidden md:flex border items-center bg-blue-900 px-6 py-[6px] rounded-full text-white font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
+              >
+                Login
+                <span className="ml-1 text-white group-hover:text-black">
+                  <LogInIcon className="h-5 w-5" />
+                </span>
+              </button>
+            )}
             <button
               className=" text-gray-800 focus:outline-none"
               onClick={() => setMenuOpen(true)}

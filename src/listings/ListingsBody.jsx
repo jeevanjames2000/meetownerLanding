@@ -38,6 +38,8 @@ import config from "../../config";
 import axios from "axios";
 import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
+import Login from "../auth/Login";
+import useWhatsappHook from "../utilities/useWhatsappHook";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -438,6 +440,11 @@ function ListingsBody() {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const cardsContainerRef = useRef(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const modalRef = useRef(null);
+  const handleClose = () => {
+    setShowLoginModal(false);
+  };
   const bottomRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -497,7 +504,9 @@ function ListingsBody() {
   useEffect(() => {
     const fetchLikedProperties = async () => {
       const data = localStorage.getItem("user");
-      if (!data) return;
+      if (!data) {
+        return;
+      }
       const { userDetails } = JSON.parse(data);
       try {
         const response = await axios.get(
@@ -556,10 +565,10 @@ function ListingsBody() {
   );
   const handleLike = useCallback(
     async (property) => {
-      console.log("property: ", property.image, property);
       const data = localStorage.getItem("user");
       if (!data) {
-        toast.error("Please Login to Contact!");
+        toast.info("Please Login to Save Property!");
+        setShowLoginModal(true);
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -607,12 +616,17 @@ function ListingsBody() {
   const handleScheduleVisit = (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
-      toast.error("Please Login to Contact!");
+      toast.info("Please Login to Schedule Visits!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setShowLoginModal(true);
       return;
     }
     setSelectedProperty(property);
     setModalOpen(true);
   };
+  const { handleAPI, error } = useWhatsappHook(selectedProperty);
   const handleModalSubmit = async (formData) => {
     try {
       const { userDetails } = JSON.parse(localStorage.getItem("user"));
@@ -627,18 +641,20 @@ function ListingsBody() {
         shedule_time: formData.time,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
-      toast.success("Enquiry submitted successfully");
+      await handleAPI();
+      toast.success("Visit Scheduled Successfully!");
       setModalOpen(false);
     } catch (err) {
       console.error("Enquiry Failed:", err);
-      toast.error("Something went wrong while submitting enquiry");
+      toast.error("Something went wrong!");
     }
   };
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");
       if (!data) {
-        toast.error("Please Login to Contact!");
+        toast.info("Please Login to Contact!");
+        setShowLoginModal(true);
 
         return;
       }
@@ -702,7 +718,6 @@ function ListingsBody() {
     );
   };
   const [showScrollTop, setShowScrollTop] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -823,17 +838,31 @@ function ListingsBody() {
         </div>
       )}
       <div className="w-full h-[40px]" ref={bottomRef}></div>
-      <ScheduleFormModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleModalSubmit}
-      />
+      {modalOpen && (
+        <ScheduleFormModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleModalSubmit}
+        />
+      )}
       {showScrollTop && (
         <div
           onClick={scrollToTop}
           className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
         >
           <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
+        </div>
+      )}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
         </div>
       )}
     </div>
