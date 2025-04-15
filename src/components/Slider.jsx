@@ -135,9 +135,20 @@ const PropertyListing = () => {
     const payload = {
       property_id: property.unique_property_id,
       user_id: userDetails.user_id,
+      name: userDetails.name,
+      email: userDetails.email,
+      mobile: userDetails.mobile,
       property_name: property.property_name,
       property_image: property.image,
       property_cost: property.property_cost,
+      property_type: property.property_type,
+      property_in: property.property_in,
+      bathroom: property.bathroom,
+      parking: property.parking,
+      car_parking: property.car_parking,
+      builtup_area: property.builtup_area,
+      builtup_unit: property.builtup_unit,
+      created_user_id: property.user_id,
       status: isAlreadyLiked ? 1 : 0,
     };
     try {

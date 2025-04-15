@@ -11,15 +11,13 @@ import {
   Building2,
   Building,
 } from "lucide-react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
 import {
-  FaHeart,
-  FaPhoneAlt,
-  FaShareAlt,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+  List,
+  AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
+  WindowScroller,
+} from "react-virtualized";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -34,6 +32,8 @@ import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
 import Header from "./Header";
 import Footer from "./Footer";
+import ListingAds from "../listings/ListingAds";
+import DynamicAds from "../utilities/DynamicAds";
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
   console.log("likedProperties: ", likedProperties);
@@ -76,14 +76,9 @@ const Favourites = () => {
         return;
       }
       const { userDetails } = JSON.parse(data);
-      console.log("userDetails: ", userDetails);
-
       const payload = {
         property_id: property.property_id,
         user_id: userDetails.user_id,
-        property_name: property.property_name,
-        property_image: property.property_image,
-        property_cost: property.property_cost,
         status: 1,
       };
       try {
@@ -129,10 +124,10 @@ const Favourites = () => {
       return (
         <div
           key={`property-${index}`}
-          className="flex flex-col md:flex-row w-[100%] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+          className="flex flex-col md:flex-row w-4xl max-h-[300px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
           onClick={() => handleNavigation(property)}
         >
-          <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-[100%] max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="bg-[#F3F3F3] rounded-[20px] p-4 h-full w-[100%]  overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             <div className="flex flex-col md:flex-row gap-5">
               <div className="w-full md:w-[300px]">
                 <div className="rounded-lg overflow-hidden mb-4 relative">
@@ -146,7 +141,7 @@ const Favourites = () => {
                     }
                     alt="Property"
                     crossOrigin="anonymous"
-                    className="w-full h-70 object-cover rounded-md"
+                    className="w-full h-60 object-cover rounded-md"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = `https://placehold.co/600x400?text=${
@@ -159,15 +154,8 @@ const Favourites = () => {
               <div className="flex-1 max-w-full md:max-w-[550px]">
                 <div className="mb-3 text-left">
                   <div className="flex justify-between items-center">
-                    <p className="text-[#1D3A76] font-bold text-[15px]">
-                      {property.sub_type === "Apartment"
-                        ? `${property.bedrooms} BHK ${
-                            property.property_type
-                              ? property.property_type
-                              : property.sub_type || ""
-                          } for ${property.property_for}`
-                        : `${property.sub_type} for ${property.property_for}`}{" "}
-                      in {property.locality_name}, {property.google_address}
+                    <p className="text-[#A4A4A4] font-semibold text-[18px]">
+                      {property.property_name}
                     </p>
                     <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
                       {likedProperties.includes(property.unique_property_id) ? (
@@ -192,9 +180,6 @@ const Favourites = () => {
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-[#A4A4A4] font-semibold text-[18px]">
-                      {property.property_name}
-                    </p>
                     <p className="text-[#1D3A76] font-semibold text-[18px]">
                       {property.project_name || ""}{" "}
                       <span className="text-[#A4A4A4] font-medium text-[15px]">
@@ -380,23 +365,49 @@ const Favourites = () => {
   return (
     <>
       <Header />
-      <div className="flex flex-col gap-6 px-4 md:px-10 py-6">
-        {likedProperties.map((property, index) => (
-          <PropertyCard
-            key={`fav-${property.unique_property_id}-${index}`}
-            property={property}
-            index={index}
-            toggleReadMore={toggleReadMore}
-            toggleFacilities={toggleFacilities}
-            handleNavigation={handleNavigation}
-            readMoreStates={readMoreStates}
-            expandedCards={expandedCards}
-            likedProperties={likedProperties.map((p) => p.unique_property_id)}
-            handleLike={handleLike}
-            handleScheduleVisit={handleScheduleVisit}
-            handleContactSeller={handleContactSeller}
-          />
-        ))}
+      <div className="flex">
+        <div className="flex-1 px-4 md:px-10 py-6">
+          <div className="w-full h-[calc(100vh-150px)]">
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  height={height}
+                  itemCount={likedProperties.length}
+                  itemSize={320}
+                  width={width - 300}
+                  className="pr-4"
+                >
+                  {({ index, style }) => {
+                    const property = likedProperties[index];
+                    return (
+                      <div
+                        style={style}
+                        key={`fav-${property.unique_property_id}-${index}`}
+                      >
+                        <PropertyCard
+                          property={property}
+                          index={index}
+                          toggleReadMore={toggleReadMore}
+                          toggleFacilities={toggleFacilities}
+                          handleNavigation={handleNavigation}
+                          readMoreStates={readMoreStates}
+                          expandedCards={expandedCards}
+                          likedProperties={likedProperties.map(
+                            (p) => p.unique_property_id
+                          )}
+                          handleLike={handleLike}
+                          handleScheduleVisit={handleScheduleVisit}
+                          handleContactSeller={handleContactSeller}
+                        />
+                      </div>
+                    );
+                  }}
+                </List>
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <DynamicAds />
       </div>
       <Footer />
     </>
