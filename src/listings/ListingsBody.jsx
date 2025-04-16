@@ -43,24 +43,38 @@ import useWhatsappHook from "../utilities/useWhatsappHook";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
-  const featuredProjects = [
-    {
-      name: "Swan",
-      priceRange: "₹ 2 Cr - ₹ 4 Cr",
-      description: "3 BHK Apartment for sell in Nizampet, Telangana, India",
-      possession: "Jan, 2025",
-      avgPrice: "₹ 14.99 k/sq.ft",
-      image: "https://api.meetowner.in/uploads/202401101408101.jpg",
+  const [property, setProperty] = useState([]);
+  console.log("property: ", property);
+  const fetchLatestProperties = async () => {
+    setProperty([]);
+    try {
+      const response = await fetch(
+        `${config.awsApiUrl}/listings/getRandomPropertiesAds`
+      );
+      const data = await response.json();
+      setProperty(data.results);
+    } catch (err) {
+      console.error("Failed to fetch properties:", err);
+    }
+  };
+  useEffect(() => {
+    fetchLatestProperties();
+  }, []);
+  const formatToIndianCurrency = (value) => {
+    if (!value || isNaN(value)) return "N/A";
+    const numValue = parseFloat(value);
+    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+    return numValue.toString();
+  };
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
     },
-    {
-      name: "Tranquil Heights",
-      priceRange: "₹ 1.5 Cr - ₹ 3 Cr",
-      description: "2 & 3 BHK Flats in Gachibowli, Telangana, India",
-      possession: "Dec, 2024",
-      avgPrice: "₹ 12.49 k/sq.ft",
-      image: "https://placehold.co/600x400",
-    },
-  ];
+    [navigate]
+  );
   return (
     <div className="bg-white rounded-lg shadow-md relative p-2 mb-4 md:mb-4 max-w-6xl mx-auto mt-8">
       <h2 className="text-xl text-left md:text-xl font-semibold text-[#1E2A53] mb-4">
@@ -83,52 +97,74 @@ const AdsCard = memo(() => {
           768: { slidesPerView: 1 },
           1024: { slidesPerView: 1 },
         }}
+        className="pb-10 overflow-hidden h-[350px]"
       >
-        {featuredProjects.map((project, index) => (
+        {property?.map((project, index) => (
           <SwiperSlide key={index}>
             <div className="rounded-2xl border border-gray-200 p-2 md:p-2 relative bg-white flex flex-col md:flex-row items-center gap-8">
-              <div className="absolute top-4 right-4 flex gap-3 text-xl text-gray-500 z-10">
-                <FaHeart className="text-orange-500 cursor-pointer" />
-                <FaShareAlt className="cursor-pointer" />
-              </div>
               <div className="w-full md:w-1/2">
                 <img
-                  src={project.image}
-                  alt="Project"
-                  className="w-full h-[200px] object-cover rounded-md"
+                  src={
+                    project?.image
+                      ? `https://api.meetowner.in/uploads/${project?.image}`
+                      : `https://placehold.co/600x400?text=${
+                          project?.property_name || "No Image Found"
+                        }`
+                  }
+                  alt="Property"
+                  crossOrigin="anonymous"
+                  className="w-full h-70 object-cover rounded-md"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://placehold.co/600x400?text=${
+                      project?.property_name || "No Image Found"
+                    }`;
+                  }}
                 />
               </div>
-              <div className="w-full md:w-1/2">
-                <p className="text-xl text-left md:text-2xl font-semibold text-[#442C2E]">
-                  {project.priceRange}
-                </p>
-                <h3 className="text-2xl text-left md:text-3xl font-bold text-[#442C2E] mt-1">
-                  {project.name}
-                </h3>
+              <div
+                className="w-full md:w-1/2 cursor-pointer"
+                onClick={() => handleNavigation(project)}
+              >
+                <div className="flex flex-row justify-between items-center">
+                  <p className="text-sm text-left md:text-2xl font-bold text-gray-500">
+                    Rs:{" "}
+                    {formatToIndianCurrency(project?.property_cost) || "N/A"}
+                  </p>
+                  <h3 className="text-2xl text-left  font-bold text-blue-900 mt-1 ">
+                    {project?.property_name}
+                  </h3>
+                </div>
                 <p className="text-gray-600 text-left text-sm md:text-base mt-1 mb-4">
-                  {project.description}
+                  {project?.description?.length > 100
+                    ? project?.description.slice(0, 150) + "..."
+                    : project?.description}
                 </p>
+
                 <div className="flex flex-wrap gap-4 mb-6">
                   <div className="bg-white shadow rounded-md px-4 py-2">
                     <p className="text-xs text-gray-500">Possession Date</p>
                     <p className="font-semibold text-[#1E2A53]">
-                      {project.possession}
+                      {project?.possession_status}
                     </p>
                   </div>
                   <div className="bg-white shadow rounded-md px-4 py-2">
-                    <p className="text-xs text-gray-500">Average Price</p>
+                    <p className="text-xs text-gray-500">Facing</p>
                     <p className="font-semibold text-[#1E2A53]">
-                      {project.avgPrice}
+                      {project?.facing}
+                    </p>
+                  </div>
+                  <div className="bg-white shadow rounded-md px-4 py-2">
+                    <p className="text-xs text-gray-500">Bedrooms</p>
+                    <p className="font-semibold text-[#1E2A53]">
+                      {project?.bedroom}
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex justify-end items-center">
                   <button className="flex items-center gap-2 px-6 py-2 bg-[#EC8F6A] hover:bg-[#e07955] text-white rounded-xl shadow">
                     <FaPhoneAlt />
                     Contact Developer
-                  </button>
-                  <button className="px-6 py-2 bg-[#EC8F6A] hover:bg-[#e07955] text-white rounded-xl shadow">
-                    View More
                   </button>
                 </div>
               </div>
@@ -138,7 +174,7 @@ const AdsCard = memo(() => {
         <div className="absolute top-1/2 left-0 -translate-y-1/2 z-10">
           <button
             ref={prevRef}
-            className="text-gray-500 text-2xl bg-white shadow rounded-full p-2 ml-2 hover:bg-gray-100"
+            className="text-gray-500 text-1xl bg-white shadow rounded-full p-2 ml-2 hover:bg-gray-100"
           >
             <FaChevronLeft />
           </button>
@@ -146,7 +182,7 @@ const AdsCard = memo(() => {
         <div className="absolute top-1/2 right-0 -translate-y-1/2 z-10">
           <button
             ref={nextRef}
-            className="text-gray-500 text-2xl bg-white shadow rounded-full p-2 mr-2 hover:bg-gray-100"
+            className="text-gray-500 text-1xl bg-white shadow rounded-full p-2 mr-2 hover:bg-gray-100"
           >
             <FaChevronRight />
           </button>
@@ -232,7 +268,6 @@ const PropertyCard = memo(
                     in {property.locality_name}, {property.google_address}
                   </p>
                   <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium my-2 md:my-0">
-                    <></>
                     {likedProperties.includes(property.unique_property_id) ? (
                       <IoIosHeart
                         onClick={(e) => {

@@ -16,7 +16,7 @@ export default function ProfilePage() {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
   const [profileImage, setProfileImage] = useState(
-    "https://i.pravatar.cc/150?img=3"
+    "https://placehold.co/200x200?text=Upload Image"
   );
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -79,7 +79,9 @@ export default function ProfilePage() {
             className="w-40 h-40 rounded-full shadow-md object-cover"
           />
           <label className="realtive top-8 right-8 bg-white rounded-full p-1 shadow cursor-pointer hover:bg-gray-100">
-            <Pencil size={18} />
+            <button className="w-20 p-1 bg-blue-900 text-white rounded-lg">
+              Edit
+            </button>
             <input
               type="file"
               accept="image/*"
