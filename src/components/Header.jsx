@@ -18,7 +18,6 @@ import { LogInIcon } from "lucide-react";
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
-  console.log("sData: ", user);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -32,7 +31,6 @@ const Header = () => {
       );
     }
   }, [Data]);
-
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -70,7 +68,6 @@ const Header = () => {
     localStorage.clear();
     navigate("/");
   };
-
   const handleFavRoute = () => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -158,7 +155,6 @@ const Header = () => {
         setShowLoginModal={setShowLoginModal}
         handleLogout={handleLogout}
       />
-
       {showLoginModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
           <div ref={modalRef} className="relative w-[90%] max-w-sm">

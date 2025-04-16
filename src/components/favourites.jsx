@@ -70,7 +70,6 @@ const Favourites = () => {
     setShowLoginModal(false);
   };
   const [selectedProperty, setSelectedProperty] = useState(null);
-  console.log("selectedProperty: ", selectedProperty);
   const { handleAPI, error } = useWhatsappHook(selectedProperty);
   useEffect(() => {
     if (selectedProperty) {
@@ -104,7 +103,6 @@ const Favourites = () => {
     setSelectedProperty(property);
   };
   const handleContactSeller = async (property) => {
-    console.log("property: ", property);
     setSelectedProperty(property);
     try {
       const data = localStorage.getItem("user");

@@ -15,7 +15,6 @@ import config from "../../config";
 const PropertyAds = () => {
   const { state: property } = useLocation();
   const [videos, setVideos] = useState([]);
-  console.log("videos: ", videos);
   const [images, setImages] = useState([]);
   const fetchPropertyVideos = async () => {
     setVideos([]);

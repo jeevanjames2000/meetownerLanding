@@ -149,7 +149,6 @@ const PropertyHeader = () => {
         const data = await response.json();
         setLocalities(data);
       } catch (err) {
-        console.log(err);
       }
     };
     fetchLocalities();

@@ -67,7 +67,6 @@ const DealProperties = () => {
         `${config.awsApiUrl}/enquiry/postEnquiry`,
         payload
       );
-      console.log("Enquiry Response:", res.data);
 
       toast.success("Enquiry submitted successfully!");
     } catch (err) {
@@ -87,6 +86,9 @@ const DealProperties = () => {
     },
     [navigate]
   );
+  const handleNavigate = () => {
+    navigate("/listings");
+  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">
@@ -109,7 +111,10 @@ const DealProperties = () => {
           </svg>
         </div>
         <div>
-          <button className="text-[#1D3A76] cursor-pointer underline hover:text-yellow-500 font-small flex items-center">
+          <button
+            onClick={handleNavigate}
+            className="text-[#1D3A76] cursor-pointer underline hover:text-yellow-500 font-small flex items-center"
+          >
             View All
           </button>
         </div>

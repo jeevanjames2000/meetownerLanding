@@ -4,7 +4,6 @@ import config from "../../config";
 
 const DynamicAds = () => {
   const [property, setProperty] = useState([]);
-  console.log("property: ", property);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {

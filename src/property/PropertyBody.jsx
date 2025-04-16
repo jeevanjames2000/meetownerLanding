@@ -109,10 +109,8 @@ const PropertyBody = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const { handleAPI, error } = useWhatsappHook(property);
-  console.log("error: ", error);
 
   const handleContactSeller = async () => {
-    console.log("property: ", property);
     try {
       const data = localStorage.getItem("user");
       if (!data) {
@@ -132,7 +130,6 @@ const PropertyBody = () => {
       handleAPI();
       toast.success("Details submitted successfully");
     } catch (err) {
-      console.log("err: ", err);
       toast.error("Something went wrong while submitting enquiry");
     }
   };

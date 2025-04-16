@@ -181,7 +181,7 @@ const Footer = () => {
             <FaLinkedin className="h-5 w-5" />
           </a>
           <a
-            // href="https://www.facebook.com"
+            href="https://www.facebook.com/meetownerinofficial/"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -189,7 +189,7 @@ const Footer = () => {
             <FaFacebook className="h-5 w-5" />
           </a>
           <a
-            // href="https://www.instagram.com"
+            href="https://www.instagram.com/meetownerofficial/#"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
@@ -197,7 +197,7 @@ const Footer = () => {
             <FaInstagram className="h-5 w-5 text-red-500" />
           </a>
           <a
-            // href="https://www.youtube.com"
+            href="https://www.youtube.com/@meetownerofficial"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"

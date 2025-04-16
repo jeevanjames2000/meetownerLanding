@@ -14,6 +14,7 @@ import config from "../../config";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
+import useWhatsappHook from "../utilities/useWhatsappHook";
 
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
@@ -89,6 +90,8 @@ const PropertyListing = () => {
       })
     );
   }, [activeTab, dispatch]);
+  const { handleAPI, error } = useWhatsappHook();
+
   const handleEnquireNow = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -114,6 +117,7 @@ const PropertyListing = () => {
         `${config.awsApiUrl}/enquiry/postEnquiry`,
         payload
       );
+      handleAPI(property);
       toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);
@@ -297,18 +301,21 @@ const PropertyListing = () => {
                     <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500 cursor-pointer" />
                   </div>
                 </div>
-                <div
-                  className="p-4 cursor-pointer"
-                  onClick={() => handleNavigation(property)}
-                >
+                <div className="p-4 cursor-pointer">
                   <div className="flex items-center text-gray-500 mb-3">
                     <FaMapMarkerAlt className="mr-2 text-gray-700" />
                     <span>{property.location_id}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-[#1D3A76] text-left  mb-2">
+                  <h3
+                    className="text-xl font-bold text-[#1D3A76] text-left  mb-2"
+                    onClick={() => handleNavigation(property)}
+                  >
                     {property.property_name}
                   </h3>
-                  <div className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700">
+                  <div
+                    className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700"
+                    onClick={() => handleNavigation(property)}
+                  >
                     <div className="flex items-center">
                       <FaBed className="mr-2" /> {property.bedrooms} Beds
                     </div>

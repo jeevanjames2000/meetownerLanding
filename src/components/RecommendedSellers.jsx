@@ -14,7 +14,6 @@ const RecommendedSellers = () => {
           `${config.awsApiUrl}/listings/getMostPropertiesSeller`
         );
         const data = await response.json();
-        console.log("data: ", data);
         setSellers(data.sellers);
       } catch (err) {
         console.error("Failed to fetch properties:", err);

@@ -177,7 +177,6 @@ const PropertyCard = memo(
     handleLike,
     handleScheduleVisit,
     handleContactSeller,
-    handleRoute,
   }) => {
     const showReadMore = readMoreStates[index];
     const shortDescription = property.description?.slice(0, 180);
@@ -195,9 +194,9 @@ const PropertyCard = memo(
         className="flex flex-col md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
         onClick={() => handleNavigation(property)}
       >
-        <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          <div className="flex flex-col md:flex-row gap-5">
-            <div className="w-full md:w-[300px]">
+        <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[700px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="flex flex-col lg:flex-row gap-5">
+            <div className="w-full lg:w-[300px]">
               <div className="rounded-lg overflow-hidden mb-4 relative">
                 <img
                   src={
@@ -221,7 +220,7 @@ const PropertyCard = memo(
             </div>
             <div className="flex-1 max-w-full md:max-w-[550px]">
               <div className="mb-3 text-left">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between md:items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
                     {property.sub_type === "Apartment"
                       ? `${property.bedrooms} BHK ${
@@ -232,7 +231,8 @@ const PropertyCard = memo(
                       : `${property.sub_type} for ${property.property_for}`}{" "}
                     in {property.locality_name}, {property.google_address}
                   </p>
-                  <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
+                  <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium my-2 md:my-0">
+                    <></>
                     {likedProperties.includes(property.unique_property_id) ? (
                       <IoIosHeart
                         onClick={(e) => {
@@ -251,11 +251,11 @@ const PropertyCard = memo(
                       />
                     )}
                     <MdOutlineVerified className="text-xl text-green-500" />
-                    <p>Verified</p>
+                    <p className="text-[12px] lg:text-base">Verified</p>
                   </div>
                 </div>
-                <div className="flex justify-between">
-                  <p className="text-[#A4A4A4] font-semibold text-[18px]">
+                <div className="flex flex-col lg:flex-row justify-between">
+                  <p className="text-[#A4A4A4] font-semibold text-base md:text-[18px]">
                     {property.property_name}
                   </p>
                   <p className="text-[#1D3A76] font-semibold text-[18px]">
@@ -282,7 +282,7 @@ const PropertyCard = memo(
                       e.stopPropagation();
                       toggleFacilities(index);
                     }}
-                    className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-sm flex items-center gap-1"
+                    className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-xs lg:text-sm flex items-center gap-1"
                   >
                     {expandedCards[index] ? "Show Less" : "Show All"}
                     {expandedCards[index] ? (
@@ -361,14 +361,14 @@ const PropertyCard = memo(
                   ).map((detail, idx) => (
                     <div
                       key={idx}
-                      className="bg-inherit w-full p-2 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col sm:basis-1/3"
+                      className="bg-inherit w-full px-4 py-4 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col  md:items-center md:justify-between sm:basis-1/3"
                     >
-                      <span className="text-[11px] text-[#A4A4A4] mb-[2px]">
+                      <span className="text-[11px] text-[#A4A4A4] mb-[2px] self-center whitespace-nowrap">
                         {detail.title}
                       </span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex md:flex-col justify-center items-center gap-2 my-2">
                         {detail.icon}
-                        <span className="text-sm text-[#1D3A76]">
+                        <span className="text-[12px] text-[#1D3A76]">
                           {detail.value}
                         </span>
                       </div>
@@ -392,13 +392,14 @@ const PropertyCard = memo(
                   </span>
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
+              {/* <div className="flex flex-col sm:flex-row gap-3"> */}
+              <div className="grid  md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3  gap-3">
                 <p
                   onClick={(e) => {
                     e.stopPropagation();
                     handleScheduleVisit(property);
                   }}
-                  className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                  className="sm:flex-1 transition  text-[15px]  bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
                 >
                   Schedule Visit
                 </p>
@@ -407,7 +408,7 @@ const PropertyCard = memo(
                     e.stopPropagation();
                     handleContactSeller(property);
                   }}
-                  className="sm:flex-1 transition text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                  className="sm:flex-1 transition  lg:text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
                 >
                   Contact Seller
                 </p>
@@ -730,13 +731,12 @@ function ListingsBody() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
   return (
     <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] p-1 pt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-        <div className="flex items-start md:items-start">
-          <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0" />
-          <p className="text-xl text-left font-normal text-[#1D3A76]">
+        <div className="flex items-center md:items-start">
+          <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0 " />
+          <p className="text-base md:text-xl text-left font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"
               ? "Commercial"
               : searchData?.property_in === "Plot"
@@ -797,7 +797,13 @@ function ListingsBody() {
                   scrollTop={scrollTop}
                   width={width}
                   rowCount={cards.length}
-                  rowHeight={window.innerWidth >= 768 ? 350 : 420}
+                  rowHeight={
+                    window.innerWidth < 768
+                      ? 420
+                      : window.innerWidth < 1024
+                      ? 400
+                      : 400
+                  }
                   rowRenderer={rowRenderer}
                 />
               )}

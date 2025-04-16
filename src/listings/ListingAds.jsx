@@ -7,7 +7,6 @@ import Login from "../auth/Login";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
-  console.log("property: ", property);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
@@ -75,7 +74,7 @@ const ListingAds = () => {
             crossOrigin="anonymous"
             className="w-full h-44 object-cover rounded-md"
           />
-          <div className="absolute bottom-2 right-2 flex gap-2">
+          <div className="absolute bottom-2 right-2 flex md:flex-col lg:flex-row justify-center  gap-2">
             <p
               onClick={() => {
                 handleNavigation(property[2]);
@@ -95,7 +94,7 @@ const ListingAds = () => {
           </div>
         </div>
         <div className="py-3">
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid xl:grid-cols-2 gap-4 mb-8">
             {property.slice(0, 2).map((item, i) => (
               <div
                 key={item.id || i}

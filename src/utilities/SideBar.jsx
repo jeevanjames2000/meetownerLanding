@@ -44,7 +44,7 @@ const Sidebar = ({
         );
         const data = await response.data;
         const liked = data.favourites;
-        console.log("liked: ", liked);
+
         if (liked && Array.isArray(liked)) {
           setLikedProperties(liked);
         }
@@ -55,7 +55,6 @@ const Sidebar = ({
     fetchLikedProperties();
   }, []);
   const RecentActivitySwiper = ({ data }) => {
-    console.log("data: ", data);
     if (!data?.length) {
       return (
         <p className="text-sm text-gray-500 px-4">No recent activity found.</p>
@@ -191,14 +190,7 @@ const Sidebar = ({
       toast.error("Something went wrong while submitting enquiry");
     }
   };
-  useEffect(() => {
-    console.log("Sidebar auth state:", {
-      isLoggedIn,
-      user,
-      userDetails: user,
-      name: user,
-    });
-  }, [isLoggedIn, user, Data]);
+  useEffect(() => {}, [isLoggedIn, user, Data]);
   const navigate = useNavigate();
   const handleRoute = () => {
     navigate("/profile");
@@ -264,7 +256,6 @@ const Sidebar = ({
         </button>
         <button
           onClick={() => {
-            console.log("Sidebar button clicked, isLoggedIn:", isLoggedIn);
             if (isLoggedIn) {
               handleLogout();
             } else {
