@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: true,
     cors: true,
     hmr: {
-      host: "preprod.meetowner.in",
+      host: "https://preprod.meetowner.in/",
     },
     base: "/",
   },
