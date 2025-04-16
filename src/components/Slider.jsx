@@ -179,7 +179,7 @@ const PropertyListing = () => {
     [navigate]
   );
   return (
-    <div className="max-w-7xl z-auto mx-auto px-4 py-1">
+    <div className=" z-auto mx-auto px-4 py-1">
       <div className="mb-8">
         <div className="relative">
           <h2 className="text-3xl font-bold text-gray-900 text-left">

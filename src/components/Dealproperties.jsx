@@ -90,7 +90,7 @@ const DealProperties = () => {
     navigate("/listings");
   };
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-900 text-left">

@@ -17,7 +17,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BiBasketball } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
@@ -26,6 +26,7 @@ import Login from "../auth/Login";
 import { toast } from "react-toastify";
 import axios from "axios";
 import useWhatsappHook from "../utilities/useWhatsappHook";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 const PropertyBody = () => {
   const { state: property } = useLocation();
   const facilityIconMap = {
@@ -134,7 +135,7 @@ const PropertyBody = () => {
     }
   };
   return (
-    <div className="p-6 w-full  lg:w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
+    <div className="p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
@@ -221,7 +222,7 @@ const PropertyBody = () => {
         <img
           src={mainImage}
           alt="Main"
-          className="w-full h-auto md:h-[400px] object-cover rounded-2xl shadow-md"
+          className="w-full h-auto md:h-[500px] object-cover rounded-2xl shadow-md"
           crossOrigin="anonymous"
           onError={(e) => {
             e.target.src = `https://placehold.co/600x400?text=${
@@ -232,10 +233,14 @@ const PropertyBody = () => {
         {images.length > 1 && (
           <div className="mt-4">
             <Swiper
-              modules={[Navigation]}
+              modules={[Navigation, Pagination]}
+              navigation={{
+                nextEl: ".swiper-button-next-custom",
+                prevEl: ".swiper-button-prev-custom",
+              }}
+              pagination={{ clickable: true, el: ".swiper-pagination-custom" }}
               slidesPerView={4}
               spaceBetween={16}
-              navigation
               className="mySwiper"
             >
               {images.map((img, index) => (
@@ -244,11 +249,20 @@ const PropertyBody = () => {
                     src={`${img.url}`}
                     alt={`Thumbnail ${index + 1}`}
                     crossOrigin="anonymous"
-                    className="w-full h-16 md:h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-all"
+                    className="w-full h-20 md:h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-all"
                     onClick={() => setMainImage(`${img.url}`)}
                   />
                 </SwiperSlide>
               ))}
+              <div className="flex justify-center items-center gap-6 mt-6 max-w-fit mx-auto">
+                <button className="swiper-button-prev-custom">
+                  <FaAngleLeft className="w-6 h-6 p-1 border border-gray-400 rounded-full hover:bg-gray-200" />
+                </button>
+                <div className="swiper-pagination-custom flex justify-center"></div>
+                <button className="swiper-button-next-custom">
+                  <FaAngleRight className="w-6 h-6 p-1 border border-gray-400 rounded-full hover:bg-gray-200" />
+                </button>
+              </div>
             </Swiper>
           </div>
         )}

@@ -148,8 +148,7 @@ const PropertyHeader = () => {
         );
         const data = await response.json();
         setLocalities(data);
-      } catch (err) {
-      }
+      } catch (err) {}
     };
     fetchLocalities();
   }, [searchInput, location]);
@@ -191,7 +190,7 @@ const PropertyHeader = () => {
             />
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
+            <div className="flex items-center rounded-full shadow-md w-full  bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
               <div className="hidden md:flex items-center gap-4 shrink-0">
                 <div
                   className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"

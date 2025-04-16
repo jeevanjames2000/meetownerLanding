@@ -28,7 +28,7 @@ const Footer = () => {
       style={{ backgroundColor: "#1D3A76" }}
     >
       <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full -translate-y-1/2 opacity-10"></div>
-      <div className="max-w-8xl mx-auto px-6">
+      <div className=" mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between text-white gap-8">
           <div className="w-full md:w-[60%] flex flex-wrap justify-center gap-x-6 gap-y-6">
             <div className="text-left w-40">

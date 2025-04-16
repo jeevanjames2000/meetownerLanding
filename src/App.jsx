@@ -24,7 +24,6 @@ import PrivacyAndPolicies from "./legal/privacy";
 import { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import Favourites from "./components/favourites";
-import Profile from "./utilities/Profile";
 import ProfileWrapper from "./profile/ProfileWrapper";
 
 function Home() {

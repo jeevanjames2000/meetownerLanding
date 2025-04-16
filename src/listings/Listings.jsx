@@ -11,7 +11,7 @@ const Listings = () => {
   return (
     <>
       <ListingsHeader />
-      <div className="flex w-full justify-between h-auto p-5 bg-[#F5F5F5]">
+      <div className="flex w-full justify-center h-auto p-5 bg-[#F5F5F5]">
         <ListingsBody />
         <ListingAds />
       </div>

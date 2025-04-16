@@ -227,12 +227,12 @@ const PropertyCard = memo(
     return (
       <div
         key={`property-${index}`}
-        className="flex flex-col md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+        className="flex flex-col items-center w-[4.5xl] p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
         onClick={() => handleNavigation(property)}
       >
-        <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full max-h-[700px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          <div className="flex flex-col lg:flex-row gap-5">
-            <div className="w-full lg:w-[300px]">
+        <div className="bg-[#ffff] rounded-[20px]  p-3 w-full max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="flex flex-col  lg:flex-row gap-8">
+            <div className="w-full h-auto lg:w-[300px] gap-2">
               <div className="rounded-lg overflow-hidden mb-4 relative">
                 <img
                   src={
@@ -254,7 +254,7 @@ const PropertyCard = memo(
                 />
               </div>
             </div>
-            <div className="flex-1 max-w-full md:max-w-[550px]">
+            <div className="flex-1 max-w-full md:max-w-[500px]">
               <div className="mb-3 text-left">
                 <div className="flex flex-col md:flex-row justify-between md:items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
@@ -396,13 +396,13 @@ const PropertyCard = memo(
                   ).map((detail, idx) => (
                     <div
                       key={idx}
-                      className="bg-inherit w-full px-4 py-4 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col  md:items-center md:justify-between sm:basis-1/3"
+                      className="bg-inherit w-full px-4 py-1 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col  md:items-center md:justify-between sm:basis-1/3"
                     >
-                      <span className="text-[11px] text-[#A4A4A4] mb-[2px] self-center whitespace-nowrap">
+                      <span className="text-[11px] flex gap-2 text-[#A4A4A4] mb-[2px] self-center whitespace-nowrap">
                         {detail.title}
+                        {detail.icon}
                       </span>
                       <div className="flex md:flex-col justify-center items-center gap-2 my-2">
-                        {detail.icon}
                         <span className="text-[12px] text-[#1D3A76]">
                           {detail.value}
                         </span>
@@ -427,7 +427,6 @@ const PropertyCard = memo(
                   </span>
                 </p>
               </div>
-              {/* <div className="flex flex-col sm:flex-row gap-3"> */}
               <div className="grid  md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3  gap-3">
                 <p
                   onClick={(e) => {
@@ -748,7 +747,7 @@ function ListingsBody() {
           ...style,
           paddingBottom: window.innerWidth < 768 ? "24px" : "32px",
         }}
-        className="w-full px-2"
+        className="w-full flex justify-center px-2"
       >
         {item.content}
       </div>
@@ -767,7 +766,7 @@ function ListingsBody() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <div className="min-h-screen w-full md:w-[75%] sm:w-[100%] p-1 pt-20 relative z-0">
+    <div className="min-h-screen w-full md:w-[60%] sm:w-[100%] p-1 mt-20 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0 " />
@@ -832,14 +831,13 @@ function ListingsBody() {
                   scrollTop={scrollTop}
                   width={width}
                   rowCount={cards.length}
-                  rowHeight={
+                  rowHeight={({ index }) =>
                     window.innerWidth < 768
                       ? 420
-                      : window.innerWidth < 1024
-                      ? 400
-                      : 400
+                      : 400 + (expandedCards[index] ? 100 : 0)
                   }
                   rowRenderer={rowRenderer}
+                  overscanRowCount={2}
                 />
               )}
             </AutoSizer>

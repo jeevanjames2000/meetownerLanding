@@ -41,7 +41,7 @@ const HighDemandProjects = () => {
     [navigate]
   );
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="px-4 py-8">
       <div className="relative">
         <h2 className="text-3xl font-bold text-gray-900 text-left">
           High-demand projects to invest now

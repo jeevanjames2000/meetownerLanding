@@ -218,28 +218,28 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 w-full bg-white shadow-sm px-6 z-20"
+        className="fixed top-0 left-0 w-full bg-white shadow-sm p-4 md:px-6 z-20"
       >
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div className="py-3 flex items-center relative">
           <div
-            className="flex items-center cursor-pointer"
+            className="flex text-left items-center cursor-pointer mr-auto"
             onClick={handleRouteHome}
           >
             <img
               src={logoImage}
               alt="Meet Owner Logo"
-              className="h-8 w-full hidden md:block cursor-pointer"
+              className="h-10 w-full hidden md:block cursor-pointer"
               onClick={handleRouteHome}
             />
             <img
               src={favicon}
               alt="Meet Owner"
-              className="w-8 h-8 md:hidden cursor-pointer"
+              className="w-10 h-10 md:hidden cursor-pointer"
               onClick={handleRouteHome}
             />
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center rounded-full shadow-md w-full max-w-[65rem] bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-[65rem] px-4">
+            <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
               <div className="hidden md:flex items-center gap-4 shrink-0">
                 <div className="relative inline-block">
                   <div

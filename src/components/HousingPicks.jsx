@@ -93,7 +93,7 @@ const HousingPicks = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-2">
+    <div className="mx-auto px-4 py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div className="relative">
           <h2 className="text-3xl font-bold text-gray-900 text-left">

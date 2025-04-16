@@ -23,7 +23,7 @@ const RecommendedSellers = () => {
   }, []);
   return (
     <div className="py-2" style={{ backgroundColor: "#ddd" }}>
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="mx-auto px-4">
         <h1 className="text-start text-3xl font-bold text-gray-800 mb-2">
           Recommended Sellers
         </h1>

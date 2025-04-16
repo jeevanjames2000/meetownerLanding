@@ -34,7 +34,7 @@ const ExclussiveCards = () => {
     [navigate]
   );
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="mx-auto px-4 py-2">
       <div className="relative">
         <h2 className="text-3xl font-bold text-gray-900 text-left">
           Meet Owner Exclusive
