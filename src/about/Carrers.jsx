@@ -17,6 +17,12 @@ const categories = [
 export default function Careers() {
   const [selectedCategory, setSelectedCategory] = useState("View all");
   const [careers, setCareers] = useState([]);
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
 
   useEffect(() => {
     const fetchCareers = async () => {

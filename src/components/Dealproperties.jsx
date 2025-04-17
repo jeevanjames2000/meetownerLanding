@@ -15,6 +15,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
 import { useNavigate } from "react-router-dom";
+import useWhatsappHook from "../utilities/useWhatsappHook";
 
 const formatPrice = (price) => {
   if (price >= 10000000) {
@@ -42,6 +43,8 @@ const DealProperties = () => {
     };
     fetchLatestProperties();
   }, []);
+  const { handleAPI, error } = useWhatsappHook();
+
   const handleEnquireNow = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -63,11 +66,8 @@ const DealProperties = () => {
         interested_status: 4,
         property_user_id: property.user_id,
       };
-      const res = await axios.post(
-        `${config.awsApiUrl}/enquiry/postEnquiry`,
-        payload
-      );
-
+      await axios.post(`${config.awsApiUrl}/enquiry/postEnquiry`, payload);
+      await handleAPI(property);
       toast.success("Enquiry submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);

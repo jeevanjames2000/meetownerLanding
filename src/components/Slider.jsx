@@ -90,7 +90,7 @@ const PropertyListing = () => {
       })
     );
   }, [activeTab, dispatch]);
-  const { handleAPI, error } = useWhatsappHook();
+  const { handleAPI } = useWhatsappHook();
 
   const handleEnquireNow = async (property) => {
     try {
@@ -113,11 +113,8 @@ const PropertyListing = () => {
         interested_status: 4,
         property_user_id: property.user_id,
       };
-      const res = await axios.post(
-        `${config.awsApiUrl}/enquiry/postEnquiry`,
-        payload
-      );
-      handleAPI(property);
+      await axios.post(`${config.awsApiUrl}/enquiry/postEnquiry`, payload);
+      await handleAPI(property);
       toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);

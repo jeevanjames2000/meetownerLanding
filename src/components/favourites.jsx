@@ -65,18 +65,27 @@ const Favourites = () => {
     setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
   };
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const modalRef = useRef(null);
   const handleClose = () => {
     setShowLoginModal(false);
   };
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const { handleAPI, error } = useWhatsappHook(selectedProperty);
-  useEffect(() => {
-    if (selectedProperty) {
-      handleAPI();
-    }
-  }, [selectedProperty, handleAPI]);
-  const handleNavigation = (property) => {};
+  const { handleAPI } = useWhatsappHook();
+  const navigate = useNavigate();
+  const handleNavigation = useCallback(
+    (property) => {
+      navigate("/property", { state: property });
+    },
+    [navigate]
+  );
+  const getSingleProperty = async (property) => {
+    const res = await fetch(
+      `${config.awsApiUrl}/listings/getSinleProperty?unique_property_id=${property.property_id}`
+    );
+    const data = await res.json();
+    return data.property;
+  };
   const handleLike = useCallback(
     async (property) => {
       const data = localStorage.getItem("user");
@@ -99,10 +108,43 @@ const Favourites = () => {
     },
     [likedProperties]
   );
-  const handleScheduleVisit = (property) => {
-    setSelectedProperty(property);
+  const handleModalSubmit = async (formData) => {
+    try {
+      const { userDetails } = JSON.parse(localStorage.getItem("user"));
+      const payload = {
+        property_id: selectedProperty.unique_property_id,
+        user_id: userDetails.user_id,
+        name: formData.name,
+        mobile: formData.phone,
+        email: formData.email,
+        property_user_id: selectedProperty.user_id,
+        shedule_date: formData.date,
+        shedule_time: formData.time,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
+      await handleAPI(selectedProperty);
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Enquiry Failed:", err);
+      toast.error("Something went wrong!");
+    }
+  };
+  const handleScheduleVisit = async (property) => {
+    const propertyData = await getSingleProperty(property);
+    const data = localStorage.getItem("user");
+    if (!data) {
+      toast.info("Please Login to Schedule Visits!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setShowLoginModal(true);
+      return;
+    }
+    setSelectedProperty(propertyData);
+    setModalOpen(true);
   };
   const handleContactSeller = async (property) => {
+    const propertyData = await getSingleProperty(property);
     setSelectedProperty(property);
     try {
       const data = localStorage.getItem("user");
@@ -120,8 +162,7 @@ const Favourites = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
-      await handleAPI(property);
-      toast.success("Details submitted successfully");
+      await handleAPI(propertyData);
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -154,7 +195,7 @@ const Favourites = () => {
       return (
         <div
           key={`property-${index}`}
-          className="flex flex-col md:flex-row w-full max-h-[300px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+          className="flex flex-col md:flex-row w-full max-h-[500px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
           onClick={() => handleNavigation(property)}
         >
           <div className="bg-[#F3F3F3] rounded-[20px] p-4 h-full w-[100%]  overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
@@ -195,7 +236,6 @@ const Favourites = () => {
                         }}
                         className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 cursor-pointer"
                       />
-
                       <MdOutlineVerified className="text-xl text-green-500" />
                       <p>Verified</p>
                     </div>
@@ -371,7 +411,6 @@ const Favourites = () => {
       );
     }
   );
-
   if (!likedProperties.length) {
     return (
       <>
@@ -434,6 +473,13 @@ const Favourites = () => {
             />
           </div>
         </div>
+      )}
+      {modalOpen && (
+        <ScheduleFormModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleModalSubmit}
+        />
       )}
       <Footer />
     </>

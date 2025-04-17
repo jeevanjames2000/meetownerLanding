@@ -82,7 +82,7 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 top-10 flex items-center justify-center z-50 bg-opacity-50">
+    <div className="fixed inset-0 top-10 flex items-center justify-center z-100 bg-opacity-50">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 relative">
         <h2 className="text-lg font-semibold mb-1">Please Fill Your Details</h2>
         <button

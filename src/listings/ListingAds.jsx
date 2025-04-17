@@ -66,7 +66,7 @@ const ListingAds = () => {
   };
   return (
     <>
-      <div className="hidden relative right-0 top-40 lg:block md:block w-[24%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden sticky right-0 top-20 lg:block md:block h-auto bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
             src={`https://api.meetowner.in/uploads/${property[2]?.image}`}

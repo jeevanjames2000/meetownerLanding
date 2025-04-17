@@ -121,9 +121,11 @@ const Footer = () => {
               </ul>
             </div>
 
-            <div className="text-left w-28">
+            <div className="text-left w-40">
               <h3 className="text-lg font-bold mb-4">Timings</h3>
-              <p className="md:text-sm text-xs">10:00 AM TO 06:00 PM</p>
+              <p className="md:text-sm text-xs inline-block">
+                10:00 AM - 06:00 PM
+              </p>
             </div>
           </div>
 

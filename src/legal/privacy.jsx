@@ -18,7 +18,12 @@ const PrivacyAndPolicies = () => {
     fetchPrivacy();
   }, []);
   const [showScrollTop, setShowScrollTop] = useState(false);
-
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);

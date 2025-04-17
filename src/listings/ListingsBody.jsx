@@ -1,4 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  memo,
+  useMemo,
+} from "react";
 import {
   MapPin,
   ChevronDown,
@@ -30,9 +37,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   List,
   AutoSizer,
+  WindowScroller,
   CellMeasurer,
   CellMeasurerCache,
-  WindowScroller,
 } from "react-virtualized";
 import config from "../../config";
 import axios from "axios";
@@ -40,11 +47,11 @@ import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
 import useWhatsappHook from "../utilities/useWhatsappHook";
+import { debounce } from "lodash";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const [property, setProperty] = useState([]);
-  console.log("property: ", property);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
@@ -140,7 +147,6 @@ const AdsCard = memo(() => {
                     ? project?.description.slice(0, 150) + "..."
                     : project?.description}
                 </p>
-
                 <div className="flex flex-wrap gap-4 mb-6">
                   <div className="bg-white shadow rounded-md px-4 py-2">
                     <p className="text-xs text-gray-500">Possession Date</p>
@@ -204,18 +210,12 @@ const PropertyCard = memo(
   ({
     property,
     index,
-    toggleReadMore,
-    toggleFacilities,
     handleNavigation,
-    readMoreStates,
-    expandedCards,
     likedProperties,
     handleLike,
     handleScheduleVisit,
     handleContactSeller,
   }) => {
-    const showReadMore = readMoreStates[index];
-    const shortDescription = property.description?.slice(0, 180);
     const formatToIndianCurrency = (value) => {
       if (!value || isNaN(value)) return "N/A";
       const numValue = parseFloat(value);
@@ -227,11 +227,12 @@ const PropertyCard = memo(
     return (
       <div
         key={`property-${index}`}
-        className="flex flex-col items-center w-[5xl] p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+        className="flex flex-col items-center p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer w-full"
         onClick={() => handleNavigation(property)}
+        style={{ minHeight: "auto", height: "auto" }}
       >
-        <div className="bg-[#ffff] rounded-[20px]  p-3 w-full max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          <div className="flex flex-col  lg:flex-row gap-8">
+        <div className="bg-[#ffff] rounded-[20px] p-3 w-full h-auto flex flex-col">
+          <div className="flex flex-col lg:flex-row gap-8">
             <div className="w-full h-auto lg:w-[300px] gap-2">
               <div className="rounded-lg overflow-hidden mb-4 relative">
                 <img
@@ -244,7 +245,7 @@ const PropertyCard = memo(
                   }
                   alt="Property"
                   crossOrigin="anonymous"
-                  className="w-full h-70 object-cover rounded-md"
+                  className="w-full h-50 object-cover rounded-md"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = `https://placehold.co/600x400?text=${
@@ -254,7 +255,7 @@ const PropertyCard = memo(
                 />
               </div>
             </div>
-            <div className="flex-1 max-w-full md:max-w-[500px]">
+            <div className="flex-1 max-w-full md:max-w-[500px] flex flex-col">
               <div className="mb-3 text-left">
                 <div className="flex flex-col md:flex-row justify-between md:items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
@@ -290,12 +291,12 @@ const PropertyCard = memo(
                   </div>
                 </div>
                 <div className="flex flex-col lg:flex-row justify-between">
-                  <p className="text-[#A4A4A4] font-semibold text-base md:text-[18px]">
+                  <p className="text-[#A4A4A4] font-bold text-base md:text-[18px]">
                     {property.property_name}
                   </p>
                   <p className="text-[#1D3A76] font-semibold text-[18px]">
                     {property.project_name || ""}{" "}
-                    <span className="text-[#A4A4A4] font-medium text-[15px]">
+                    <span className="text-[#1D3A76] font-bold text-[15px]">
                       Rs: {formatToIndianCurrency(property.property_cost)}{" "}
                       {property.price_negotiable && " (Negotiable)"}
                     </span>
@@ -307,133 +308,110 @@ const PropertyCard = memo(
                   </p>
                 </div>
               </div>
-              <div className="mb-4 relative">
+              <div className="mb-4 relative flex-1">
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-[#A4A4A4] font-medium text-[15px]">
-                    Property Details
-                  </h4>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFacilities(index);
-                    }}
-                    className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-xs lg:text-sm flex items-center gap-1"
-                  >
-                    {expandedCards[index] ? "Show Less" : "Show All"}
-                    {expandedCards[index] ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
+                  <div className="flex flex-wrap gap-2 items-center text-[#204691] font-medium text-sm">
+                    {[
+                      property.sub_type === "Plot"
+                        ? property.plot_area
+                          ? `${property.plot_area} ${property?.area_units} Plot area`
+                          : property.carpet_area
+                          ? `${property.carpet_area} ${property?.area_units} Carpet area`
+                          : null
+                        : property.builtup_area
+                        ? `${property.builtup_area} ${property?.area_units} Builtup area`
+                        : null,
+                      property?.investor_property === "Yes" &&
+                        "Investor Property",
+                      property?.under_construction && "Under Construction",
+                      property?.under_construction &&
+                        `Possession: ${property.under_construction.slice(
+                          2,
+                          10
+                        )}`,
+                      property?.possession_status === "Immediate" &&
+                        "Ready to move",
+                    ]
+                      .filter(Boolean)
+                      .map((item, index, arr) => (
+                        <React.Fragment key={index}>
+                          <p>{item}</p>
+                          {index !== arr.length - 1 && (
+                            <span className="text-gray-400 mx-1">|</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full">
-                  {(expandedCards[index]
-                    ? [
-                        {
-                          icon: <Ruler className="w-4 h-4" />,
-                          title: property?.builtup_area
-                            ? "Built-up Area"
-                            : "Built-up Units",
-                          value: `${
-                            property?.builtup_area ||
-                            property?.builtup_unit ||
-                            "N/A"
-                          } ${property?.area_units || ""}`,
-                        },
-                        {
-                          icon: <Home className="w-4 h-4" />,
-                          title: "Facing",
-                          value: property?.facing || "N/A",
-                        },
-                        {
-                          icon: <Key className="w-4 h-4" />,
-                          title: "Property In",
-                          value: property?.property_in || "N/A",
-                        },
-                        {
-                          icon: <Building className="w-4 h-4" />,
-                          title: "Sub Type",
-                          value: property?.sub_type || "N/A",
-                        },
-                        {
-                          icon: <CreditCard className="w-4 h-4" />,
-                          title: "Loan Facility",
-                          value:
-                            property?.loan_facility === "Yes"
-                              ? "Available"
-                              : "Not Available",
-                        },
-                        {
-                          icon: <ShieldCheck className="w-4 h-4" />,
-                          title: "Furnishing Status",
-                          value: property?.furnished_status || "N/A",
-                        },
-                      ]
-                    : [
-                        {
-                          icon: <Ruler className="w-4 h-4" />,
-                          title: property?.builtup_area
-                            ? "Built-up Area"
-                            : "Built-up Units",
-                          value: `${
-                            property?.builtup_area ||
-                            property?.builtup_unit ||
-                            "N/A"
-                          } ${property?.area_units || ""}`,
-                        },
-                        {
-                          icon: <Home className="w-4 h-4" />,
-                          title: "Facing",
-                          value: property?.facing || "N/A",
-                        },
-                        {
-                          icon: <Key className="w-4 h-4" />,
-                          title: "Property In",
-                          value: property?.property_in || "N/A",
-                        },
-                      ]
-                  ).map((detail, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-inherit w-full px-4 py-1 rounded-lg shadow-sm text-xs text-[#1D3A76] font-medium flex flex-col  md:items-center md:justify-between sm:basis-1/3"
-                    >
-                      <span className="text-[11px] flex gap-2 text-[#A4A4A4] mb-[2px] self-center whitespace-nowrap">
-                        {detail.title}
-                        {detail.icon}
-                      </span>
-                      <div className="flex md:flex-col justify-center items-center gap-2 my-2">
-                        <span className="text-[12px] text-[#1D3A76]">
-                          {detail.value}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
+                  <p>Highlights:</p>
+                  {[
+                    property?.facing && `${property.facing} Facing`,
+                    property?.bedrooms && `${property?.bedrooms} BHK`,
+                    property?.property_in &&
+                      property?.sub_type &&
+                      `${property.property_in} ${property.sub_type}`,
+                  ]
+                    .filter(Boolean)
+                    .map((item, index, arr) => (
+                      <React.Fragment key={index}>
+                        <p>{item}</p>
+                        {index !== arr.length - 1 && (
+                          <span className="text-gray-500">|</span>
+                        )}
+                      </React.Fragment>
+                    ))}
                 </div>
+                {(property?.facilities ||
+                  property?.car_parking ||
+                  property?.bike_parking ||
+                  property?.private_washrooms ||
+                  property?.public_washrooms ||
+                  property?.public_parking ||
+                  property?.private_parking) && (
+                  <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
+                    <p>Amenities:</p>
+                    {property?.facilities
+                      ? property?.facilities
+                          .split(",")
+                          .slice(0, 5)
+                          .map((facility, index) => (
+                            <React.Fragment key={index}>
+                              <p>{facility.trim()}</p>
+                              {index !== 4 && (
+                                <span className="w-1.5 h-1.5 bg-gray-500 rounded-full inline-block mx-1" />
+                              )}
+                            </React.Fragment>
+                          ))
+                      : [
+                          property?.car_parking &&
+                            `${property?.car_parking} Car Parking`,
+                          property?.bike_parking &&
+                            `${property?.bike_parking} Bike Parking`,
+                          property?.private_washrooms && "Private Washroom",
+                          property?.public_washrooms && "Public Washroom",
+                          property?.public_parking && "Public Parking",
+                          property?.private_parking && "Private Parking",
+                        ]
+                          .filter(Boolean)
+                          .map((item, index, arr) => (
+                            <React.Fragment key={index}>
+                              <p>{item}</p>
+                              {index !== arr.length - 1 && (
+                                <span className="text-gray-500">|</span>
+                              )}
+                            </React.Fragment>
+                          ))}
+                  </div>
+                )}
               </div>
-              <div className="mb-4">
-                <p className="text-[#A4A4A4] text-sm text-left">
-                  {showReadMore
-                    ? property.description
-                    : `${shortDescription}... `}
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleReadMore(index);
-                    }}
-                    className="text-[#1D3A76] font-normal cursor-pointer"
-                  >
-                    {showReadMore ? "Read Less..." : "Read More..."}
-                  </span>
-                </p>
-              </div>
-              <div className="grid  md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3  gap-3">
+              <div className="grid md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 <p
                   onClick={(e) => {
                     e.stopPropagation();
                     handleScheduleVisit(property);
                   }}
-                  className="sm:flex-1 transition  text-[15px]  bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                  className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
                 >
                   Schedule Visit
                 </p>
@@ -442,7 +420,7 @@ const PropertyCard = memo(
                     e.stopPropagation();
                     handleContactSeller(property);
                   }}
-                  className="sm:flex-1 transition  lg:text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                  className="sm:flex-1 transition lg:text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
                 >
                   Contact Seller
                 </p>
@@ -472,71 +450,22 @@ function ListingsBody() {
   const [readMoreStates, setReadMoreStates] = useState({});
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const maxLimit = 50;
   const [likedProperties, setLikedProperties] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
-  const cardsContainerRef = useRef(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const handleClose = () => {
     setShowLoginModal(false);
   };
-  const bottomRef = useRef(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const options = [
     "Relevance",
     "Price: Low to High",
     "Price: High to Low",
     "Newest First",
   ];
-  const fetchProperties = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `${
-          config.awsApiUrl
-        }/listings/getAllPropertiesByType?page=${page}&property_for=${
-          searchData?.tab === "Latest"
-            ? "Sell"
-            : searchData.tab === "Buy"
-            ? "Sell"
-            : searchData?.tab === "Rent"
-            ? "Rent"
-            : searchData?.tab === "Plot"
-            ? "Plot"
-            : "Commercial"
-        }&property_in=${searchData?.property_in || ""}&sub_type=${
-          searchData?.sub_type === "Others" ? "" : searchData?.sub_type
-        }&search=${searchData.location || ""}&bedrooms=${
-          searchData?.bhk || ""
-        }&property_cost=${
-          searchData?.budget || ""
-        }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
-          searchData?.occupancy
-        }&property_status=1`
-      );
-      const res = await response.json();
-      const newData = res.properties || [];
-      setData((prevData) => (page === 1 ? newData : [...prevData, ...newData]));
-      setHasMore(newData.length > 0);
-    } catch (error) {
-      setData([]);
-      setHasMore(false);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    page,
-    searchData.location,
-    searchData?.bhk,
-    searchData.property_in,
-    searchData.tab,
-    searchData.occupancy,
-    searchData.sub_type,
-    searchData?.budget,
-    selected,
-  ]);
   useEffect(() => {
     const fetchLikedProperties = async () => {
       const data = localStorage.getItem("user");
@@ -557,36 +486,80 @@ function ListingsBody() {
     };
     fetchLikedProperties();
   }, []);
+  const fetchProperties = useCallback(
+    async (currentPage = 1, reset = false) => {
+      if (loading) return;
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${
+            config.awsApiUrl
+          }/listings/getAllPropertiesByType?page=${currentPage}&property_for=${
+            searchData?.tab === "Latest"
+              ? "Sell"
+              : searchData.tab === "Buy"
+              ? "Sell"
+              : searchData?.tab === "Rent"
+              ? "Rent"
+              : searchData?.tab === "Plot"
+              ? "Plot"
+              : "Commercial"
+          }&property_in=${searchData?.property_in || ""}&sub_type=${
+            searchData?.sub_type === "Others" ? "" : searchData?.sub_type
+          }&search=${searchData.location || ""}&bedrooms=${
+            searchData?.bhk || ""
+          }&property_cost=${
+            searchData?.budget || ""
+          }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
+            searchData?.occupancy || ""
+          }&property_status=1`
+        );
+
+        const res = await response.json();
+        const newData = res.properties || [];
+
+        setData((prevData) => {
+          const combined = reset ? newData : [...prevData, ...newData];
+          return combined.slice(0, maxLimit);
+        });
+
+        setHasMore(
+          newData.length > 0 &&
+            (reset
+              ? newData.length < maxLimit
+              : data.length + newData.length < maxLimit)
+        );
+      } catch (error) {
+        console.error("Failed to fetch properties:", error);
+        setData([]);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [searchData, selected, loading]
+  );
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      { threshold: 1.0 }
-    );
-    if (bottomRef.current) {
-      observer.observe(bottomRef.current);
-    }
-    return () => {
-      if (bottomRef.current) observer.unobserve(bottomRef.current);
-    };
-  }, [hasMore, loading]);
-  useEffect(() => {
+    setData([]);
     setPage(1);
-    fetchProperties();
+    setHasMore(true);
+    fetchProperties(1, true);
   }, [
-    fetchProperties,
-    searchData.location,
+    searchData?.location,
     searchData?.bhk,
-    searchData.property_in,
-    searchData.tab,
-    searchData.occupancy,
-    searchData.sub_type,
+    searchData?.property_in,
+    searchData?.tab,
+    searchData?.occupancy,
+    searchData?.sub_type,
     searchData?.budget,
     selected,
   ]);
+
+  useEffect(() => {
+    if (page > 1) fetchProperties(page);
+  }, [page]);
+
   const toggleReadMore = useCallback((index) => {
     setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
@@ -599,6 +572,9 @@ function ListingsBody() {
     },
     [navigate]
   );
+  const [selectedProperty, setSelectedProperty] = useState(null);
+
+  const { handleAPI } = useWhatsappHook(selectedProperty);
   const handleLike = useCallback(
     async (property) => {
       const data = localStorage.getItem("user");
@@ -637,6 +613,7 @@ function ListingsBody() {
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+        await handleAPI(property);
       } catch (err) {
         console.error("Error updating interest:", err);
         setLikedProperties((prev) =>
@@ -648,7 +625,6 @@ function ListingsBody() {
     },
     [likedProperties]
   );
-  const [selectedProperty, setSelectedProperty] = useState(null);
   const handleScheduleVisit = (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -662,7 +638,6 @@ function ListingsBody() {
     setSelectedProperty(property);
     setModalOpen(true);
   };
-  const { handleAPI, error } = useWhatsappHook(selectedProperty);
   const handleModalSubmit = async (formData) => {
     try {
       const { userDetails } = JSON.parse(localStorage.getItem("user"));
@@ -677,7 +652,7 @@ function ListingsBody() {
         shedule_time: formData.time,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
-      await handleAPI();
+      await handleAPI(selectedProperty);
       toast.success("Visit Scheduled Successfully!");
       setModalOpen(false);
     } catch (err) {
@@ -691,7 +666,6 @@ function ListingsBody() {
       if (!data) {
         toast.info("Please Login to Contact!");
         setShowLoginModal(true);
-
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -703,7 +677,7 @@ function ListingsBody() {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
-      toast.success("Details submitted successfully");
+      await handleAPI(property);
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -737,20 +711,35 @@ function ListingsBody() {
     likedProperties,
     handleLike,
   ]);
-  const cards = prepareCards();
-  const rowRenderer = ({ index, key, style }) => {
+  const cards = useMemo(() => prepareCards(), [prepareCards]);
+  const cache = new CellMeasurerCache({
+    fixedWidth: true,
+    defaultHeight: 400,
+  });
+  const rowRenderer = ({ index, key, style, parent }) => {
     const item = cards[index];
     return (
-      <div
-        key={key}
-        style={{
-          ...style,
-          paddingBottom: window.innerWidth < 768 ? "24px" : "32px",
-        }}
-        className="w-full flex justify-center px-2"
+      <CellMeasurer
+        cache={cache}
+        columnIndex={0}
+        rowIndex={index}
+        parent={parent}
       >
-        {item.content}
-      </div>
+        {({ measure, registerChild }) => (
+          <div
+            ref={registerChild}
+            key={key}
+            style={{
+              ...style,
+              paddingBottom: window.innerWidth < 768 ? "24px" : "32px",
+              marginBottom: window.innerWidth < 768 ? "16px" : "24px",
+            }}
+            className="w-full flex justify-center px-2"
+          >
+            <div className="w-full">{item.content}</div>
+          </div>
+        )}
+      </CellMeasurer>
     );
   };
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -761,12 +750,11 @@ function ListingsBody() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <div className="min-h-screen w-full md:w-[60%] sm:w-[100%] p-1 mt-20 relative z-0">
+    <div className="min-h-screen p-1 relative z-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0 " />
@@ -831,11 +819,8 @@ function ListingsBody() {
                   scrollTop={scrollTop}
                   width={width}
                   rowCount={cards.length}
-                  rowHeight={({ index }) =>
-                    window.innerWidth < 768
-                      ? 420
-                      : 400 + (expandedCards[index] ? 100 : 0)
-                  }
+                  deferredMeasurementCache={cache}
+                  rowHeight={cache.rowHeight}
                   rowRenderer={rowRenderer}
                   overscanRowCount={2}
                 />
@@ -843,14 +828,14 @@ function ListingsBody() {
             </AutoSizer>
           )}
         </WindowScroller>
-      ) : (
-        <div>
+      ) : !loading ? (
+        <div className="text-center">
           <h1 className="text-2xl text-gray-500 font-bold">
             No Properties Found!
           </h1>
           <AdsCard />
         </div>
-      )}
+      ) : null}
       {loading && hasMore && (
         <div className="w-full py-4 flex justify-center items-center gap-2">
           <svg
@@ -878,7 +863,22 @@ function ListingsBody() {
           </span>
         </div>
       )}
-      <div className="w-full h-[40px]" ref={bottomRef}></div>
+      {!hasMore && data.length > 0 && (
+        <div className="w-full py-4 text-center text-[#1D3A76] font-medium">
+          No more properties to load.
+        </div>
+      )}
+      {hasMore && data.length < maxLimit && !loading && (
+        <div className="w-full py-4 flex justify-center">
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            className="px-4 py-2 bg-[#1D3A76] text-white rounded hover:bg-[#162f5c] transition"
+          >
+            Load More properties
+          </button>
+        </div>
+      )}
+
       {modalOpen && (
         <ScheduleFormModal
           isOpen={modalOpen}

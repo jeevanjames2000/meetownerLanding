@@ -27,8 +27,10 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import useWhatsappHook from "../utilities/useWhatsappHook";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { MdOutlineVerified } from "react-icons/md";
 const PropertyBody = () => {
   const { state: property } = useLocation();
+  console.log("property: ", property);
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
@@ -97,7 +99,6 @@ const PropertyBody = () => {
     return numValue.toString();
   };
   const [showScrollTop, setShowScrollTop] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -105,12 +106,10 @@ const PropertyBody = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const { handleAPI, error } = useWhatsappHook(property);
-
+  const { handleAPI } = useWhatsappHook();
   const handleContactSeller = async () => {
     try {
       const data = localStorage.getItem("user");
@@ -128,7 +127,7 @@ const PropertyBody = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
-      handleAPI();
+      await handleAPI(property);
       toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
@@ -172,10 +171,10 @@ const PropertyBody = () => {
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
           <div>
-            <p className="text-xs text-left text-gray-400 uppercase tracking-wide mt-1">
+            <p className="text-xs text-left font-semibold text-gray-400 uppercase tracking-wide mt-1">
               Construction Pvt Ltd...
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-left font-semibold text-gray-600 mt-1">
               {property?.location_id}
             </p>
           </div>
@@ -183,7 +182,9 @@ const PropertyBody = () => {
             EMI starts at ₹{" "}
             {(parseInt(property?.property_cost) / 2400).toFixed(2)} K
             <br />
-            <span className="text-xs text-gray-400">All Inclusive Price</span>
+            <span className="text-xs font-semibold text-gray-400">
+              All Inclusive Price
+            </span>
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between">
@@ -206,6 +207,11 @@ const PropertyBody = () => {
                 }
               )}
             </span>
+            <span className="border-l h-4 border-gray-300"></span>
+            <span className="flex items-center gap-1">
+              <MdOutlineVerified className="text-xl text-green-500" />
+              <p>Rera</p>
+            </span>
           </div>
           <button
             onClick={() => {
@@ -217,7 +223,7 @@ const PropertyBody = () => {
           </button>
         </div>
       </div>
-      {/* slider  */}
+
       <div className="mt-6">
         <img
           src={mainImage}
@@ -267,41 +273,45 @@ const PropertyBody = () => {
           </div>
         )}
       </div>
-      <div>
-        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
-          Floor Plan
-        </h2>
-        <img
-          src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
-          alt="FloorPlan"
-          crossOrigin="anonymous"
-          className="rounded-lg shadow-md w-full object-cover h-full"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
-          }}
-        />
-      </div>
-      <div>
-        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
-          Amenities
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2  border-1 border-gray-500 rounded-lg">
-          {facilitiesList?.map((facility, index) => (
-            <div
-              key={index}
-              className="flex flex-col md:flex-row items-center gap-2 p-4 text-[#4B1D1D]"
-            >
-              <div className="w-6 h-6">
-                {facilityIconMap[facility] || <Building />}
-              </div>
-              <span className="text-sm text-center md:text-left">
-                {facility}
-              </span>
-            </div>
-          ))}
+      {floorplan?.image && (
+        <div>
+          <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
+            Floor Plan
+          </h2>
+          <img
+            src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
+            alt="FloorPlan"
+            crossOrigin="anonymous"
+            className="rounded-lg shadow-md w-200 object-contain h-100"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
+            }}
+          />
         </div>
-      </div>
+      )}
+      {facilitiesList && (
+        <div>
+          <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
+            Amenities
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2  border-1 border-gray-500 rounded-lg">
+            {facilitiesList?.map((facility, index) => (
+              <div
+                key={index}
+                className="flex flex-col md:flex-row items-center gap-2 p-4 text-[#4B1D1D]"
+              >
+                <div className="w-6 h-6">
+                  {facilityIconMap[facility] || <Building />}
+                </div>
+                <span className="text-sm text-center md:text-left">
+                  {facility}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="mt-6">
         <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
           Explore Map

@@ -189,8 +189,6 @@ export default function SearchBar() {
     };
     fetchLatestAds();
   }, []);
-
-  // Utility to check file type
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
@@ -410,7 +408,10 @@ export default function SearchBar() {
                 </ul>
               )}
             </div>
-            <IoSearch className="w-6 h-6 text-gray-600 cursor-pointer md:hidden" />
+            <IoSearch
+              className="w-6 h-6 text-gray-600 cursor-pointer md:hidden"
+              onClick={() => handleNavigation()}
+            />
           </div>
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
             <span className="hidden md:block text-gray-400">

@@ -218,9 +218,9 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 w-full bg-white shadow-sm p-4 md:px-6 z-20"
+        className="fixed top-0 left-0 w-full bg-white shadow-sm p-2 md:px-6 z-20"
       >
-        <div className="py-3 flex items-center relative">
+        <div className="flex justify-between items-center">
           <div
             className="flex text-left items-center cursor-pointer mr-auto"
             onClick={handleRouteHome}
@@ -238,7 +238,7 @@ const Header = () => {
               onClick={handleRouteHome}
             />
           </div>
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-[65rem] px-4">
+          <div className="flex justify-end w-full max-w-[65rem] px-4">
             <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
               <div className="hidden md:flex items-center gap-4 shrink-0">
                 <div className="relative inline-block">
