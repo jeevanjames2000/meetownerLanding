@@ -227,7 +227,7 @@ const PropertyCard = memo(
     return (
       <div
         key={`property-${index}`}
-        className="flex flex-col items-center w-[4.5xl] p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+        className="flex flex-col items-center w-[5xl] p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
         onClick={() => handleNavigation(property)}
       >
         <div className="bg-[#ffff] rounded-[20px]  p-3 w-full max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
