@@ -162,7 +162,7 @@ const DealProperties = () => {
                   <FaMapMarkerAlt className="mr-2 text-gray-600" />
                   <span>{property.location_id}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div className="grid grid-cols-3 gap-1 text-sm text-gray-600">
                   <div className="flex items-center">
                     <FaCompass className="mr-2" /> {property?.facing}
                   </div>
@@ -173,9 +173,70 @@ const DealProperties = () => {
                     <FaBath className="mr-2" /> {property?.bedrooms} Bedrooms
                   </div>
                 </div>
+                <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
+                  <p>Highlights:</p>
+                  {[
+                    property?.facing && `${property.facing} Facing`,
+                    property?.bedrooms && `${property?.bedrooms} BHK`,
+                    property?.property_in &&
+                      property?.sub_type &&
+                      `${property.property_in} ${property.sub_type}`,
+                  ]
+                    .filter(Boolean)
+                    .map((item, index, arr) => (
+                      <React.Fragment key={index}>
+                        <p>{item}</p>
+                        {index !== arr.length - 1 && (
+                          <span className="text-gray-500">|</span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                </div>
+                {(property?.facilities ||
+                  property?.car_parking ||
+                  property?.bike_parking ||
+                  property?.private_washrooms ||
+                  property?.public_washrooms ||
+                  property?.public_parking ||
+                  property?.private_parking) && (
+                  <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
+                    <p>Amenities:</p>
+                    {property?.facilities
+                      ? property?.facilities
+                          .split(",")
+                          .slice(0, 5)
+                          .map((facility, index) => (
+                            <React.Fragment key={index}>
+                              <p>{facility.trim()}</p>
+                              {index !== 4 && (
+                                <span className="w-1.5 h-1.5 bg-gray-500 rounded-full inline-block mx-1" />
+                              )}
+                            </React.Fragment>
+                          ))
+                      : [
+                          property?.car_parking &&
+                            `${property?.car_parking} Car Parking`,
+                          property?.bike_parking &&
+                            `${property?.bike_parking} Bike Parking`,
+                          property?.private_washrooms && "Private Washroom",
+                          property?.public_washrooms && "Public Washroom",
+                          property?.public_parking && "Public Parking",
+                          property?.private_parking && "Private Parking",
+                        ]
+                          .filter(Boolean)
+                          .map((item, index, arr) => (
+                            <React.Fragment key={index}>
+                              <p>{item}</p>
+                              {index !== arr.length - 1 && (
+                                <span className="text-gray-500">|</span>
+                              )}
+                            </React.Fragment>
+                          ))}
+                  </div>
+                )}
                 <div className="flex justify-between items-center mt-4">
                   <div className="text-xl font-bold text-[#1D3A76]">
-                    ₹{formatPrice(property.property_cost)}
+                    ₹ {formatPrice(property.property_cost)}
                   </div>
                   <button
                     className="bg-[#1D3A76] text-white px-4 py-2 rounded-full"

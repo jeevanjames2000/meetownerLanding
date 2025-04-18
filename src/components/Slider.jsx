@@ -278,9 +278,11 @@ const PropertyListing = () => {
                     }}
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
+                    <span className="bg-[#F0AA00] text-black px-3 py-1 rounded-full text-sm">
                       For {""}
-                      {property.property_for}
+                      {property.property_for === "Sell"
+                        ? "Sale"
+                        : property.property_for}
                     </span>
                   </div>
                   <div className="absolute top-4 right-4 flex space-x-2">
@@ -299,8 +301,8 @@ const PropertyListing = () => {
                   </div>
                 </div>
                 <div className="p-4 cursor-pointer">
-                  <div className="flex items-center text-gray-500 mb-3">
-                    <FaMapMarkerAlt className="mr-2 text-gray-700" />
+                  <div className="flex items-center text-gray-600 mb-3">
+                    <FaMapMarkerAlt className="mr-2 text-gray-500" />
                     <span>{property.location_id}</span>
                   </div>
                   <h3
@@ -330,7 +332,7 @@ const PropertyListing = () => {
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <div className="text-lg font-bold text-[#1D3A76]">
-                      ₹
+                      ₹{" "}
                       {formatPrice(
                         activeTab === "Rent"
                           ? property?.monthly_rent

@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { LogInIcon } from "lucide-react";
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
+  console.log("Data: ", Data);
   const user = useSelector((state) => state.auth.userDetails);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -83,6 +84,20 @@ const Header = () => {
   const handleRoute = () => {
     navigate("/");
   };
+  useEffect(() => {
+    const handleClickOutsideDownload = (e) => {
+      if (downloadRef.current && !downloadRef.current.contains(e.target)) {
+        setShowDownloadModal(false);
+      }
+    };
+    if (showDownloadModal) {
+      document.addEventListener("mousedown", handleClickOutsideDownload);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideDownload);
+    };
+  }, [showDownloadModal]);
+
   return (
     <>
       <header className="w-full bg-white shadow-sm px-4 relative z-10">
@@ -113,29 +128,28 @@ const Header = () => {
               onClick={() =>
                 (window.location.href = "https://sellers.meetowner.in/")
               }
-              className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-black font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
+              className="hidden md:flex bg-blue-900 px-6 py-1 rounded-full text-white font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
             >
               Add Property
               <span className="ml-1 text-[#F0AA00] group-hover:text-black">
                 | Free
               </span>
             </button>
-            <div
-              className="flex cursor-pointer border border-[#F0AA00] px-4 py-1 rounded-full"
-              onClick={handleFavRoute}
-            >
-              <IoIosHeartEmpty className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 " />
-              <p>Favourites</p>
-            </div>
+            {Data && (
+              <div
+                className="flex cursor-pointer border border-[#F0AA00] px-6 py-1 rounded-full"
+                onClick={handleFavRoute}
+              >
+                <IoIosHeartEmpty className="p-1 w-6 h-6 bg-white rounded-2xl text-red-600 hover:text-red-500 " />
+                <p>Favourites</p>
+              </div>
+            )}
             {!Data && (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="hidden md:flex border items-center bg-blue-900 px-6 py-[6px] rounded-full text-white font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
+                className="hidden md:flex border items-center bg-blue-900 px-6 py-1 rounded-full text-white font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
               >
                 Login
-                <span className="ml-1 text-white group-hover:text-black">
-                  <LogInIcon className="h-5 w-5" />
-                </span>
               </button>
             )}
             <button

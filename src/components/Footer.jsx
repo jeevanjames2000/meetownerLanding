@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import favicon from "../assets/Images/Favicon@10x.png";
 import { useNavigate } from "react-router-dom";
-import QR from "../assets/Images/qrcode_193007135_71c6cda8449bb038d4fc90072469a021.png";
+import QR from "../assets/Images/QR Code.png";
 const Footer = () => {
   const navigate = useNavigate();
   const handleNavigation = useCallback(
@@ -32,20 +32,11 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between text-white gap-8">
           <div className="w-full md:w-[60%] flex flex-wrap justify-center gap-x-6 gap-y-6">
             <div className="text-left w-40">
-              <div>
-                <img
-                  src={favicon}
-                  alt="Meet Owner"
-                  className="w-10 h-10 md:hidden mb-2"
-                />
-                <h3 className="text-lg font-bold mb-4">MEET OWNER</h3>
+              <div className="flex justify-center">
+                <h3 className="text-lg font-bold mb-2">MEET OWNER</h3>
               </div>
               <div className="flex flex-col space-y-3">
-                <img
-                  src={QR}
-                  alt="Android QR"
-                  className="w-full h-full mx-auto"
-                />
+                <img src={QR} alt="Qr Code" className="w-full h-full mx-auto" />
                 <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaGooglePlay className="h-5 w-5" />
                   <div className="flex flex-col">

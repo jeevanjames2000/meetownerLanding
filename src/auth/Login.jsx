@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
@@ -7,6 +7,21 @@ import { useNavigate } from "react-router-dom";
 import config from "../../config";
 import { toast } from "react-toastify";
 const Login = ({ onClose }) => {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose(); // Close modal
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
   const [mobile, setMobile] = useState("6302816551");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
@@ -181,15 +196,18 @@ const Login = ({ onClose }) => {
   }, [enteredOtp, otp, mobile, dispatch, onClose, loginData]);
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-opacity-75 z-50">
-      <div className="bg-[#1D3F8E] w-[320px] p-6 rounded-md shadow-md relative">
+      <div
+        ref={modalRef}
+        className="bg-[#FFFF] w-[420px] p-6 rounded-md shadow-md relative"
+      >
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-white text-xl"
+          className="absolute top-2 right-2 text-black text-2xl"
           disabled={isLoading}
         >
           ×
         </button>
-        <h2 className="text-white text-center text-xl font-semibold mb-5">
+        <h2 className="text-black  text-center text-2xl font-bold mb-5">
           Login
         </h2>
         {message && (
@@ -206,7 +224,7 @@ const Login = ({ onClose }) => {
             setMobile(value);
             setError("");
           }}
-          className="w-full px-4 py-2 mb-1 rounded-md bg-white text-black placeholder-gray-400 focus:outline-none"
+          className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black text-black placeholder-gray-400 focus:outline-none"
           disabled={isLoading || otpSent}
         />
         {otpSent && (
@@ -220,12 +238,12 @@ const Login = ({ onClose }) => {
               setEnteredOtp(value);
               setError("");
             }}
-            className="w-full px-4 py-2 mb-1 rounded-md bg-white text-black placeholder-gray-400 focus:outline-none"
+            className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black placeholder-gray-400 focus:outline-none"
             disabled={isLoading}
           />
         )}
         <p
-          className="text-yellow-300 underline cursor-pointer text-left text-xs mb-2"
+          className="text-black underline cursor-pointer text-left text-xs mb-4"
           onClick={() => {
             setOtpSent(false);
             setEnteredOtp("");
@@ -239,14 +257,14 @@ const Login = ({ onClose }) => {
 
         <button
           onClick={otpSent ? verifyOTP : () => handleLogin(0)}
-          className="w-full bg-[#FFD400] text-black font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
+          className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
           disabled={isLoading}
         >
           {isLoading ? "Processing..." : otpSent ? "VERIFY OTP" : "SEND OTP"}
         </button>
-        <div className="flex items-center my-4">
+        <div className="flex items-center my-2">
           <div className="flex-grow border-t border-gray-300"></div>
-          <span className="mx-2 text-white text-sm">OR</span>
+          <span className=" text-black text-sm">OR</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
         <button

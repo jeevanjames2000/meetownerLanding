@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaApple, FaGooglePlay } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import QR from "../assets/Images/qrcode_193007135_71c6cda8449bb038d4fc90072469a021.png";
+import QR from "../assets/Images/QR Code.png";
 const DownloadApp = ({ onClose }) => {
   const [showAndroidQR, setShowAndroidQR] = useState(false);
   const [showAppleQR, setShowAppleQR] = useState(false);
@@ -22,7 +22,7 @@ const DownloadApp = ({ onClose }) => {
         <IoClose size={24} />
       </button>
       <h2 className="text-lg font-semibold mb-4 text-center">Download App</h2>
-      {}
+
       <div className="mb-4">
         <button
           onClick={toggleAndroidQR}
@@ -37,7 +37,6 @@ const DownloadApp = ({ onClose }) => {
         {showAndroidQR && (
           <div className="mt-3 text-center">
             <img src={QR} alt="Android QR" className="w-full h-full mx-auto" />
-            {/* <p className="text-xs mt-1 text-gray-600">Scan to download</p> */}
           </div>
         )}
       </div>
@@ -56,7 +55,6 @@ const DownloadApp = ({ onClose }) => {
         {showAppleQR && (
           <div className="mt-3 text-center">
             <img src={QR} alt="Apple QR" className="w-full h-full mx-auto" />
-            {/* <p className="text-xs mt-1 text-gray-600">Scan to download</p> */}
           </div>
         )}
       </div>

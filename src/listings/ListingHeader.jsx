@@ -96,7 +96,7 @@ const Header = () => {
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
   const [selectedPropertyIn, setSelectedPropertyIn] = useState(
-    searchData.property_in || ""
+    searchData.property_in || "Residential"
   );
   const [selectedSubType, setSelectedSubType] = useState(
     searchData.sub_type || ""
@@ -131,7 +131,7 @@ const Header = () => {
         "Type",
         "Apartment",
         "Independent House",
-        "Indepenedent Villa",
+        "Independent Villa",
         "Plot",
         "Land",
         "Others",

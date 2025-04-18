@@ -1,5 +1,5 @@
 import { IoClose } from "react-icons/io5";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QR from "../assets/Images/qrcode_193007135_71c6cda8449bb038d4fc90072469a021.png";
 import { useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,7 +22,22 @@ const Sidebar = ({
   const [openSection, setOpenSection] = useState(0);
   const Data = useSelector((state) => state.auth.loggedIn);
   const intrested = useSelector((state) => state.property.intrested);
-
+  const sidebarRef = useRef();
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
   const toggleSection = (section) => {
     setOpenSection((prev) => (prev === section ? null : section));
   };
@@ -145,19 +160,7 @@ const Sidebar = ({
       title: "Recent Activity",
       content: <RecentActivitySwiper data={recentData} />,
     },
-    {
-      title: "FAQ",
-      content: (
-        <ol className="list-decimal pl-5 space-y-2 text-sm text-gray-700">
-          {faq.map((item, i) => (
-            <li key={i}>
-              <p className="font-semibold text-left">{item.title}</p>
-              <p className="text-gray-500 text-left">{item.description}</p>
-            </li>
-          ))}
-        </ol>
-      ),
-    },
+
     {
       title: "Download App",
       content: (
@@ -197,7 +200,8 @@ const Sidebar = ({
   };
   return (
     <div
-      className={`fixed top-0 right-0 h-full pb-30 w-64 bg-white z-50 shadow-lg transform transition-transform duration-300 ${
+      ref={sidebarRef}
+      className={`fixed top-0 right-0 h-full pb-10 w-64 bg-white z-50 shadow-lg transform transition-transform duration-300 ${
         menuOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -207,16 +211,14 @@ const Sidebar = ({
             {isLoggedIn && user?.name ? user.name.charAt(0).toUpperCase() : "?"}
           </div>
           <div>
-            <p className="font-semibold text-left text-sm">
-              {isLoggedIn ? (
-                <>
-                  <p className="text-xs text-black">Hello!</p>
-                  <p className="text-gray-500 text-xs">Welcome back!</p>
-                </>
-              ) : (
-                "Sign in to get"
-              )}
-            </p>
+            {isLoggedIn ? (
+              <>
+                <p className="text-xs text-left text-black">Hello!</p>
+                <p className="text-gray-500 text-xs">Welcome back!</p>
+              </>
+            ) : (
+              <p className="font-semibold text-left text-sm">Sign in to get</p>
+            )}
             <p className="text-sm text-left text-black">
               {isLoggedIn && user?.name ? user.name : "personalised feed!"}
             </p>
@@ -265,7 +267,7 @@ const Sidebar = ({
           }}
           className={`w-full ${
             isLoggedIn ? "bg-red-500" : "bg-green-500"
-          } hover:text-black text-white px-4 py-2 rounded-full font-medium mb-4`}
+          }  text-white px-4 py-2 rounded-full font-medium mb-4`}
         >
           <div className="flex flex-row justify-center gap-3 cursor-pointer items-center">
             {isLoggedIn ? "Logout" : "Login"}
