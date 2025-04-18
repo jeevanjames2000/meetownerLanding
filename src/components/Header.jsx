@@ -100,8 +100,8 @@ const Header = () => {
 
   return (
     <>
-      <header className="w-full bg-white shadow-sm px-4 relative z-10">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+      <header className="w-full bg-white shadow-sm px-2 relative z-10">
+        <div className="container mx-auto px-1 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <img
               onClick={handleRoute}
