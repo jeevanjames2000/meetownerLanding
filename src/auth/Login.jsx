@@ -22,7 +22,7 @@ const Login = ({ onClose }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
-  const [mobile, setMobile] = useState("6302816551");
+  const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
