@@ -176,7 +176,7 @@ const PropertyHeader = () => {
             <img
               src={logoImage}
               alt="Meet Owner Logo"
-              className="h-8 w-full hidden md:block cursor-pointer"
+              className="h-8 w-full max-w-30 hidden md:block cursor-pointer"
               onClick={handleRouteHome}
             />
             <img
