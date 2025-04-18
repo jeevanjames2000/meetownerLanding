@@ -56,7 +56,7 @@ export default function ProfilePage() {
       return;
     }
     const { userDetails } = JSON.parse(data);
-    fetchProfile(275);
+    fetchProfile(271);
     setData(userDetails);
   }, []);
 
