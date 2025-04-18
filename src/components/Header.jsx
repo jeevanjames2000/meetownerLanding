@@ -182,7 +182,7 @@ const Header = () => {
         </div>
       )}
       {showDownloadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
           <div ref={downloadRef} className="relative w-[90%] max-w-sm">
             <DownloadApp
               setShowDownloadModal={setShowDownloadModal}

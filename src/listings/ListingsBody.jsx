@@ -755,7 +755,7 @@ function ListingsBody() {
   };
   return (
     <div className="min-h-screen p-1 relative z-0 ">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8 ">
         <div className="flex items-center md:items-start">
           <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0 " />
           <p className="text-base md:text-xl text-left font-normal text-[#1D3A76]">

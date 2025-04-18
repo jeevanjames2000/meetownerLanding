@@ -14,7 +14,7 @@ const DownloadApp = ({ onClose }) => {
     setShowAndroidQR(false);
   };
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-h-120 overflow-y-scroll relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
+    <div className="bg-white p-6  rounded-lg shadow-lg w-full max-h-120 overflow-y-scroll relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
       <button
         onClick={onClose}
         className="absolute top-3 right-3 text-black hover:text-gray-600"

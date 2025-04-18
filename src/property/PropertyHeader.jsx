@@ -7,8 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setBHK,
   setBudget,
-  setCity,
-  setLocation,
   setOccupancy,
   setPropertyIn,
   setSearchData,
@@ -29,15 +27,18 @@ import config from "../../config";
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-  const [selectedCity, setSelectedCity] = useState(
-    searchData?.city || "Hyderabad"
-  );
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [dropdowns, setDropdowns] = useState({});
   const toggleDropdown = (key) => {
-    setDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+    setDropdowns((prev) => {
+      const newDropdowns = {};
+      Object.keys(prev).forEach((k) => {
+        newDropdowns[k] = false;
+      });
+      newDropdowns[key] = !prev[key];
+      return newDropdowns;
+    });
   };
-  const cities = ["Hyderabad", "Kondapur", "Telangana"];
   const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || "Bhk");
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
@@ -100,7 +101,6 @@ const PropertyHeader = () => {
   const handleNavigation = () => {
     navigate("/listings");
   };
-
   const [location, setLocation] = useState("Hyderabad");
   const locations = [
     "Top Cities",
@@ -128,7 +128,6 @@ const PropertyHeader = () => {
     Mumbai: mumbaiLocalities,
     Pune: puneLocalities,
   };
-
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const currentLocalities = cityLocalitiesMap[location] || [];
   const filteredLocalities = currentLocalities.filter((locality) =>
@@ -152,7 +151,6 @@ const PropertyHeader = () => {
     };
     fetchLocalities();
   }, [searchInput, location]);
-
   const handleValueChange = (value) => {
     setSearchInput(value);
     dispatch(
@@ -164,7 +162,6 @@ const PropertyHeader = () => {
       handleNavigation();
     }, 3000);
   };
-
   const handleRouteHome = () => {
     navigate("/");
   };
@@ -192,43 +189,45 @@ const PropertyHeader = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center rounded-full shadow-md w-full  bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
               <div className="hidden md:flex items-center gap-4 shrink-0">
-                <div
-                  className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
-                  onClick={() => setIsLocationOpen(!isLocationOpen)}
-                >
-                  <span className="hidden md:inline">{location}</span>
-                  <FaFilter />
-                </div>
-                {isLocationOpen && (
-                  <ul
-                    className="absolute z-50 left-50 top-17 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
-                    onWheel={(e) => e.stopPropagation()}
+                <div className="relative inline-block">
+                  <div
+                    className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
+                    onClick={() => setIsLocationOpen(!isLocationOpen)}
                   >
-                    {locations.map((option) => {
-                      const isDisabled = option === "Top Cities";
-                      return (
-                        <li
-                          key={option}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setLocation(option);
-                              setIsLocationOpen(false);
-                              setSearchInput("");
-                              setIsSearchDropdownOpen(false);
-                            }
-                          }}
-                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                            isDisabled
-                              ? "text-gray-400 cursor-default"
-                              : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                          }`}
-                        >
-                          {option}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                    <span className="hidden md:inline">{location}</span>
+                    <FaFilter />
+                  </div>
+                  {isLocationOpen && (
+                    <ul
+                      className="absolute left-0 top-full mt-1 w-38 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto overflow-x-hidden z-50"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      {locations.map((option) => {
+                        const isDisabled = option === "Top Cities";
+                        return (
+                          <li
+                            key={option}
+                            onClick={() => {
+                              if (!isDisabled) {
+                                setLocation(option);
+                                setIsLocationOpen(false);
+                                setSearchInput("");
+                                setIsSearchDropdownOpen(false);
+                              }
+                            }}
+                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                              isDisabled
+                                ? "text-gray-400 cursor-default"
+                                : "hover:bg-[#1D3A76] hover:text-white cursor-default"
+                            }`}
+                          >
+                            {option}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
                 <div className="hidden lg:flex items-center gap-4">
                   {Object.entries(dropdownOptions).map(([label, options]) => (
                     <div key={label} className="relative">
@@ -269,7 +268,7 @@ const PropertyHeader = () => {
                   onBlur={() =>
                     setTimeout(() => setIsSearchDropdownOpen(false), 200)
                   }
-                  className="w-full pl-1 border-l border-gray-200 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
+                  className="w-full pl-1 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
                 />
                 <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
                   {searchInput && (
@@ -287,7 +286,7 @@ const PropertyHeader = () => {
                 </div>
               </div>
               {isSearchDropdownOpen && (
-                <ul className="absolute z-50 right-15 top-16 w-50 bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
+                <ul className="absolute z-50 right-15 top-16 w-52 bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                   {searchInput.trim() === "" ? (
                     filteredLocalities.length > 0 ? (
                       filteredLocalities.map((locality) => {

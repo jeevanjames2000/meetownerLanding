@@ -228,13 +228,13 @@ const Header = () => {
             <img
               src={logoImage}
               alt="Meet Owner Logo"
-              className="h-10 w-full hidden md:block cursor-pointer"
+              className="h-10 w-full max-w-30 hidden md:block cursor-pointer"
               onClick={handleRouteHome}
             />
             <img
               src={favicon}
               alt="Meet Owner"
-              className="w-10 h-10 md:hidden cursor-pointer"
+              className="w-10 h-10 max-w-14 md:hidden cursor-pointer"
               onClick={handleRouteHome}
             />
           </div>
@@ -340,7 +340,7 @@ const Header = () => {
                   onBlur={() =>
                     setTimeout(() => setIsSearchDropdownOpen(false), 200)
                   }
-                  className="w-full pl-1 border-l border-gray-200 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
+                  className="w-full pl-1 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
                 />
                 <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
                   {searchInput && (

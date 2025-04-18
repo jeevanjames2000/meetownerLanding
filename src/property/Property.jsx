@@ -16,7 +16,7 @@ const Property = () => {
     <>
       <PropertyHeader />
 
-      <div className="flex flex-col lg:flex-row w-full  justify-between h-auto p-5 mx-5 pt-2 bg-[#F5F5F5] gap-4">
+      <div className="flex flex-col lg:flex-row w-full  justify-between h-auto p-5  pt-2 gap-4">
         <div className="w-full lg:w-[70%]">
           <PropertyBody />
         </div>

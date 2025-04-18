@@ -133,6 +133,12 @@ const PropertyBody = () => {
       toast.error("Something went wrong while submitting enquiry");
     }
   };
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
   return (
     <div className="p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">

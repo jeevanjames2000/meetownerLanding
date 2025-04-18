@@ -130,7 +130,7 @@ const PropertyAds = () => {
   );
   return (
     <>
-      <div className="hidden lg:block h-auto bg-white relative p-3 rounded-xl shadow-lg overflow-hidden">
+      <div className="hidden lg:block h-auto bg-white relative p-3 rounded-xl shadow-lg overflow-hidden hide-scrollbar">
         <div className="relative w-full">
           <video
             ref={videoRef}

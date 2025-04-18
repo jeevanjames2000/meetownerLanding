@@ -143,7 +143,7 @@ const DealProperties = () => {
                 }
                 alt="Property"
                 crossOrigin="anonymous"
-                className="w-full lg:w-60 h-auto object-cover"
+                className="w-full lg:w-60 h-70 max-h-70 object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = `https://placehold.co/600x400?text=${

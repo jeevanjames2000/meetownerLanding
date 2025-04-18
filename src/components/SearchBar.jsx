@@ -2,7 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { IoChevronDownOutline, IoSearch } from "react-icons/io5";
+import {
+  IoChevronDownOutline,
+  IoCloseCircleOutline,
+  IoSearch,
+} from "react-icons/io5";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import {
@@ -192,8 +196,29 @@ export default function SearchBar() {
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
+  const containerRef = useRef(null);
+  const [city, setCity] = useState("");
+  console.log("city: ", city);
+  const filteredLocations = locations.filter((loc) =>
+    loc.toLowerCase().includes(city.toLowerCase())
+  );
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setIsLocationOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   return (
-    <div className="w-full relative  lg:h-[510px] md:h-[500px] sm:h-[200px]">
+    <div
+      className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"
+      ref={containerRef}
+    >
       <Slider {...settings} ref={sliderRef}>
         {mediaList.map((item, index) => (
           <div key={index} className="relative">
@@ -213,7 +238,7 @@ export default function SearchBar() {
                 <img
                   src={item.video_url}
                   alt={`media-${index}`}
-                  className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
+                  className="w-full h-[300px] sm:h-[300px] md:h-[400px] object-cover"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -231,93 +256,92 @@ export default function SearchBar() {
           />
         </div>
       )}
-      <div
-        className="relative bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3 
-                   bg-white/30 backdrop-blur-lg rounded-lg shadow-xl p-3 sm:p-4 border border-white/20 z-10"
-      >
-        <div className="inline-flex flex-wrap justify-center gap-1 mb-3 sm:mb-4 bg-gray-100 rounded-full p-1 sm:p-2">
-          {tabs.map((item, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveTab(index)}
-              className={`relative z-10 w-auto px-3 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
-                activeTab === index
-                  ? "bg-[#1D3A76] text-white"
-                  : "text-gray-600"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center justify-between space-x-2 bg-white/40 backdrop-blur-md p-2 rounded-lg shadow-sm border border-white/20">
-          <div className="flex items-center space-x-1 sm:space-x-2 w-full">
-            <div className="relative  w-auto">
+      <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
+        <div className="bg-white/30  rounded-t-2xl shadow-lg  p-3 sm:p-4 border border-white/20">
+          <div className="inline-flex flex-wrap justify-center bg-white  rounded-full p-1 sm:p-2">
+            {tabs.map((item, index) => (
               <button
-                onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="w-full gap-1 px-3 py-1 rounded bg-transparent text-[#1D3A76] focus:outline-none flex items-center justify-between"
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`relative z-10 w-auto px-3 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
+                  activeTab === index
+                    ? "bg-[#1D3A76] text-white"
+                    : "text-gray-600"
+                }`}
               >
-                <span>{location}</span>
-                <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
+                {item}
               </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center  backdrop-blur-none justify-between space-x-1 bg-white p-3 rounded-b-lg shadow-sm border border-white">
+          <div className="flex items-center space-x-1 sm:space-x-2 w-full">
+            <div className="relative w-auto inline-block">
+              <div
+                className="flex items-center gap-1 px-3 py-1 rounded bg-white  text-[#1D3A76] cursor-pointer"
+                onClick={() => setIsLocationOpen((prev) => !prev)}
+              >
+                <div className="flex items-center mr-2">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      if (!isLocationOpen) setIsLocationOpen(true);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => {
+                      setIsLocationOpen(true);
+                    }}
+                    placeholder="Search City..."
+                    className="bg-transparent w-30 text-[#1D3A76] focus:outline-none"
+                  />
+                  {city && (
+                    <IoCloseCircleOutline
+                      className="w-5 h-5 text-gray-400 cursor-pointer hover:text-[#1D3A76]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCity("");
+                      }}
+                    />
+                  )}
+                </div>
+                <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
+              </div>
               {isLocationOpen && (
                 <ul
-                  className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
+                  className="absolute left-0 top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto hide-scrollbar"
                   onWheel={(e) => e.stopPropagation()}
                 >
-                  {locations.map((option) => {
-                    const isDisabled = option === "Top Cities";
-                    return (
-                      <li
-                        key={option}
-                        onClick={() => {
-                          if (!isDisabled) {
-                            setLocation(option);
-                            setIsLocationOpen(false);
-                            setSearchInput("");
-                            setIsSearchDropdownOpen(false);
-                          }
-                        }}
-                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                          isDisabled
-                            ? "text-gray-400 cursor-default"
-                            : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                        }`}
-                      >
-                        {option}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}{" "}
-              {isLocationOpen && (
-                <ul
-                  className="absolute z-50 left-0 top-12 w-34 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto"
-                  onWheel={(e) => e.stopPropagation()}
-                >
-                  {locations.map((option) => {
-                    const isDisabled = option === "Top Cities";
-                    return (
-                      <li
-                        key={option}
-                        onClick={() => {
-                          if (!isDisabled) {
-                            setLocation(option);
-                            setIsLocationOpen(false);
-                            setSearchInput("");
-                            setIsSearchDropdownOpen(false);
-                          }
-                        }}
-                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                          isDisabled
-                            ? "text-gray-400 cursor-default"
-                            : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                        }`}
-                      >
-                        {option}
-                      </li>
-                    );
-                  })}
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((option) => {
+                      const isDisabled = option === "Top Cities";
+                      return (
+                        <li
+                          key={option}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setLocation(option);
+                              setCity(option);
+                              setIsLocationOpen(false);
+                              setSearchInput("");
+                            }
+                          }}
+                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                            isDisabled
+                              ? "text-gray-400 cursor-default"
+                              : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
+                          }`}
+                        >
+                          {option}
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <li className="px-3 py-2 text-gray-400 text-sm">
+                      No results found
+                    </li>
+                  )}
                 </ul>
               )}
             </div>
@@ -328,7 +352,7 @@ export default function SearchBar() {
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
-                placeholder="Search Locality, City, Property"
+                placeholder="Search Locality, City, Property..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onFocus={() => setIsSearchDropdownOpen(true)}
@@ -338,15 +362,16 @@ export default function SearchBar() {
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
               {searchInput && (
-                <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  onClick={() => setSearchInput("")}
-                >
-                  &times;
-                </button>
+                <IoCloseCircleOutline
+                  className="absolute w-5 h-5 right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchInput("");
+                  }}
+                />
               )}
               {isSearchDropdownOpen && (
-                <ul className="absolute z-50 left-0 top-10 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
+                <ul className="absolute z-1000 left-0 top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto">
                   {searchInput.trim() === "" ? (
                     filteredLocalities.length > 0 ? (
                       filteredLocalities.map((locality) => {
