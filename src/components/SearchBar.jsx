@@ -181,11 +181,9 @@ export default function SearchBar() {
     const fetchLatestAds = async () => {
       setMediaList([]);
       try {
-        const response = await fetch(
-          `${config.awsApiUrl}/awsS3/getAllAdVideos`
-        );
+        const response = await fetch(`${config.awsApiUrl}/adAssets/getAds`);
         const data = await response.json();
-        setMediaList(data.results || []);
+        setMediaList(data.ads || []);
       } catch (err) {
         setIsError(true);
         console.error("Failed to fetch media:", err);

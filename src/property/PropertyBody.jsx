@@ -272,7 +272,8 @@ const PropertyBody = () => {
             </span>
             <span className="border-l h-4 border-gray-300"></span>
             <span>
-              ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /sq.ft
+              {property?.builtup_unit || property?.builtup_area} /{" "}
+              {property.area_units}
             </span>
             <span className="border-l h-4 border-gray-300"></span>
             <span>{property?.facing} Facing</span>
