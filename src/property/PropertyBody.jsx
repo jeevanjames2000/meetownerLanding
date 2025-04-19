@@ -21,12 +21,32 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
-import { FaBasketball } from "react-icons/fa6";
+import {
+  FaBatteryFull,
+  FaBicycle,
+  FaChild,
+  FaDoorOpen,
+  FaFilter,
+  FaFireExtinguisher,
+  FaLeaf,
+  FaPlug,
+  FaShuttleSpace,
+  FaSolarPanel,
+  FaToolbox,
+  FaWater,
+  FaWifi,
+} from "react-icons/fa6";
 import Login from "../auth/Login";
 import { toast } from "react-toastify";
 import axios from "axios";
 import useWhatsappHook from "../utilities/useWhatsappHook";
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import {
+  FaAngleLeft,
+  FaAngleRight,
+  FaBasketballBall,
+  FaCogs,
+  FaShieldAlt,
+} from "react-icons/fa";
 import { MdOutlineVerified } from "react-icons/md";
 const PropertyBody = () => {
   const { state: property } = useLocation();
@@ -44,7 +64,34 @@ const PropertyBody = () => {
     "Regular Water": <Droplet />,
     "Community Hall": <Landmark />,
     "Pet Allowed": <PawPrint />,
-    "Half Basket Ball Court": <FaBasketball />,
+    "Half Basket Ball Court": <FaBasketballBall />,
+    "Power Backup": <FaBatteryFull />,
+    "Entry / Exit": <FaDoorOpen />,
+    "Badminton Court": <FaShuttleSpace />,
+    "Children Play Area": <FaChild />,
+    "Water Harvesting Pit": <FaWater />,
+    "Water Softener": <FaFilter />,
+    "Solar Fencing": <FaSolarPanel />,
+    "Security Cabin": <FaShieldAlt />,
+    Lawn: <FaLeaf />,
+    "Transformer Yard": <FaPlug />,
+  };
+  const fallbackIcons = [
+    <FaWifi />,
+    <FaBicycle />,
+    <FaFireExtinguisher />,
+    <FaToolbox />,
+    <FaCogs />,
+    <FaWater />,
+    <FaSolarPanel />,
+    <FaShieldAlt />,
+  ];
+  const getFallbackIcon = (name) => {
+    const hash = [...name].reduce(
+      (acc, c, i) => acc + c.charCodeAt(0) * (i + 1),
+      0
+    );
+    return fallbackIcons[hash % fallbackIcons.length];
   };
   const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
   const [isExpanded, setIsExpanded] = useState(false);
@@ -73,6 +120,19 @@ const PropertyBody = () => {
       console.error("Failed to fetch properties:", err);
     }
   };
+  const [aroundProperty, setAroundProperty] = useState("");
+  console.log("aroundProperty: ", aroundProperty);
+  const fetchAroundThisProperty = async () => {
+    try {
+      const response = await fetch(
+        `${config.awsApiUrl}/listings/getAroundThisProperty?id=${property?.unique_property_id}`
+      );
+      const data = await response.json();
+      setAroundProperty(data.results);
+    } catch (error) {
+      console.error("Failed to fetch floor plans:", error);
+    }
+  };
   useEffect(() => {
     const fetchFloorPlans = async () => {
       try {
@@ -88,6 +148,7 @@ const PropertyBody = () => {
     if (property?.unique_property_id) {
       fetchFloorPlans();
       fetchPropertyimages();
+      fetchAroundThisProperty();
     }
   }, [property?.unique_property_id]);
   const formatToIndianCurrency = (value) => {
@@ -184,9 +245,10 @@ const PropertyBody = () => {
               {property?.location_id}
             </p>
           </div>
-          <div className="text-sm text-indigo-600 text-left md:text-right">
-            EMI starts at ₹{" "}
-            {(parseInt(property?.property_cost) / 2400).toFixed(2)} K
+          <div className="text-sm text-blue-00 text-left md:text-right">
+            <span className="text-md font-bold text-blue-900">
+              {property?.loan_facility && "EMI option available"}
+            </span>
             <br />
             <span className="text-xs font-semibold text-gray-400">
               All Inclusive Price
@@ -195,7 +257,19 @@ const PropertyBody = () => {
         </div>
         <div className="flex flex-col md:flex-row justify-between">
           <div className="flex flex-wrap items-center gap-3 text-sm text-blue-800 font-medium mt-3">
-            <span>{property?.bedrooms} BHK Apartment</span>
+            <span className=" h-4 border-gray-300">
+              {property.sub_type === "Apartment"
+                ? `${property.bedrooms} BHK ${
+                    property.property_type
+                      ? property.property_type
+                      : property.sub_type || ""
+                  } for ${
+                    property.property_for === "Sell"
+                      ? "Sale"
+                      : property?.property_for
+                  }`
+                : `${property.sub_type}`}{" "}
+            </span>
             <span className="border-l h-4 border-gray-300"></span>
             <span>
               ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /sq.ft
@@ -229,7 +303,6 @@ const PropertyBody = () => {
           </button>
         </div>
       </div>
-
       <div className="mt-6">
         <img
           src={mainImage}
@@ -301,14 +374,14 @@ const PropertyBody = () => {
           <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
             Amenities
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2  border-1 border-gray-500 rounded-lg">
-            {facilitiesList?.map((facility, index) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 border border-gray-500 rounded-lg">
+            {facilitiesList.map((facility, index) => (
               <div
                 key={index}
                 className="flex flex-col md:flex-row items-center gap-2 p-4 text-[#4B1D1D]"
               >
                 <div className="w-6 h-6">
-                  {facilityIconMap[facility] || <Building />}
+                  {facilityIconMap[facility] || getFallbackIcon(facility)}
                 </div>
                 <span className="text-sm text-center md:text-left">
                   {facility}

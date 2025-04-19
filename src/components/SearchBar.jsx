@@ -174,30 +174,36 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-  const [mediaList, setMediaList] = useState([]);
+  const [mediaList, setMediaList] = useState([
+    { type: "video", file: "/assets/media/video1.mp4" },
+    {
+      type: "image",
+      file: "/src/assets/Images/WhatsApp Image 2025-04-12 at 3.44.38 PM.jpeg",
+    },
+  ]);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    const fetchLatestAds = async () => {
-      setMediaList([]);
-      try {
-        const response = await fetch(
-          `${config.awsApiUrl}/awsS3/getAllAdVideos`
-        );
-        const data = await response.json();
-        setMediaList(data.results || []);
-      } catch (err) {
-        setIsError(true);
-        console.error("Failed to fetch media:", err);
-      }
-    };
-    fetchLatestAds();
+    // const fetchLatestAds = async () => {
+    //   setMediaList([]);
+    //   try {
+    //     const response = await fetch(
+    //       `${config.awsApiUrl}/awsS3/getAllAdVideos`
+    //     );
+    //     const data = await response.json();
+    //     setMediaList(data.results || []);
+    //   } catch (err) {
+    //     setIsError(true);
+    //     console.error("Failed to fetch media:", err);
+    //   }
+    // };
+    // fetchLatestAds();
   }, []);
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
   const containerRef = useRef(null);
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("Hyderabad");
   console.log("city: ", city);
   const filteredLocations = locations.filter((loc) =>
     loc.toLowerCase().includes(city.toLowerCase())
