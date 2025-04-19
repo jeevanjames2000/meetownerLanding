@@ -175,6 +175,7 @@ export default function SearchBar() {
   };
   const [localites, setLocalities] = useState([]);
   const [mediaList, setMediaList] = useState([]);
+  console.log("mediaList: ", mediaList);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
@@ -196,7 +197,6 @@ export default function SearchBar() {
   };
   const containerRef = useRef(null);
   const [city, setCity] = useState("Hyderabad");
-  console.log("city: ", city);
   const filteredLocations = locations.filter((loc) =>
     loc.toLowerCase().includes(city.toLowerCase())
   );
