@@ -175,7 +175,6 @@ export default function SearchBar() {
   };
   const [localites, setLocalities] = useState([]);
   const [mediaList, setMediaList] = useState([]);
-  console.log("mediaList: ", mediaList);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
@@ -235,6 +234,7 @@ export default function SearchBar() {
               ) : (
                 <img
                   src={item.video_url}
+                  crossOrigin="anonymous"
                   alt={`media-${index}`}
                   className="w-full h-[300px] sm:h-[300px] md:h-[400px] object-cover"
                 />
