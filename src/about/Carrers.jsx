@@ -27,7 +27,7 @@ export default function Careers() {
   useEffect(() => {
     const fetchCareers = async () => {
       try {
-        const response = await fetch(`${config.awsApiUrl}/api/careers`);
+        const response = await fetch(`${config.awsApiUrl}/api/v1/careers`);
         const data = await response.json();
         setCareers(data);
       } catch (err) {

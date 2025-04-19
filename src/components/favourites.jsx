@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import {
-  MapPin,
   ChevronDown,
   ChevronUp,
   Ruler,
@@ -8,20 +7,13 @@ import {
   CreditCard,
   Key,
   ShieldCheck,
-  Building2,
   Building,
 } from "lucide-react";
-import {
-  List,
-  AutoSizer,
-  CellMeasurer,
-  CellMeasurerCache,
-  WindowScroller,
-} from "react-virtualized";
+import { List, AutoSizer } from "react-virtualized";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
+import { IoIosHeart } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
@@ -30,10 +22,11 @@ import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
 import Header from "./Header";
 import Footer from "./Footer";
-import ListingAds from "../listings/ListingAds";
 import DynamicAds from "../utilities/DynamicAds";
 import useWhatsappHook from "../utilities/useWhatsappHook";
 import Login from "../auth/Login";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel, Navigation } from "swiper/modules";
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +38,7 @@ const Favourites = () => {
     const { userDetails } = JSON.parse(data);
     try {
       const response = await axios.get(
-        `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+        `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
       );
       const liked = response.data.favourites || [];
       setLikedProperties(liked);
@@ -81,7 +74,7 @@ const Favourites = () => {
   );
   const getSingleProperty = async (property) => {
     const res = await fetch(
-      `${config.awsApiUrl}/listings/getSinleProperty?unique_property_id=${property.property_id}`
+      `${config.awsApiUrl}/listings/v1/getSinleProperty?unique_property_id=${property.property_id}`
     );
     const data = await res.json();
     return data.property;
@@ -100,7 +93,7 @@ const Favourites = () => {
         status: 1,
       };
       try {
-        await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+        await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
         fetchLikedProperties();
       } catch (err) {
         console.error("Error updating interest:", err);
@@ -121,7 +114,7 @@ const Favourites = () => {
         shedule_date: formData.date,
         shedule_time: formData.time,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/scheduleVisit`, payload);
       await handleAPI(selectedProperty);
       setModalOpen(false);
     } catch (err) {
@@ -161,7 +154,7 @@ const Favourites = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(propertyData);
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
@@ -192,13 +185,14 @@ const Favourites = () => {
         if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
         return numValue.toString();
       };
+
       return (
         <div
           key={`property-${index}`}
-          className="flex flex-col md:flex-row w-full max-h-[500px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer"
+          className="flex flex-col md:flex-row w-full h-full rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer mb-6"
           onClick={() => handleNavigation(property)}
         >
-          <div className="bg-[#F3F3F3] rounded-[20px] p-4 h-full w-[100%]  overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+          <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full">
             <div className="flex flex-col md:flex-row gap-5">
               <div className="w-full md:w-[300px]">
                 <div className="rounded-lg overflow-hidden mb-4 relative">
@@ -427,38 +421,33 @@ const Favourites = () => {
       <Header />
       <div className="flex">
         <div className="flex-1 px-4 md:px-10 py-6">
-          <div className="w-full h-[calc(100vh-150px)]">
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowCount={likedProperties.length}
-                  rowHeight={300}
-                  rowRenderer={({ index, key, style }) => {
-                    const property = likedProperties[index];
-                    return (
-                      <div style={style} key={key}>
-                        <PropertyCard
-                          property={property}
-                          index={index}
-                          toggleReadMore={toggleReadMore}
-                          toggleFacilities={toggleFacilities}
-                          handleNavigation={handleNavigation}
-                          readMoreStates={readMoreStates}
-                          expandedCards={expandedCards}
-                          likedProperties={likedProperties}
-                          handleLike={handleLike}
-                          handleScheduleVisit={handleScheduleVisit}
-                          handleContactSeller={handleContactSeller}
-                        />
-                      </div>
-                    );
-                  }}
+          <Swiper
+            modules={[Navigation, Mousewheel]}
+            direction="vertical"
+            spaceBetween={24}
+            slidesPerView={2}
+            mousewheel={true}
+            navigation
+            className="w-full h-[600px]"
+          >
+            {likedProperties.map((property, index) => (
+              <SwiperSlide key={index} className="w-full">
+                <PropertyCard
+                  property={property}
+                  index={index}
+                  toggleReadMore={toggleReadMore}
+                  toggleFacilities={toggleFacilities}
+                  handleNavigation={handleNavigation}
+                  readMoreStates={readMoreStates}
+                  expandedCards={expandedCards}
+                  likedProperties={likedProperties}
+                  handleLike={handleLike}
+                  handleScheduleVisit={handleScheduleVisit}
+                  handleContactSeller={handleContactSeller}
                 />
-              )}
-            </AutoSizer>
-          </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
         <DynamicAds />
       </div>

@@ -33,7 +33,7 @@ const DealProperties = () => {
       setProperty([]);
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getBestDeals`
+          `${config.awsApiUrl}/listings/v1/getBestDeals`
         );
         const data = await response.json();
         setProperty(data.results);

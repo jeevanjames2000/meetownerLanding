@@ -142,7 +142,7 @@ export default function SearchBar() {
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/api/search?query=${searchInput}&city=${location}`
+          `${config.awsApiUrl}/api/v1/search?query=${searchInput}&city=${location}`
         );
         const data = await response.json();
         setLocalities(data);
@@ -181,7 +181,7 @@ export default function SearchBar() {
     const fetchLatestAds = async () => {
       setMediaList([]);
       try {
-        const response = await fetch(`${config.awsApiUrl}/adAssets/getAds`);
+        const response = await fetch(`${config.awsApiUrl}/adAssets/v1/getAds`);
         const data = await response.json();
         setMediaList(data.ads || []);
       } catch (err) {

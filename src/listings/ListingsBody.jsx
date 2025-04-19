@@ -56,7 +56,7 @@ const AdsCard = memo(() => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/getRandomPropertiesAds`
+        `${config.awsApiUrl}/listings/v1/getRandomPropertiesAds`
       );
       const data = await response.json();
       setProperty(data.results);
@@ -480,7 +480,7 @@ function ListingsBody() {
       const { userDetails } = JSON.parse(data);
       try {
         const response = await axios.get(
-          `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+          `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
         );
         const liked = response.data.favourites || [];
         const likedIds = liked.map((fav) => fav.property_id);
@@ -499,7 +499,7 @@ function ListingsBody() {
         const response = await fetch(
           `${
             config.awsApiUrl
-          }/listings/getAllPropertiesByType?page=${currentPage}&property_for=${
+          }/listings/v1/getAllPropertiesByType?page=${currentPage}&property_for=${
             searchData?.tab === "Latest"
               ? "Sell"
               : searchData.tab === "Buy"
@@ -617,7 +617,7 @@ function ListingsBody() {
         status: isAlreadyLiked ? 1 : 0,
       };
       try {
-        await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+        await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
         await handleAPI(property);
       } catch (err) {
         console.error("Error updating interest:", err);
@@ -656,7 +656,7 @@ function ListingsBody() {
         shedule_date: formData.date,
         shedule_time: formData.time,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/scheduleVisit`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/scheduleVisit`, payload);
       await handleAPI(selectedProperty);
       toast.success("Visit Scheduled Successfully!");
       setModalOpen(false);
@@ -681,7 +681,7 @@ function ListingsBody() {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");

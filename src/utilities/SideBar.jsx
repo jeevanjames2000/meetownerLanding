@@ -55,7 +55,7 @@ const Sidebar = ({
       const { userDetails } = JSON.parse(data);
       try {
         const response = await axios.get(
-          `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+          `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
         );
         const data = await response.data;
         const liked = data.favourites;
@@ -187,7 +187,7 @@ const Sidebar = ({
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");

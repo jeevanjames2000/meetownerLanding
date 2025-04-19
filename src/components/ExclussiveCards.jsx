@@ -16,7 +16,7 @@ const ExclussiveCards = () => {
       setProperty([]);
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getMeetOwnerExclusive`
+          `${config.awsApiUrl}/listings/v1/getMeetOwnerExclusive`
         );
         const data = await response.json();
         setProperty(data.results);

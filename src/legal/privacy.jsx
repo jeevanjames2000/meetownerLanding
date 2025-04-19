@@ -8,7 +8,7 @@ const PrivacyAndPolicies = () => {
   useEffect(() => {
     const fetchPrivacy = async () => {
       try {
-        const response = await fetch(`${config.awsApiUrl}/api/privacy`);
+        const response = await fetch(`${config.awsApiUrl}/api/v1/privacy`);
         const data = await response.json();
         setPrivacy(data[0] || { description: "" });
       } catch (err) {

@@ -42,7 +42,7 @@ const PropertyListing = () => {
         const isSellTab = activeTab === "Latest" || activeTab === "Sell";
         const propertyFor = isSellTab ? "Sell" : "Rent";
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getLatestProperties?property_for=${propertyFor}`
+          `${config.awsApiUrl}/listings/v1/getLatestProperties?property_for=${propertyFor}`
         );
         const data = await response.json();
         setProperty(data.properties);
@@ -62,7 +62,7 @@ const PropertyListing = () => {
       const { userDetails } = JSON.parse(data);
       try {
         const response = await axios.get(
-          `${config.awsApiUrl}/fav/getAllFavourites?user_id=${userDetails.user_id}`
+          `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
         );
         const data = await response.data;
         const liked = data.favourites;
@@ -113,7 +113,7 @@ const PropertyListing = () => {
         interested_status: 4,
         property_user_id: property.user_id,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/postEnquiry`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload);
       await handleAPI(property);
       toast.success("Enquire submitted successfully!");
     } catch (err) {
@@ -159,7 +159,7 @@ const PropertyListing = () => {
       status: isAlreadyLiked ? 1 : 0,
     };
     try {
-      await axios.post(`${config.awsApiUrl}/fav/postIntrest`, payload);
+      await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
     } catch (err) {
       console.error("Error updating interest:", err);
     }

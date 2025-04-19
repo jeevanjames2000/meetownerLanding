@@ -47,7 +47,7 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${config.awsApiUrl}/user/uploadUserImage`,
+        `${config.awsApiUrl}/user/v1/uploadUserImage`,
         formData,
         {
           headers: {
@@ -83,7 +83,7 @@ export default function ProfilePage() {
   };
   const fetchProfile = async (user_id) => {
     const res = await fetch(
-      `${config.awsApiUrl}/user/getProfile?user_id=${user_id}`
+      `${config.awsApiUrl}/user/v1/getProfile?user_id=${user_id}`
     );
     const data = await res.json();
     setUser({
@@ -125,7 +125,7 @@ export default function ProfilePage() {
       address: user.address,
     };
     try {
-      const res = await fetch(`${config.awsApiUrl}/user/updateUser`, {
+      const res = await fetch(`${config.awsApiUrl}/user/v1/updateUser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

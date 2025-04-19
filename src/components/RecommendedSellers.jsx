@@ -11,7 +11,7 @@ const RecommendedSellers = () => {
       setSellers([]);
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getMostPropertiesSeller`
+          `${config.awsApiUrl}/listings/v1/getMostPropertiesSeller`
         );
         const data = await response.json();
         setSellers(data.sellers);

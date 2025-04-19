@@ -45,7 +45,7 @@ const PropertyAds = () => {
     setProperties([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/getPropertiesByUserID?user_id=${property?.user_id}`
+        `${config.awsApiUrl}/listings/v1/getPropertiesByUserID?user_id=${property?.user_id}`
       );
       const data = await response.json();
       setProperties(data);

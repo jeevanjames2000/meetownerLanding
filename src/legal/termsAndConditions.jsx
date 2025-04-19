@@ -11,7 +11,7 @@ const TermsAndConditions = () => {
   useEffect(() => {
     const fetchTermsAndConditions = async () => {
       try {
-        const response = await fetch(`${config.awsApiUrl}/api/terms`);
+        const response = await fetch(`${config.awsApiUrl}/api/v1/terms`);
         const data = await response.json();
         setTerms(data[0] || { description: "" });
       } catch (err) {

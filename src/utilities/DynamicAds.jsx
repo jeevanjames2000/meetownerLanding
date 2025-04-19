@@ -8,7 +8,7 @@ const DynamicAds = () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/getRandomPropertiesAds`
+        `${config.awsApiUrl}/listings/v1/getRandomPropertiesAds`
       );
       const data = await response.json();
       setProperty(data.results);

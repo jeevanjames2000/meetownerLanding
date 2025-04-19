@@ -77,7 +77,7 @@ const Header = () => {
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/api/search?query=${searchInput}&city=${location}`
+          `${config.awsApiUrl}/api/v1/search?query=${searchInput}&city=${location}`
         );
         const data = await response.json();
         setLocalities(data);

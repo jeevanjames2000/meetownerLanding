@@ -11,7 +11,7 @@ const ListingAds = () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/getRandomPropertiesAds`
+        `${config.awsApiUrl}/listings/v1/getRandomPropertiesAds`
       );
       const data = await response.json();
       setProperty(data.results);
@@ -58,7 +58,7 @@ const ListingAds = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");

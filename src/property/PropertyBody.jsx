@@ -125,7 +125,7 @@ const PropertyBody = () => {
   const fetchAroundThisProperty = async () => {
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/getAroundThisProperty?id=${property?.unique_property_id}`
+        `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${property?.unique_property_id}`
       );
       const data = await response.json();
       setAroundProperty(data.results);
@@ -137,7 +137,7 @@ const PropertyBody = () => {
     const fetchFloorPlans = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getAllFloorPlans/${property?.unique_property_id}`
+          `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${property?.unique_property_id}`
         );
         const data = await response.json();
         setFloorPlan(data[0]);
@@ -187,7 +187,7 @@ const PropertyBody = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/contactSeller`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
       toast.success("Details submitted successfully");
     } catch (err) {
@@ -362,7 +362,7 @@ const PropertyBody = () => {
             src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
             alt="FloorPlan"
             crossOrigin="anonymous"
-            className="rounded-lg shadow-md w-200 object-contain h-100"
+            className="rounded-lg shadow-md w-full object-contain h-100"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;

@@ -8,7 +8,7 @@ const Services = () => {
   useEffect(() => {
     const fetchPrivacy = async () => {
       try {
-        const response = await fetch(`${config.awsApiUrl}/api/services`);
+        const response = await fetch(`${config.awsApiUrl}/api/v1/services`);
         const data = await response.json();
         setServices(data[0] || { description: "" });
       } catch (err) {

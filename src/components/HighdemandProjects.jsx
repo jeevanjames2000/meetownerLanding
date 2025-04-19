@@ -1,12 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  FaMapMarkerAlt,
-  FaRulerCombined,
-  FaCompass,
-  FaBuilding,
-  FaParking,
-  FaBath,
-} from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
@@ -23,7 +15,7 @@ const HighDemandProjects = () => {
       setProperty([]);
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/listings/getHighDemandProjects`
+          `${config.awsApiUrl}/listings/v1/getHighDemandProjects`
         );
         const data = await response.json();
         setProperty(data.results);
