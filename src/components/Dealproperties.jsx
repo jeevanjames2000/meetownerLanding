@@ -128,7 +128,7 @@ const DealProperties = () => {
           768: { slidesPerView: 1 },
           1024: { slidesPerView: 2 },
         }}
-        className="pb-10 overflow-hidden h-[500px] lg:h-[300px]"
+        className="pb-10 overflow-hidden h-[500px] lg:h-[350px]"
       >
         {property.map((property) => (
           <SwiperSlide key={property?.unique_property_id}>

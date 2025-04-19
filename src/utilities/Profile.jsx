@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import config from "../../config";
 import { toast } from "react-toastify";
 import { Pencil } from "lucide-react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 export default function ProfilePage() {
   const [user, setUser] = useState({
@@ -11,23 +13,68 @@ export default function ProfilePage() {
     city: "",
     password: "",
     address: "",
+    user_type: "",
+    photo: "",
   });
   console.log("user: ", user);
   const [data, setData] = useState("");
   const [profileImage, setProfileImage] = useState(
     "https://placehold.co/200x200?text=Upload Image"
   );
+  console.log(profileImage);
   const fileInputRef = useRef(null);
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
+    if (!file) return;
+
+    // Update local preview
+    const imageUrl = URL.createObjectURL(file);
+    setProfileImage(imageUrl);
+
+    // Prepare FormData for API
+    const formData = new FormData();
+    formData.append("photo", file);
+    console.log(user);
+    formData.append("user_id", user?.user_id);
+
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${config.awsApiUrl}/user/uploadUserImage`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Assuming the API returns the photo URL or filename
+      const photoUrl = response.data.photoUrl || imageUrl; // Adjust based on API response
+      setProfileImage(photoUrl);
+
+      // Update userDetails in localStorage
+      const storedData = JSON.parse(localStorage.getItem("user"));
+      if (storedData) {
+        storedData.userDetails.photo = photoUrl; // Store photo URL or filename
+        localStorage.setItem("user", JSON.stringify(storedData));
+        setData(storedData); // Update state
+      }
+
+      toast.success("Profile photo updated successfully!");
+      fetchProfile(user?.user_id);
+    } catch (error) {
+      console.error("Photo Upload Error:", error);
+      toast.error("Failed to upload photo.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,10 +91,14 @@ export default function ProfilePage() {
       name: data.name || "",
       email: data.email || "",
       mobile: data.mobile || "",
+      photo: data?.photo || "",
       city: data.city || "",
-      password: "",
+      user_type: data.user_type || "",
       address: data.address || "",
     });
+    if (data.photo) {
+      setProfileImage(data.photo);
+    }
   };
   useEffect(() => {
     const data = localStorage.getItem("user");
@@ -56,7 +107,9 @@ export default function ProfilePage() {
       return;
     }
     const { userDetails } = JSON.parse(data);
-    fetchProfile(271);
+    console.log("user Details");
+    console.log(userDetails);
+    fetchProfile(parseInt(userDetails.user_id));
     setData(userDetails);
   }, []);
 
@@ -93,9 +146,9 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center md:w-1/3 relative">
           <div className="relative">
             <img
-              src={profileImage}
+              src={`${config.awsApiUrl}/${user.photo}`}
               alt="User Profile"
-              className="w-40 h-40 rounded-full shadow-md object-cover"
+              className="w-40 h-40 rounded-full shadow-md object-contain"
             />
             <button
               onClick={triggerFileSelect}
@@ -171,7 +224,7 @@ export default function ProfilePage() {
           ></textarea>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-[#1D3A76] text-white py-3 rounded-lg hover:bg-[#1D3A76] transition"
           >
             Update Profile
           </button>

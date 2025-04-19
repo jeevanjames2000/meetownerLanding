@@ -227,7 +227,12 @@ const PropertyCard = memo(
     return (
       <div
         key={`property-${index}`}
-        className="flex flex-col items-center p-1 md:flex-row rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer w-full"
+        className="flex flex-col items-center p-1 md:flex-row rounded-2xl 
+               shadow-none  /* Default: no shadow */
+               lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  /* Shadow only on lg+ */
+               hover:shadow-none  /* No hover shadow by default */
+               lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  /* Hover shadow only on lg+ */
+               transition-shadow duration-300 bg-white cursor-pointer w-full"
         onClick={() => handleNavigation(property)}
         style={{ minHeight: "auto", height: "auto" }}
       >
@@ -754,17 +759,18 @@ function ListingsBody() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <div className="min-h-screen p-1 relative z-0 ">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8 ">
-        <div className="flex items-center md:items-start">
-          <MapPin className="text-yellow-500 mr-2 mt-1 md:mt-0 " />
-          <p className="text-base md:text-xl text-left font-normal text-[#1D3A76]">
+    <div className="min-h-screen p-1 relative z-0 overflow-visible">
+      <div className="flex flex-row items-center justify-between gap-2 mb-4 mt-2 px-2">
+        {/* Location Section */}
+        <div className="flex items-center flex-shrink-0 max-w-[70%]">
+          <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
+          <p className="text-sm md:text-base text-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"
               ? "Commercial"
               : searchData?.property_in === "Plot"
               ? "Plot"
               : "Residential"}{" "}
-            {searchData.sub_type} For{" "}
+            {searchData?.sub_type || ""} For{" "}
             {searchData?.tab === "Buy"
               ? "Sell"
               : searchData?.tab === "Rent"
@@ -773,22 +779,23 @@ function ListingsBody() {
             In {searchData?.location || "Hyderabad"}
           </p>
         </div>
-        <div className="relative inline-block text-left">
-          <div className="flex items-center gap-2">
-            <p className="text-[#000000] whitespace-nowrap">Sort by :</p>
+        <div className="relative inline-block text-left z-50 flex-shrink-0">
+          <div className="flex items-center gap-1">
+            <p className="text-[#000000] text-sm whitespace-nowrap font-medium">
+              Sort:
+            </p>
             <div
-              className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg cursor-pointer px-4 py-2 pr-8 flex items-center min-w-[160px]"
+              className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg cursor-pointer px-2 py-1 pr-6 flex items-center"
               onClick={() => setIsOpen(!isOpen)}
             >
-              <span className="text-sm text-gray-800">{selected}</span>
-              <ChevronDown
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                size={20}
-              />
+              <span className="text-xs md:text-sm text-gray-800">
+                {selected}
+              </span>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
             </div>
           </div>
           {isOpen && (
-            <div className="absolute mt-2 right-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+            <div className="absolute mt-2 right-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
               {options.map((option) => (
                 <div
                   key={option}
@@ -807,6 +814,7 @@ function ListingsBody() {
           )}
         </div>
       </div>
+
       {data.length > 0 ? (
         <WindowScroller>
           {({ height, isScrolling, scrollTop }) => (
