@@ -13,6 +13,13 @@ export default defineConfig({
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     },
+    proxy: {
+      "/api": {
+        target: "https://api.meetowner.in",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
     base: "/",
     hmr: {
       host: "preprod.meetowner.in", // Optional, for Hot Module Replacement
