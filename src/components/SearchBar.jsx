@@ -22,6 +22,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import config from "../../config";
 import MeetOwner from "../assets/Images/WhatsApp Image 2025-04-12 at 3.44.38 PM.jpeg";
+import ad1 from "../assets/Images/1440x566 Hallmark Skyrena.jpg";
+import ad2 from "../assets/Images/1440x566 Hallmark Sunnyside.jpg";
+import ad3 from "../assets/Images/1440x566 Hallmark Treasor.jpg";
+import ad4 from "../assets/Images/1440x566 The Square.jpg";
+
 export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
   const cityLocalitiesMap = {
@@ -174,23 +179,44 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-  const [mediaList, setMediaList] = useState([]);
+  const [mediaList, setMediaList] = useState([
+    {
+      id: 1,
+      order: 1,
+      video_url: ad1,
+    },
+    {
+      id: 2,
+      order: 2,
+      video_url: ad2,
+    },
+    {
+      id: 3,
+      order: 3,
+      video_url: ad3,
+    },
+    {
+      id: 4,
+      order: 4,
+      video_url: ad4,
+    },
+  ]);
   const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    const fetchLatestAds = async () => {
-      setMediaList([]);
-      try {
-        const response = await fetch(`${config.awsApiUrl}/adAssets/v1/getAds`);
-        const data = await response.json();
-        setMediaList(data.ads || []);
-      } catch (err) {
-        setIsError(true);
-        console.error("Failed to fetch media:", err);
-      }
-    };
-    fetchLatestAds();
-  }, []);
+  // useEffect(() => {
+  //   const fetchLatestAds = async () => {
+  //     setMediaList([]);
+  //     try {
+  //       const response = await fetch(`${config.awsApiUrl}/adAssets/v1/getAds`);
+  //       const data = await response.json();
+  //       setMediaList(data.ads || []);
+  //     } catch (err) {
+  //       setIsError(true);
+  //       console.error("Failed to fetch media:", err);
+  //     }
+  //   };
+  //   fetchLatestAds();
+  // }, []);
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
@@ -234,7 +260,6 @@ export default function SearchBar() {
               ) : (
                 <img
                   src={item.video_url}
-                  crossOrigin="anonymous"
                   alt={`media-${index}`}
                   className="w-full h-[300px] sm:h-[300px] md:h-[400px] object-cover"
                 />
