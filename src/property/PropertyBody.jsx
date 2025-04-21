@@ -278,7 +278,7 @@ const PropertyBody = () => {
             <span className="border-l h-4 border-gray-300"></span>
             <span>{property?.facing} Facing</span>
             <span className="border-l h-4 border-gray-300"></span>
-            <span>
+            {/* <span>
               Possession Starts{" "}
               {new Date(property?.under_construction).toLocaleString(
                 "default",
@@ -287,7 +287,7 @@ const PropertyBody = () => {
                   year: "numeric",
                 }
               )}
-            </span>
+            </span> */}
             <span className="border-l h-4 border-gray-300"></span>
             <span className="flex items-center gap-1">
               <MdOutlineVerified className="text-xl text-green-500" />

@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { Pencil } from "lucide-react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-
 export default function ProfilePage() {
   const [user, setUser] = useState({
     name: "",
@@ -23,27 +22,18 @@ export default function ProfilePage() {
   );
   console.log(profileImage);
   const fileInputRef = useRef(null);
-
   const [loading, setLoading] = useState(false);
-
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
-
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Update local preview
     const imageUrl = URL.createObjectURL(file);
     setProfileImage(imageUrl);
-
-    // Prepare FormData for API
     const formData = new FormData();
     formData.append("photo", file);
-    console.log(user);
     formData.append("user_id", user?.user_id);
-
     setLoading(true);
     try {
       const response = await axios.post(
@@ -55,19 +45,14 @@ export default function ProfilePage() {
           },
         }
       );
-
-      // Assuming the API returns the photo URL or filename
-      const photoUrl = response.data.photoUrl || imageUrl; // Adjust based on API response
+      const photoUrl = response.data.photoUrl || imageUrl;
       setProfileImage(photoUrl);
-
-      // Update userDetails in localStorage
       const storedData = JSON.parse(localStorage.getItem("user"));
       if (storedData) {
-        storedData.userDetails.photo = photoUrl; // Store photo URL or filename
+        storedData.userDetails.photo = photoUrl;
         localStorage.setItem("user", JSON.stringify(storedData));
-        setData(storedData); // Update state
+        setData(storedData);
       }
-
       toast.success("Profile photo updated successfully!");
       fetchProfile(user?.user_id);
     } catch (error) {
@@ -77,7 +62,6 @@ export default function ProfilePage() {
       setLoading(false);
     }
   };
-
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
   };
@@ -112,7 +96,6 @@ export default function ProfilePage() {
     fetchProfile(parseInt(userDetails.user_id));
     setData(userDetails);
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -139,7 +122,6 @@ export default function ProfilePage() {
       alert("Something went wrong while updating profile.");
     }
   };
-
   return (
     <div className="min-h-120 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 flex flex-col md:flex-row gap-6">
@@ -170,7 +152,6 @@ export default function ProfilePage() {
           </h2>
           <p className="text-gray-500">{user.email || "N/A"}</p>
         </div>
-
         <form onSubmit={handleSubmit} className="md:w-2/3 w-full space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
