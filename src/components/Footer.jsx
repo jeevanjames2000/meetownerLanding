@@ -36,7 +36,12 @@ const Footer = () => {
                 <h3 className="text-lg font-bold mb-2">MEET OWNER</h3>
               </div>
               <div className="flex flex-col space-y-3">
-                <img src={QR} alt="Qr Code" className="w-full h-full mx-auto" />
+                <img
+                  src={QR}
+                  alt="Qr Code"
+                  crossOrigin="anonymous"
+                  className="w-full h-full mx-auto"
+                />
                 <div className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black">
                   <FaGooglePlay className="h-5 w-5" />
                   <div className="flex flex-col">

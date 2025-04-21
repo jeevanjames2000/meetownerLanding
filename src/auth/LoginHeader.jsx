@@ -11,13 +11,24 @@ const LoginHeader = () => {
           <img
             src={logoImage}
             alt="Meet Owner Logo"
+            crossOrigin="anonymous"
             className="h-10 hidden md:block"
           />
-          <img src={favicon} alt="Meet Owner" className="w-10 h-10 md:hidden" />
+          <img
+            src={favicon}
+            crossOrigin="anonymous"
+            alt="Meet Owner"
+            className="w-10 h-10 md:hidden"
+          />
         </div>
         <div className="flex items-center space-x-4">
           <button className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-gray-800 font-medium hover:bg-[#F0AA00] transition-all items-center">
-            <img src={favicon} alt="Download" className="w-5 h-5 mr-2" />
+            <img
+              src={favicon}
+              crossOrigin="anonymous"
+              alt="Download"
+              className="w-5 h-5 mr-2"
+            />
             Download App
           </button>
           <button className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-black font-medium hover:bg-[#F0AA00] hover:text-black transition-all group">

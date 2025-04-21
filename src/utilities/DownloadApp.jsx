@@ -36,7 +36,12 @@ const DownloadApp = ({ onClose }) => {
         </button>
         {showAndroidQR && (
           <div className="mt-3 text-center">
-            <img src={QR} alt="Android QR" className="w-full h-full mx-auto" />
+            <img
+              src={QR}
+              alt="Android QR"
+              crossOrigin="anonymous"
+              className="w-full h-full mx-auto"
+            />
           </div>
         )}
       </div>
@@ -54,7 +59,12 @@ const DownloadApp = ({ onClose }) => {
         </button>
         {showAppleQR && (
           <div className="mt-3 text-center">
-            <img src={QR} alt="Apple QR" className="w-full h-full mx-auto" />
+            <img
+              src={QR}
+              crossOrigin="anonymous"
+              alt="Apple QR"
+              className="w-full h-full mx-auto"
+            />
           </div>
         )}
       </div>

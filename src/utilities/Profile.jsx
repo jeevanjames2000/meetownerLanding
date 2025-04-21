@@ -130,6 +130,7 @@ export default function ProfilePage() {
             <img
               src={`${config.awsApiUrl}/${user.photo}`}
               alt="User Profile"
+              crossOrigin="anonymous"
               className="w-40 h-40 rounded-full shadow-md object-contain"
             />
             <button

@@ -176,12 +176,14 @@ const PropertyHeader = () => {
             <img
               src={logoImage}
               alt="Meet Owner Logo"
+              crossOrigin="anonymous"
               className="h-8 w-full max-w-30 hidden md:block cursor-pointer"
               onClick={handleRouteHome}
             />
             <img
               src={favicon}
               alt="Meet Owner"
+              crossOrigin="anonymous"
               className="w-8 h-8 md:hidden cursor-pointer"
               onClick={handleRouteHome}
             />
@@ -280,6 +282,7 @@ const PropertyHeader = () => {
                   <img
                     src={Searchhome}
                     alt="Search Home"
+                    crossOrigin="anonymous"
                     className="w-[34px] h-[34px]"
                     onClick={() => handleNavigation()}
                   />

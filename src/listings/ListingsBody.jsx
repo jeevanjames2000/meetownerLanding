@@ -198,6 +198,7 @@ const AdsCard = memo(() => {
         <img
           src="/src/assets/Images/Favicon@10x.png"
           alt="Meet Owner"
+          crossOrigin="anonymous"
           className="w-6 h-6"
         />
         <span className="text-[#FFC107] font-bold">MEET OWNER</span>

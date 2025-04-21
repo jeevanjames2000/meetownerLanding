@@ -107,12 +107,14 @@ const Header = () => {
               onClick={handleRoute}
               src={logoImage}
               alt="Meet Owner Logo"
+              crossOrigin="anonymous"
               className="h-10 hidden md:block cursor-pointer"
             />
             <img
               src={favicon}
               onClick={handleRoute}
               alt="Meet Owner"
+              crossOrigin="anonymous"
               className="w-10 h-10 md:hidden cursor-pointer"
             />
           </div>
@@ -121,7 +123,12 @@ const Header = () => {
               onClick={() => setShowDownloadModal(true)}
               className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-gray-800 font-medium hover:bg-[#F0AA00] transition-all items-center"
             >
-              <img src={favicon} alt="Download" className="w-5 h-5 mr-2" />
+              <img
+                src={favicon}
+                crossOrigin="anonymous"
+                alt="Download"
+                className="w-5 h-5 mr-2"
+              />
               Download App
             </button>
             <button

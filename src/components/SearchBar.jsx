@@ -260,6 +260,7 @@ export default function SearchBar() {
               ) : (
                 <img
                   src={item.video_url}
+                  crossOrigin="anonymous"
                   alt={`media-${index}`}
                   className="w-full h-[300px] sm:h-[300px] md:h-[400px] object-cover"
                 />

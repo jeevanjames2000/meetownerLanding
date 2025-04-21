@@ -165,7 +165,12 @@ const Sidebar = ({
       title: "Download App",
       content: (
         <div className="text-sm text-gray-600 flex justify-center">
-          <img src={QR} alt="QR code to download app" className="h-40 w-40" />
+          <img
+            src={QR}
+            crossOrigin="anonymous"
+            alt="QR code to download app"
+            className="h-40 w-40"
+          />
         </div>
       ),
     },
