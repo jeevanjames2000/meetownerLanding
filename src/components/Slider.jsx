@@ -248,7 +248,7 @@ const PropertyListing = () => {
           768: { slidesPerView: 2 },
           1024: { slidesPerView: 3 },
         }}
-        className="pb-10 overflow-hidden h-[500px]"
+        className="pb-10 overflow-hidden h-[550px] lg:h-[500px]"
       >
         {loading ? (
           <div className="text-center py-10 text-[#1D3A76] font-semibold">
