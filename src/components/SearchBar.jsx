@@ -372,7 +372,7 @@ export default function SearchBar() {
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
-            <IoSearch className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+            <IoSearch className="w-4 h-4 hidden md:block sm:w-5 sm:h-5 text-gray-400" />
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
