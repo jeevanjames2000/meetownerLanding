@@ -66,12 +66,12 @@ const DealProperties = () => {
         interested_status: 4,
         property_user_id: property.user_id,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/postEnquiry`, payload);
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload);
       await handleAPI(property);
-      toast.success("Enquiry submitted successfully!");
+      // toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);
-      toast.error("Something went wrong while submitting enquiry");
+      alert("Something went wrong while submitting enquiry");
     }
   };
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -141,6 +141,7 @@ const DealProperties = () => {
                         property?.property_name || "No Image Found"
                       }`
                 }
+                onClick={() => handleNavigation(property)}
                 alt="Property"
                 crossOrigin="anonymous"
                 className="w-full lg:w-60 h-70 max-h-70 object-cover"
@@ -152,8 +153,8 @@ const DealProperties = () => {
                 }}
               />
               <div
-                className="p-4 w-full lg:w-2/2 flex flex-col justify-between cursor-pointer"
                 onClick={() => handleNavigation(property)}
+                className="p-4 w-full lg:w-2/2 flex flex-col justify-between cursor-pointer"
               >
                 <h3 className="text-start text-xl font-semibold mb-2">
                   {property.property_name}
@@ -173,7 +174,10 @@ const DealProperties = () => {
                     <FaBath className="mr-2" /> {property?.bedrooms} Bedrooms
                   </div>
                 </div>
-                <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
+                <div
+                  onClick={() => handleNavigation(property)}
+                  className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1"
+                >
                   <p>Highlights:</p>
                   {[
                     property?.facing && `${property.facing} Facing`,

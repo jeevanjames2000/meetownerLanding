@@ -22,10 +22,32 @@ import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
 import {
+  FaBorderAll,
+  FaBuilding,
+  FaExpandArrowsAlt,
+  FaCalendarAlt,
+  FaDoorOpen,
+  FaRupeeSign,
+  FaThLarge,
+  FaHome,
+  FaRulerCombined,
+} from "react-icons/fa";
+import {
+  FaSchool,
+  FaHospital,
+  FaShoppingCart,
+  FaFootballBall,
+  FaPlane,
+  FaTree,
+  FaTrain,
+  FaHotel,
+  FaUniversity,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+import {
   FaBatteryFull,
   FaBicycle,
   FaChild,
-  FaDoorOpen,
   FaFilter,
   FaFireExtinguisher,
   FaLeaf,
@@ -50,7 +72,6 @@ import {
 import { MdOutlineVerified } from "react-icons/md";
 const PropertyBody = () => {
   const { state: property } = useLocation();
-  console.log("property: ", property);
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
@@ -121,7 +142,6 @@ const PropertyBody = () => {
     }
   };
   const [aroundProperty, setAroundProperty] = useState("");
-  console.log("aroundProperty: ", aroundProperty);
   const fetchAroundThisProperty = async () => {
     try {
       const response = await fetch(
@@ -189,7 +209,6 @@ const PropertyBody = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
-      toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -200,8 +219,94 @@ const PropertyBody = () => {
       behavior: "smooth",
     });
   }, []);
+  const getPlaceIcon = (title) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes("school") || lowerTitle.includes("college"))
+      return <FaSchool />;
+    if (lowerTitle.includes("hospital") || lowerTitle.includes("medical"))
+      return <FaHospital />;
+    if (lowerTitle.includes("market") || lowerTitle.includes("mall"))
+      return <FaShoppingCart />;
+    if (lowerTitle.includes("sports") || lowerTitle.includes("arena"))
+      return <FaFootballBall />;
+    if (lowerTitle.includes("airport") || lowerTitle.includes("travel"))
+      return <FaPlane />;
+    if (lowerTitle.includes("park") || lowerTitle.includes("zone"))
+      return <FaTree />;
+    if (lowerTitle.includes("railway") || lowerTitle.includes("station"))
+      return <FaTrain />;
+    if (lowerTitle.includes("hotel")) return <FaHotel />;
+    if (lowerTitle.includes("university")) return <FaUniversity />;
+    return <FaMapMarkerAlt />;
+  };
+  const formatDistance = (distance) => {
+    const d = parseInt(distance, 10);
+    if (isNaN(d)) return "";
+    return d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${d} m`;
+  };
+  const overviewItems = [
+    {
+      label: "Project Area",
+      value: `${property.total_project_area} Acres`,
+      icon: <FaBorderAll />,
+    },
+    ...(property.sub_type === "Plot" || property.sub_type === "Land"
+      ? [
+          {
+            label: "Plot Area",
+            value: `${property.plot_area} Sq.yd`,
+            icon: <FaExpandArrowsAlt />,
+          },
+          {
+            label: "Sizes",
+            value: `${property.length_area} ${property.area_units} - ${property.width_area} ${property.area_units}`,
+            icon: <FaRulerCombined />,
+          },
+        ]
+      : []),
+    ...(property.sub_type === "Apartment" ||
+    property.sub_type === "Independent Villa"
+      ? [
+          {
+            label: "Built-up Area",
+            value: `${property.builtup_area} Sq.ft`,
+            icon: <FaHome />,
+          },
+        ]
+      : []),
+    {
+      label:
+        property.occupancy === "Under Construction"
+          ? "Possession Starts"
+          : "Occupancy Status",
+      value: ["Apartment", "Independent House", "Independent Villa"].includes(
+        property?.sub_type
+      )
+        ? property.occupancy === "Under Construction"
+          ? "Under Construction"
+          : "Ready to Move"
+        : property?.sub_type === "Plot"
+        ? property.occupancy === "Future"
+          ? "Future"
+          : "Immediate"
+        : "",
+      icon: <FaDoorOpen />,
+    },
+  ];
+
+  if (
+    property.property_for === "Rent" &&
+    property.property_in === "Commercial"
+  ) {
+    overviewItems.unshift({
+      label: "Expected Monthly Rent",
+      value: `₹ ${property.expected_rent}`,
+      icon: <FaRupeeSign />,
+    });
+  }
+
   return (
-    <div className="p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
+    <div className="relative p-6 w-full mx-auto  bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
@@ -226,14 +331,17 @@ const PropertyBody = () => {
           </h3>
           <div className="text-right flex items-center gap-2">
             <p className="text-lg font-bold text-indigo-900">
-              ₹{" "}
+              ₹
               {formatToIndianCurrency(
-                property?.property_cost
+                property?.property_for === "Rent"
+                  ? property?.monthly_rent
+                  : property?.property_cost
               )?.toLocaleString()}
             </p>
-            <p className="text-sm text-gray-700">
-              - ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /sq.ft
-            </p>
+            {/* <p className="text-sm text-gray-700">
+              - ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /
+              {property?.area_units}
+            </p> */}
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
@@ -242,7 +350,7 @@ const PropertyBody = () => {
               Construction Pvt Ltd...
             </p>
             <p className="text-xs text-left font-semibold text-gray-600 mt-1">
-              {property?.location_id}
+              {property?.google_address}
             </p>
           </div>
           <div className="text-sm text-blue-00 text-left md:text-right">
@@ -270,28 +378,74 @@ const PropertyBody = () => {
                   }`
                 : `${property.sub_type}`}{" "}
             </span>
-            <span className="border-l h-4 border-gray-300"></span>
-            <span>
-              {property?.builtup_unit || property?.builtup_area} /{" "}
-              {property.area_units}
-            </span>
-            <span className="border-l h-4 border-gray-300"></span>
-            <span>{property?.facing} Facing</span>
-            <span className="border-l h-4 border-gray-300"></span>
-            {/* <span>
-              Possession Starts{" "}
-              {new Date(property?.under_construction).toLocaleString(
-                "default",
-                {
-                  month: "short",
-                  year: "numeric",
-                }
-              )}
-            </span> */}
+            {property?.builtup_area && (
+              <>
+                <span className="border-l h-4 border-gray-300"></span>
+                <span>
+                  Built-up Area: {property.builtup_area} {property.area_units}
+                </span>
+              </>
+            )}
+            {property?.sub_type === "Plot" && (
+              <>
+                <span className="border-l h-4 border-gray-300"></span>
+                <span>
+                  Plot Area: {property.plot_area} {property.area_units}
+                </span>
+              </>
+            )}
+            {property?.facing && (
+              <>
+                <span className="border-l h-4 border-gray-300"></span>
+                <span>{property.facing} Facing</span>
+                <span className="border-l h-4 border-gray-300"></span>
+              </>
+            )}
+            {(property.sub_type === "Apartment" ||
+              property.sub_type === "Independent Villa") && (
+              <>
+                {property?.occupancy === "Ready to move" ? (
+                  <span>Ready to move</span>
+                ) : property?.occupancy === "Under Construction" &&
+                  property?.under_construction ? (
+                  <span>Under Construction</span>
+                ) : null}
+              </>
+            )}
+            {(property.sub_type === "Apartment" ||
+              property.sub_type === "Independent Villa") && (
+              <>
+                {property?.occupancy === "Under Construction" &&
+                property?.under_construction ? (
+                  <>
+                    <span className="border-l h-4 border-gray-300"></span>
+                    <span>
+                      Possession Starts - {""}
+                      {new Date(property.under_construction).toLocaleString(
+                        "default",
+                        {
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+                    </span>
+                  </>
+                ) : null}
+              </>
+            )}
+            {property.sub_type === "Plot" && (
+              <>
+                <span>
+                  {property.possession_status?.toLowerCase() === "immediate"
+                    ? "Immediate"
+                    : "Future"}
+                </span>
+              </>
+            )}
             <span className="border-l h-4 border-gray-300"></span>
             <span className="flex items-center gap-1">
               <MdOutlineVerified className="text-xl text-green-500" />
-              <p>Rera</p>
+              <p>RERA</p>
             </span>
           </div>
           <button
@@ -392,6 +546,62 @@ const PropertyBody = () => {
           </div>
         </div>
       )}
+      {aroundProperty && aroundProperty.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl text-left font-semibold text-indigo-800 ">
+            Property Location
+          </h2>
+
+          <p className="text-left text-sm text-gray-600 mb-4">
+            {property?.google_address}
+          </p>
+          <div className="bg-white rounded-xl border border-gray-300 shadow-sm px-4 py-3 hover:shadow-md transition">
+            <h2 className="text-xl text-center font-semibold text-indigo-800 mb-2">
+              Around This Property
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {aroundProperty.map((place, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-white rounded-xl border border-gray-300 shadow-sm px-5 py-3 hover:shadow-md transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="text-red-600 text-xl">
+                      {getPlaceIcon(place.title)}
+                    </div>
+                    <span className="text-gray-800 font-medium text-xs">
+                      {place.title}
+                    </span>
+                  </div>
+                  <span className="bg-[#004B87] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    {formatDistance(place.distance)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="mt-8">
+        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-4">
+          Property Overview
+        </h2>
+        <div className="bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-6 py-5 hover:shadow-md transition">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {overviewItems.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-4">
+                <div className="text-[#4B1D1D] text-lg pt-1">{item.icon}</div>
+                <div>
+                  <div className="text-gray-700 font-medium text-sm">
+                    {item.label}
+                  </div>
+                  <div className="text-gray-900 text-sm">{item.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="mt-6">
         <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
           Explore Map

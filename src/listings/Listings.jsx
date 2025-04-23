@@ -11,7 +11,7 @@ const Listings = () => {
   return (
     <>
       <ListingsHeader />
-      <div className="flex w-full justify-center bg-[#F5F5F5] mt-17">
+      <div className="flex flex-col lg:flex-row w-full justify-between h-auto  pt-30 sm:pt-24 md:pt-24 lg:pt-20 gap-4">
         <div className="flex w-full max-w-[1400px] flex-col md:flex-row gap-2">
           <div className="w-full md:w-[70%]">
             <ListingsBody />

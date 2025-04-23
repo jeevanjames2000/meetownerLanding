@@ -26,7 +26,6 @@ import ad1 from "../assets/Images/1440x566 Hallmark Skyrena.jpg";
 import ad2 from "../assets/Images/1440x566 Hallmark Sunnyside.jpg";
 import ad3 from "../assets/Images/1440x566 Hallmark Treasor.jpg";
 import ad4 from "../assets/Images/1440x566 The Square.jpg";
-
 export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
   const cityLocalitiesMap = {
@@ -118,13 +117,16 @@ export default function SearchBar() {
       setSearchData({
         city: location,
         tab: selectedTab,
-        property_for: selectedTab === "Buy" ? "Sell" : "Rent",
+        property_for: selectedTab === "Rent" ? "Rent" : "Sell",
         property_in:
-          selectedTab === "Commercial"
-            ? "Commercial"
-            : selectedTab === "Plot"
+          selectedTab === "Commercial" ? "Commercial" : "Residential",
+        sub_type:
+          selectedTab === "Plot"
             ? "Plot"
-            : "Residential",
+            : selectedTab === "Commercial"
+            ? "Others"
+            : "Apartment",
+
         location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
@@ -202,21 +204,6 @@ export default function SearchBar() {
     },
   ]);
   const [isError, setIsError] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchLatestAds = async () => {
-  //     setMediaList([]);
-  //     try {
-  //       const response = await fetch(`${config.awsApiUrl}/adAssets/v1/getAds`);
-  //       const data = await response.json();
-  //       setMediaList(data.ads || []);
-  //     } catch (err) {
-  //       setIsError(true);
-  //       console.error("Failed to fetch media:", err);
-  //     }
-  //   };
-  //   fetchLatestAds();
-  // }, []);
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
@@ -299,113 +286,55 @@ export default function SearchBar() {
           </div>
         </div>
         <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
-        <div className="flex items-center space-x-1 sm:space-x-2 w-full">
-          {/* City Selection Dropdown */}
-          <div className="relative w-auto inline-block">
-            <div
-              className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76] cursor-pointer"
-              onClick={() => setIsLocationOpen((prev) => !prev)}
-            >
-              <div className="flex items-center mr-1 sm:mr-2">
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    if (!isLocationOpen) setIsLocationOpen(true);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={() => setIsLocationOpen(true)}
-                  placeholder="Search City..."
-                  className="bg-transparent w-24 sm:w-30 text-sm sm:text-base text-[#1D3A76] focus:outline-none"
-                />
-                {city && (
-                  <IoCloseCircleOutline
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 cursor-pointer hover:text-[#1D3A76]"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCity("");
-                    }}
-                  />
-                )}
-              </div>
-              <IoChevronDownOutline className="w-3 h-3 sm:w-4 sm:h-4 text-[#1D3A76]" />
-            </div>
-            {isLocationOpen && (
-              <ul
-                className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
-                onWheel={(e) => e.stopPropagation()}
+          <div className="flex items-center space-x-1 sm:space-x-2 w-full">
+            {}
+            <div className="relative w-auto inline-block">
+              <div
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76] cursor-pointer"
+                onClick={() => setIsLocationOpen((prev) => !prev)}
               >
-                {filteredLocations.length > 0 ? (
-                  filteredLocations.map((option) => {
-                    const isDisabled = option === "Top Cities";
-                    return (
-                      <li
-                        key={option}
-                        onClick={() => {
-                          if (!isDisabled) {
-                            setLocation(option);
-                            setCity(option);
-                            setIsLocationOpen(false);
-                            setSearchInput("");
-                          }
-                        }}
-                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                          isDisabled
-                            ? "text-gray-400 cursor-default"
-                            : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
-                        }`}
-                      >
-                        {option}
-                      </li>
-                    );
-                  })
-                ) : (
-                  <li className="px-3 py-2 text-gray-400 text-sm">
-                    No results found
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
-
-          <span className="hidden md:block text-gray-400">
-            <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
-          </span>
-
-          {/* Locality Search Field */}
-          <div className="relative flex-1 items-start text-left">
-            <input
-              type="text"
-              placeholder="Search Locality, City, Property..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onFocus={() => setIsSearchDropdownOpen(true)}
-              onBlur={() => setTimeout(() => setIsSearchDropdownOpen(false), 200)}
-              className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
-            />
-            {searchInput && (
-              <IoCloseCircleOutline
-                className="absolute w-4 h-4 sm:w-4 sm:h-4 right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSearchInput("");
-                }}
-              />
-            )}
-            {isSearchDropdownOpen && (
-              <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
-                {searchInput.trim() === "" ? (
-                  filteredLocalities.length > 0 ? (
-                    filteredLocalities.map((locality) => {
-                      const isDisabled = locality === "Most Searched";
+                <div className="flex items-center mr-1 sm:mr-2">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      if (!isLocationOpen) setIsLocationOpen(true);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={() => setIsLocationOpen(true)}
+                    placeholder="Search City..."
+                    className="bg-transparent w-24 sm:w-30 text-sm sm:text-base text-[#1D3A76] focus:outline-none"
+                  />
+                  {city && (
+                    <IoCloseCircleOutline
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 cursor-pointer hover:text-[#1D3A76]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCity("");
+                      }}
+                    />
+                  )}
+                </div>
+                <IoChevronDownOutline className="w-3 h-3 sm:w-4 sm:h-4 text-[#1D3A76]" />
+              </div>
+              {isLocationOpen && (
+                <ul
+                  className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((option) => {
+                      const isDisabled = option === "Top Cities";
                       return (
                         <li
-                          key={locality}
+                          key={option}
                           onClick={() => {
                             if (!isDisabled) {
-                              setSearchInput(locality);
-                              setIsSearchDropdownOpen(false);
+                              setLocation(option);
+                              setCity(option);
+                              setIsLocationOpen(false);
+                              setSearchInput("");
                             }
                           }}
                           className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
@@ -414,102 +343,158 @@ export default function SearchBar() {
                               : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
                           }`}
                         >
-                          <div className="flex justify-between">
-                            <div>{locality}</div>
-                            <p
-                              className="text-sm text-gray-300"
-                              style={{
-                                display:
-                                  locality === "Most Searched" ? "none" : "",
-                              }}
-                            >
-                              Locality
-                            </p>
-                          </div>
+                          {option}
                         </li>
                       );
                     })
                   ) : (
-                    <li className="px-3 py-1 text-gray-500">
-                      No matching localities
+                    <li className="px-3 py-2 text-gray-400 text-sm">
+                      No results found
                     </li>
-                  )
-                ) : localites.length > 0 ? (
-                  localites.map((item) => (
-                    <li
-                      key={item.locality}
-                      onClick={() => {
-                        setSearchInput(item.locality);
-                        setIsSearchDropdownOpen(false);
-                      }}
-                      className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
-                    >
-                      {item.locality}{" "}
-                      <p className="text-sm text-gray-300">Locality</p>
-                    </li>
-                  ))
-                ) : (
-                  <li className="px-3 py-1 text-gray-500">
-                    No matching localities
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
-
-          {/* Mobile Search Icon */}
-          <IoSearch
-            className="w-5 h-5 text-gray-600 cursor-pointer md:hidden"
-            onClick={() => handleNavigation()}
-          />
-        </div>
-
-      {/* Desktop Controls */}
-        <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
-          <span className="hidden md:block text-gray-400">
-            <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
-          </span>
-          {(activeTab === 2 || activeTab === 3) && (
-            <div className="relative inline-block w-32">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full text-left px-3 py-1 rounded bg-transparent text-[#1D3A76] focus:outline-none flex justify-between items-center text-sm sm:text-base"
-              >
-                {selected}
-                <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
-              </button>
-              {isOpen && (
-                <ul className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-md border border-gray-300 text-sm sm:text-base">
-                  {options.map((option) => (
-                    <li
-                      key={option}
-                      onClick={() => {
-                        if (activeTab === 2) setPlotSubType(option);
-                        else if (activeTab === 3) setCommercialSubType(option);
-                        setSelected(option);
-                        setIsOpen(false);
-                      }}
-                      className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white cursor-pointer rounded-md transition-all duration-200"
-                    >
-                      {option}
-                    </li>
-                  ))}
+                  )}
                 </ul>
               )}
             </div>
-          )}
-          <FaLocationCrosshairs
-            onClick={getCurrentLocation}
-            className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer"
-          />
-          <button
-            className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap"
-            onClick={() => handleNavigation()}
-          >
-            Search
-          </button>
+            <span className="hidden md:block text-gray-400">
+              <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
+            </span>
+            {}
+            <div className="relative flex-1 items-start text-left">
+              <input
+                type="text"
+                placeholder="Search Locality, City, Property..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onFocus={() => setIsSearchDropdownOpen(true)}
+                onBlur={() =>
+                  setTimeout(() => setIsSearchDropdownOpen(false), 200)
+                }
+                className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
+              />
+              {searchInput && (
+                <IoCloseCircleOutline
+                  className="absolute w-4 h-4 sm:w-4 sm:h-4 right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchInput("");
+                  }}
+                />
+              )}
+              {isSearchDropdownOpen && (
+                <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
+                  {searchInput.trim() === "" ? (
+                    filteredLocalities.length > 0 ? (
+                      filteredLocalities.map((locality) => {
+                        const isDisabled = locality === "Most Searched";
+                        return (
+                          <li
+                            key={locality}
+                            onClick={() => {
+                              if (!isDisabled) {
+                                setSearchInput(locality);
+                                setIsSearchDropdownOpen(false);
+                              }
+                            }}
+                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                              isDisabled
+                                ? "text-gray-400 cursor-default"
+                                : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
+                            }`}
+                          >
+                            <div className="flex justify-between">
+                              <div>{locality}</div>
+                              <p
+                                className="text-sm text-gray-300"
+                                style={{
+                                  display:
+                                    locality === "Most Searched" ? "none" : "",
+                                }}
+                              >
+                                Locality
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })
+                    ) : (
+                      <li className="px-3 py-1 text-gray-500">
+                        No matching localities
+                      </li>
+                    )
+                  ) : localites.length > 0 ? (
+                    localites.map((item) => (
+                      <li
+                        key={item.locality}
+                        onClick={() => {
+                          setSearchInput(item.locality);
+                          setIsSearchDropdownOpen(false);
+                        }}
+                        className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
+                      >
+                        {item.locality}{" "}
+                        <p className="text-sm text-gray-300">Locality</p>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-3 py-1 text-gray-500">
+                      No matching localities
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+            {}
+            <IoSearch
+              className="w-5 h-5 text-gray-600 cursor-pointer md:hidden"
+              onClick={() => handleNavigation()}
+            />
+          </div>
+          <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
+            <span className="hidden md:block text-gray-400">
+              <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
+            </span>
+            {(activeTab === 2 || activeTab === 3) && (
+              <div className="relative inline-block w-32">
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="w-full text-left px-3 py-1 rounded bg-transparent text-[#1D3A76] focus:outline-none flex justify-between items-center text-sm sm:text-base"
+                >
+                  {selected}
+                  <IoChevronDownOutline className="w-4 h-4 text-[#1D3A76]" />
+                </button>
+                {isOpen && (
+                  <ul className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-md border border-gray-300 text-sm sm:text-base">
+                    {options.map((option) => (
+                      <li
+                        key={option}
+                        onClick={() => {
+                          if (activeTab === 2) setPlotSubType(option);
+                          else if (activeTab === 3)
+                            setCommercialSubType(option);
+                          setSelected(option);
+                          setIsOpen(false);
+                        }}
+                        className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white cursor-pointer rounded-md transition-all duration-200"
+                      >
+                        {option}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            <FaLocationCrosshairs
+              onClick={getCurrentLocation}
+              className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer"
+            />
+            <button
+              className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap"
+              onClick={() => handleNavigation()}
+            >
+              Search
+            </button>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

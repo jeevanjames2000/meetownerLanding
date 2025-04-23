@@ -81,7 +81,6 @@ const HousingPicks = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      toast.success("Details submitted successfully!");
     } catch (err) {
       toast.error("Something went wrong! Please try again");
     }
@@ -164,7 +163,7 @@ const HousingPicks = () => {
             }}
             pagination={{ clickable: true }}
             autoplay={{ delay: 8000, disableOnInteraction: false }}
-            className="rounded-lg overflow-hidden h-auto"
+            className="pb-10 overflow-hidden h-[500px] lg:h-[450px]"
           >
             {property.map((property) => (
               <SwiperSlide key={property.unique_property_id}>

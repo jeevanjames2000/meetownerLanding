@@ -17,7 +17,6 @@ import { toast } from "react-toastify";
 import { LogInIcon } from "lucide-react";
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
-  console.log("Data: ", Data);
   const user = useSelector((state) => state.auth.userDetails);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {

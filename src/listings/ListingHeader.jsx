@@ -3,10 +3,8 @@ import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
 import favicon from "../assets/Images/Favicon@10x.png";
-import { HiMenu, HiX } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import config from "../../config";
-
 import {
   setBHK,
   setBudget,
@@ -26,14 +24,16 @@ import {
   puneLocalities,
 } from "../components/customCities";
 import { useNavigate } from "react-router-dom";
+import { IoCloseCircleOutline } from "react-icons/io5";
+
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
   const [selectedCity, setSelectedCity] = useState(
     searchData?.city || "Hyderabad"
   );
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-
   const [location, setLocation] = useState("Hyderabad");
   const locations = [
     "Top Cities",
@@ -68,7 +68,9 @@ const Header = () => {
     locality.toLowerCase().includes(searchInput.toLowerCase())
   );
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
-  const [localites, setLocalities] = useState([]);
+  const [localities, setLocalities] = useState([]);
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+
   useEffect(() => {
     if (searchInput.trim() === "") {
       setLocalities([]);
@@ -85,13 +87,22 @@ const Header = () => {
     };
     fetchLocalities();
   }, [searchInput, location]);
-  const [dropdowns, setDropdowns] = useState({});
+
   const [activeDropdown, setActiveDropdown] = useState(null);
   const toggleDropdown = (key) => {
-    setActiveDropdown((prev) => (prev === key ? null : key));
+    console.log(
+      "Toggling dropdown for:",
+      key,
+      "Current activeDropdown:",
+      activeDropdown
+    );
+    setActiveDropdown((prev) => {
+      const newValue = prev === key ? null : key;
+      console.log("New activeDropdown value:", newValue);
+      return newValue;
+    });
   };
-  const [menuOpen, setMenuOpen] = useState(false);
-  const cities = ["Hyderabad", "Kondapur", "Telangana"];
+
   const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
@@ -101,24 +112,15 @@ const Header = () => {
   const [selectedSubType, setSelectedSubType] = useState(
     searchData.sub_type || ""
   );
+  console.log("selectedSubType: ", selectedSubType);
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
   );
-  const dropdownOptions = {
-    Buy: ["Buy", "Rent"],
-    BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
-    Budget: [
-      { label: "Up to 50 Lakhs", value: "50" },
-      { label: "50-75 Lakhs", value: "50-75" },
-      { label: "75 Lakhs+", value: "75+" },
-    ],
-    "Property In": ["Property In", "Residential", "Commercial"],
-    Status: ["Status", "Ready to Move", "Under Construction"],
-  };
+
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
-        "Type",
+        "Property Type",
         "Office",
         "Retail shop",
         "Show room",
@@ -128,7 +130,7 @@ const Header = () => {
       ];
     } else if (selectedPropertyIn === "Residential") {
       return [
-        "Type",
+        "Property Type",
         "Apartment",
         "Independent House",
         "Independent Villa",
@@ -136,9 +138,30 @@ const Header = () => {
         "Land",
         "Others",
       ];
-    } else {
-      return ["Type"];
     }
+    return ["Property Type"];
+  };
+
+  const dropdownOptions = {
+    Buy: ["Buy", "Rent"],
+    BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
+    Budget: [
+      { label: "Budget", value: "" },
+      { label: "Up to 50 Lakhs", value: "50" },
+      { label: "50-75 Lakhs", value: "50-75" },
+      { label: "75 Lakhs+", value: "75+" },
+    ],
+    "Property In": ["Property In", "Residential", "Commercial"],
+    Type: [
+      "Property Type",
+      "Apartment",
+      "Independent House",
+      "Independent Villa",
+      "Plot",
+      "Land",
+      "Others",
+    ],
+    Status: ["Status", "Ready to Move", "Under Construction"],
   };
   const labelToActionMap = {
     Buy: setTab,
@@ -148,6 +171,7 @@ const Header = () => {
     Type: setSubType,
     Status: setOccupancy,
   };
+
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
     BHK: setSelectedBHK,
@@ -156,6 +180,7 @@ const Header = () => {
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
   };
+
   const labelToStoreKeyMap = {
     Buy: "tab",
     BHK: "bhk",
@@ -164,14 +189,12 @@ const Header = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
+
   const handleClear = () => {
     setSearchInput("");
-    dispatch(
-      setSearchData({
-        location: "",
-      })
-    );
+    dispatch(setSearchData({ location: "" }));
   };
+
   const getSelectedLabel = (label) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
@@ -182,8 +205,9 @@ const Header = () => {
       if (typeof opt === "object") return opt.value === selectedValue;
       return opt === selectedValue;
     });
-    return typeof match === "object" ? match.label : match || label;
+    return typeof match === "object" ? match.label : match || options[0];
   };
+
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -198,10 +222,7 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const [isUserInput, setIsUserInput] = useState(false);
-
   const handleValueChange = (value) => {
-    setIsUserInput(true);
     setSearchInput(value);
     dispatch(
       setSearchData({
@@ -249,12 +270,8 @@ const Header = () => {
                     <span className="hidden md:inline">{location}</span>
                     <FaFilter />
                   </div>
-
                   {isLocationOpen && (
-                    <ul
-                      className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50"
-                      onWheel={(e) => e.stopPropagation()}
-                    >
+                    <ul className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50">
                       {locations.map((option) => {
                         const isDisabled = option === "Top Cities";
                         return (
@@ -281,12 +298,8 @@ const Header = () => {
                     </ul>
                   )}
                 </div>
-
                 <div className="hidden lg:flex items-center gap-4">
-                  {[
-                    ...Object.entries(dropdownOptions),
-                    ["Type", getTypeOptions()],
-                  ].map(([label, options]) => (
+                  {Object.entries(dropdownOptions).map(([label, options]) => (
                     <div key={label} className="relative">
                       <button
                         className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
@@ -295,7 +308,7 @@ const Header = () => {
                         {getSelectedLabel(label)} <FaChevronDown />
                       </button>
                       {activeDropdown === label && (
-                        <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-10 text-left">
+                        <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-50 text-left">
                           {options.map((option, index) => {
                             const isObject = typeof option === "object";
                             const value = isObject ? option.value : option;
@@ -304,6 +317,7 @@ const Header = () => {
                               (label === "Type" ||
                                 label === "Property In" ||
                                 label === "Status" ||
+                                label === "Property Type" ||
                                 label === "BHK") &&
                               index === 0
                             ) {
@@ -311,7 +325,7 @@ const Header = () => {
                             }
                             return (
                               <div
-                                key={value}
+                                key={`${label}-${value}`}
                                 onClick={() => {
                                   const key = labelToStoreKeyMap[label];
                                   dispatch(labelToActionMap[label](value));
@@ -338,17 +352,25 @@ const Header = () => {
                   onChange={(e) => handleValueChange(e.target.value)}
                   onFocus={() => setIsSearchDropdownOpen(true)}
                   onBlur={() =>
-                    setTimeout(() => setIsSearchDropdownOpen(false), 200)
+                    setTimeout(() => setIsSearchDropdownOpen(false), 300)
                   }
-                  className="w-full pl-1 py-4 pr-10 focus:outline-none focus:ring-0 h-13 text-center placeholder:text-center md:text-left md:placeholder:text-left"
+                  className="w-full pl-1 pr-10 
+             py-2 h-11
+             text-center placeholder:text-center 
+             bg-[#fff] rounded-lg border border-gray-300
+             md:py-4 md:h-13 
+             md:bg-transparent md:rounded-none md:border-none 
+             md:text-left md:placeholder:text-left 
+             focus:outline-none focus:ring-0"
                 />
-                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-3">
+
+                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2">
                   {searchInput && (
                     <button
-                      className=" text-gray-400 hover:text-gray-600 focus:outline-none"
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none"
                       onClick={handleClear}
                     >
-                      &times;
+                      <IoCloseCircleOutline className="w-5 h-5" />
                     </button>
                   )}
                   <img
@@ -357,7 +379,6 @@ const Header = () => {
                     className="w-[34px] h-[34px]"
                   />
                 </div>
-
                 {isSearchDropdownOpen && (
                   <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto z-50">
                     {searchInput.trim() === "" ? (
@@ -371,9 +392,7 @@ const Header = () => {
                                 if (!isDisabled) {
                                   setSearchInput(locality);
                                   dispatch(
-                                    setSearchData({
-                                      location: locality,
-                                    })
+                                    setSearchData({ location: locality })
                                   );
                                   setIsSearchDropdownOpen(false);
                                 }
@@ -386,16 +405,10 @@ const Header = () => {
                             >
                               <div className="flex justify-between">
                                 <div>{locality}</div>
-                                <p
-                                  className="text-sm text-gray-300"
-                                  style={{
-                                    display:
-                                      locality === "Most Searched"
-                                        ? "none"
-                                        : "",
-                                  }}
-                                >
-                                  Locality
+                                <p className="text-sm text-gray-300">
+                                  {locality === "Most Searched"
+                                    ? ""
+                                    : "Locality"}
                                 </p>
                               </div>
                             </li>
@@ -406,8 +419,8 @@ const Header = () => {
                           No matching localities
                         </li>
                       )
-                    ) : localites.length > 0 ? (
-                      localites.map((item) => (
+                    ) : localities.length > 0 ? (
+                      localities.map((item) => (
                         <li
                           key={item.locality}
                           onClick={() => {
@@ -428,62 +441,156 @@ const Header = () => {
                   </ul>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
 
-              {isCityDropdownOpen && (
-                <div className="absolute mt-1 w-60 lg:hidden left-0 bg-white rounded-lg shadow-lg z-20 text-left">
-                  <div className="border-b px-4 font-semibold text-[#1D3A76]">
-                    Select City
+        <div className="md:hidden mt-3 flex overflow-x-auto gap-2 px-4 relative pb-3">
+          {["Buy", "BHK", "Budget", "Property In", "Type"].map((label) => (
+            <div key={label} className="relative flex-shrink-0">
+              <button
+                className="flex items-center gap-1 text-gray-700 text-sm px-3 py-1 bg-gray-100 rounded-full cursor-pointer whitespace-nowrap"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleDropdown(label);
+                }}
+              >
+                {getSelectedLabel(label)} <FaChevronDown className="text-xs" />
+              </button>
+              {activeDropdown === label && (
+                <div
+                  className="fixed inset-0 bg-transparent bg-opacity-30 z-40"
+                  onClick={() => setActiveDropdown(null)}
+                ></div>
+              )}
+              {activeDropdown === label && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium">{label}</h3>
+                    <button
+                      onClick={() => setActiveDropdown(null)}
+                      className="text-gray-500"
+                    >
+                      ×
+                    </button>
                   </div>
-                  {locations.map((option) => {
-                    const isDisabled = option === "Top Cities";
-                    return (
-                      <li
-                        key={option}
-                        onClick={() => {
-                          if (!isDisabled) {
-                            setLocation(option);
-                            setIsLocationOpen(false);
-                            setSearchInput("");
-                          }
-                        }}
-                        className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                          isDisabled
-                            ? "text-gray-400 cursor-default"
-                            : "hover:bg-[#1D3A76] hover:text-white cursor-default"
-                        }`}
-                      >
-                        {option}
-                      </li>
-                    );
-                  })}
-                  <div className="border-t px-4 py-2 font-semibold text-[#1D3A76]">
-                    Filters
-                  </div>
-                  <div className="flex flex-col items-start px-4 gap-2">
-                    {/* {Object.entries(dropdownOptions).map(([label, options]) => (
-                      <div key={label} className="w-full">
-                        <div className="font-medium text-sm mb-1">{label}</div>
-                        <div className="flex flex-wrap gap-2">
-                          {options.map((option) => (
-                            <span
-                              key={option}
-                              onClick={() => setIsCityDropdownOpen(false)}
-                              className="bg-[#F3F3F3] px-3 py-1 rounded text-xs cursor-pointer hover:bg-[#e0e0e0]"
-                            >
-                              {option}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))} */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {(label === "Type"
+                      ? getTypeOptions()
+                      : dropdownOptions[label] || []
+                    ).map((option, index) => {
+                      const isObject = typeof option === "object";
+                      const value = isObject ? option.value : option;
+                      const display = isObject ? option.label : option;
+                      if (
+                        (label === "BHK" ||
+                          label === "Property In" ||
+                          label === "Type" ||
+                          label === "Budget") &&
+                        index === 0
+                      )
+                        return null;
+                      return (
+                        <button
+                          key={`${label}-${value}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const key = labelToStoreKeyMap[label];
+                            dispatch(labelToActionMap[label](value));
+                            labelToLocalSetterMap[label](value);
+                            setActiveDropdown(null);
+                          }}
+                          className={`px-4 py-2 rounded-lg text-left text-sm ${
+                            searchData[labelToStoreKeyMap[label]] === value ||
+                            (value === "" &&
+                              !searchData[labelToStoreKeyMap[label]])
+                              ? "bg-[#1D3A76] text-white"
+                              : "bg-gray-100 hover:bg-gray-200"
+                          }`}
+                        >
+                          {display}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </div>
+          ))}
+          <div className="relative flex-shrink-0">
+            <button
+              className="flex items-center gap-1  text-sm px-3 py-[2px] bg-gray-100 rounded-full cursor-pointer whitespace-nowrap border-2 border-blue-900 text-blue-900"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMoreFiltersOpen(!isMoreFiltersOpen);
+              }}
+            >
+              MORE FILTERS <FaChevronDown className="text-xs" />
+            </button>
+            {isMoreFiltersOpen && (
+              <div
+                className="fixed inset-0 bg-transparent bg-opacity-10 z-40"
+                onClick={() => setIsMoreFiltersOpen(false)}
+              ></div>
+            )}
+            {isMoreFiltersOpen && (
+              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-xl text-blue-900">
+                    More Filters
+                  </h3>
+                  <button
+                    onClick={() => setIsMoreFiltersOpen(false)}
+                    className="text-gray-500"
+                  >
+                    ×
+                  </button>
+                </div>
+                {["Status", "Type"].map((label) => (
+                  <div key={label} className="mb-4">
+                    <h4 className="font-medium mb-2 text-left">{label}</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(label === "Type"
+                        ? getTypeOptions()
+                        : dropdownOptions[label]
+                      ).map((option, index) => {
+                        const isObject = typeof option === "object";
+                        const value = isObject ? option.value : option;
+                        const display = isObject ? option.label : option;
+                        if (index === 0) return null;
+                        return (
+                          <button
+                            key={`${label}-${value}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const key = labelToStoreKeyMap[label];
+                              dispatch(labelToActionMap[label](value));
+                              labelToLocalSetterMap[label](value);
+                            }}
+                            className={`px-4 py-2 text-left rounded-lg text-sm ${
+                              searchData[labelToStoreKeyMap[label]] === value ||
+                              (value === "" &&
+                                !searchData[labelToStoreKeyMap[label]])
+                                ? "bg-[#1D3A76] text-white"
+                                : "bg-gray-100 hover:bg-gray-200"
+                            }`}
+                          >
+                            {display}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>
     </>
   );
 };
+
 export default Header;

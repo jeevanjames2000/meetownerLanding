@@ -30,7 +30,6 @@ const Login = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState(null);
-  console.log("loginData: ", loginData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const OTP_LENGTH = 4;
@@ -64,7 +63,6 @@ const Login = ({ onClose }) => {
         );
         if (response.data.status === "success") {
           const userData = await checkUserExists();
-          console.log("userData: ", userData);
 
           setLoginData(userData);
           if (type === 0) {
@@ -91,13 +89,11 @@ const Login = ({ onClose }) => {
           mobile,
         }
       );
-      console.log("res.data: ", res);
       setOtp(parseInt(res.data.otp));
       setMessage(`WhatsApp OTP sent successfully to +91 ${mobile}`);
       setOtpSent(true);
       setError("");
     } catch (err) {
-      console.log("err: ", err);
       setError("Failed to send OTP via WhatsApp. Please try again!");
       setMessage("");
     }
@@ -111,7 +107,6 @@ const Login = ({ onClose }) => {
         `${config.awsApiUrl}/auth/v1/sendOtp?mobile=${mobile}`
       );
       if (response.data.status === "success") {
-        console.log("response.data.otp: ", response.data.otp);
         setOtp(response.data.otp);
         setMessage(`OTP sent successfully to +91${mobile}`);
         setOtpSent(true);

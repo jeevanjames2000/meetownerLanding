@@ -59,7 +59,7 @@ const ListingAds = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      toast.success("Details submitted successfully");
+      // toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }

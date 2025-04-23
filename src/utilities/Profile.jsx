@@ -15,12 +15,10 @@ export default function ProfilePage() {
     user_type: "",
     photo: "",
   });
-  console.log("user: ", user);
   const [data, setData] = useState("");
   const [profileImage, setProfileImage] = useState(
     "https://placehold.co/200x200?text=Upload Image"
   );
-  console.log(profileImage);
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
@@ -91,8 +89,6 @@ export default function ProfilePage() {
       return;
     }
     const { userDetails } = JSON.parse(data);
-    console.log("user Details");
-    console.log(userDetails);
     fetchProfile(parseInt(userDetails.user_id));
     setData(userDetails);
   }, []);

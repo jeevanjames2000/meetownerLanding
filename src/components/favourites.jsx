@@ -9,10 +9,6 @@ import {
   ShieldCheck,
   Building,
 } from "lucide-react";
-import { List, AutoSizer } from "react-virtualized";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
 import { IoIosHeart } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +22,12 @@ import DynamicAds from "../utilities/DynamicAds";
 import useWhatsappHook from "../utilities/useWhatsappHook";
 import Login from "../auth/Login";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Mousewheel, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
+// Import only Pagination module
+import { Pagination } from "swiper/modules";
+
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -192,7 +193,7 @@ const Favourites = () => {
           className="flex flex-col md:flex-row w-full h-full rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer mb-6"
           onClick={() => handleNavigation(property)}
         >
-          <div className="bg-[#F3F3F3] rounded-[20px] p-4 w-full">
+          <div className="bg-[#fff] rounded-[20px] p-4 w-full">
             <div className="flex flex-col md:flex-row gap-5">
               <div className="w-full md:w-[300px]">
                 <div className="rounded-lg overflow-hidden mb-4 relative">
@@ -422,13 +423,13 @@ const Favourites = () => {
       <div className="flex">
         <div className="flex-1 px-4 md:px-10 py-6">
           <Swiper
-            modules={[Navigation, Mousewheel]}
+            modules={[Pagination]}
             direction="vertical"
             spaceBetween={24}
             slidesPerView={2}
-            mousewheel={true}
-            navigation
+            pagination={{ clickable: true }}
             className="w-full h-[600px]"
+            style={{ overflowY: "auto", overscrollBehavior: "contain" }}
           >
             {likedProperties.map((property, index) => (
               <SwiperSlide key={index} className="w-full">

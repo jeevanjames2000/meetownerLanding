@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import config from "../../config";
 
 export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
   const [userDetails, setUserDetails] = useState(null);
+  const [agreeToTerms, setAgreeToTerms] = useState(true);
+  const [agreeCall, setAgreeCall] = useState(true);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,46 +41,64 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const missingName = !userDetails?.name || userDetails.name === "N/A";
-    const missingEmail = !userDetails?.email || userDetails.email === "N/A";
 
-    if ((missingName && formData.name) || (missingEmail && formData.email)) {
-      try {
-        const res = await fetch("http://localhost:5000/user/updateUser", {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      let updatedUserDetails = { ...storedUser.userDetails };
+
+      // Check if the user info is missing
+      const missingName =
+        !updatedUserDetails?.name || updatedUserDetails.name === "N/A";
+      const missingEmail =
+        !updatedUserDetails?.email || updatedUserDetails.email === "N/A";
+      const missingMobile =
+        !updatedUserDetails?.mobile || updatedUserDetails.mobile === "N/A";
+
+      // If anything is missing, update it via API
+      if (missingName || missingEmail || missingMobile) {
+        const updatePayload = {
+          id: updatedUserDetails.user_id,
+          name: formData.name,
+          email: formData.email,
+          mobile: formData.phone,
+        };
+
+        const res = await fetch(`${config.awsApiUrl}/user/v1/updateUser`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: userDetails.user_id,
-            name: formData.name,
-            email: formData.email,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatePayload),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to update user");
-        }
+        if (!res.ok) throw new Error("Failed to update user");
 
         const updatedUser = await res.json();
 
-        const existingUserData = JSON.parse(localStorage.getItem("user"));
-        const updatedUserData = {
-          ...existingUserData,
-          userDetails: {
-            ...existingUserData.userDetails,
-            name: updatedUser.name || formData.name,
-            email: updatedUser.email || formData.email,
-          },
+        updatedUserDetails = {
+          ...updatedUserDetails,
+          name: updatedUser.name || formData.name,
+          email: updatedUser.email || formData.email,
+          mobile: updatedUser.mobile || formData.phone,
         };
 
-        localStorage.setItem("user", JSON.stringify(updatedUserData));
-      } catch (error) {
-        console.error("Error updating user:", error);
+        // Update localStorage
+        const newUserData = {
+          ...storedUser,
+          userDetails: updatedUserDetails,
+        };
+        localStorage.setItem("user", JSON.stringify(newUserData));
       }
-    }
 
-    onSubmit(formData);
+      // Proceed with form submission
+      onSubmit({
+        ...formData,
+        name: updatedUserDetails.name,
+        email: updatedUserDetails.email,
+        phone: updatedUserDetails.mobile,
+      });
+    } catch (err) {
+      console.error("Error in handleSubmit:", err);
+      toast.error("Something went wrong while saving your details.");
+    }
   };
 
   if (!isOpen) return null;
@@ -84,7 +106,9 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 top-10 flex items-center justify-center z-100 bg-opacity-50">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 relative">
-        <h2 className="text-lg font-semibold mb-1">Please Fill Your Details</h2>
+        <h2 className="text-lg font-semibold mb-1 text-yellow-500">
+          Please Fill Your Details
+        </h2>
         <button
           className="absolute top-3 right-3 text-blue-900 font-bold"
           onClick={onClose}
@@ -119,28 +143,33 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
             onChange={handleChange}
             required
           />
-          <label htmlFor="date" className="block w-full text-left">
-            Schedule Date
-          </label>
-          <input
-            type="date"
-            name="date"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="time" className="block w-full text-left">
-            Schedule Time
-          </label>
-          <input
-            type="time"
-            name="time"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={formData.time}
-            onChange={handleChange}
-            required
-          />
+          <div className="flex items-start gap-2 mt-2">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreeCall}
+              onChange={() => setAgreeCall(!agreeCall)}
+              className="mt-1"
+            />
+            <label htmlFor="terms" className="text-sm text-gray-700">
+              I agree to contact me via mobile or whatsapp
+            </label>
+          </div>
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreeToTerms}
+              onChange={() => setAgreeToTerms(!agreeToTerms)}
+              className="mt-1"
+            />
+            <label htmlFor="terms" className="text-sm text-gray-700">
+              I agree to the{" "}
+              <a href="/terms" className="text-blue-600 underline">
+                terms and conditions
+              </a>
+            </label>
+          </div>
           <button
             type="submit"
             className="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-800"

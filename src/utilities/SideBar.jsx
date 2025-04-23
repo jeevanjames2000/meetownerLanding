@@ -176,12 +176,10 @@ const Sidebar = ({
     },
   ];
   const handleContactSeller = async (property) => {
-    console.log("property: ", property);
     try {
       const data = localStorage.getItem("user");
       if (!data) {
         toast.error("Please Login to Contact!");
-
         return;
       }
       const { userDetails } = JSON.parse(data);
@@ -193,7 +191,7 @@ const Sidebar = ({
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      toast.success("Details submitted successfully");
+      // toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }

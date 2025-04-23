@@ -1,12 +1,10 @@
 import React, { useEffect } from "react";
-
 import Footer from "../components/Footer";
 import PropertyHeader from "./PropertyHeader";
 import PropertyBody from "./PropertyBody";
 import PropertyAds from "./PropertyAds";
 import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-
 const Property = () => {
   const { state: property } = useLocation();
   useEffect(() => {
@@ -15,17 +13,14 @@ const Property = () => {
   return (
     <>
       <PropertyHeader />
-
-      <div className="flex flex-col lg:flex-row w-full  justify-between h-auto p-5  pt-2 gap-4">
+      <div className="flex flex-col lg:flex-row w-full justify-between h-auto p-5 pt-26 sm:pt-24 md:pt-24 lg:pt-20 gap-4">
         <div className="w-full lg:w-[70%]">
           <PropertyBody />
         </div>
-
         <div className="hidden lg:block w-[30%]">
           <PropertyAds />
         </div>
       </div>
-
       <ToastContainer
         position="top-right"
         autoClose={3000}

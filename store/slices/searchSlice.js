@@ -8,7 +8,7 @@ const searchSlice = createSlice({
     property_in: "",
     bhk: null,
     budget: "",
-    sub_type: "",
+    sub_type: "Apartment",
     plot_subType: "Buy",
     commercial_subType: "Buy",
     occupancy: "",

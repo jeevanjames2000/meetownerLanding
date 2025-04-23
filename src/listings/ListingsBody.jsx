@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
+import whatsappIcon from "../assets/Images/whatsapp (3).png";
+import meetlogo from "../assets/Images/Favicon@10x.png";
 import {
   FaHeart,
   FaPhoneAlt,
@@ -215,7 +217,9 @@ const PropertyCard = memo(
     likedProperties,
     handleLike,
     handleScheduleVisit,
-    handleContactSeller,
+    submittedState,
+    contacted,
+    getOwnerDetails,
   }) => {
     const formatToIndianCurrency = (value) => {
       if (!value || isNaN(value)) return "N/A";
@@ -225,21 +229,45 @@ const PropertyCard = memo(
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     };
+    const handleChatClick = async (e) => {
+      e.stopPropagation();
+      try {
+        const sellerData = await getOwnerDetails(property);
+        const phone = sellerData?.mobile || sellerData?.phone;
+        if (phone) {
+          const encodedMessage = encodeURIComponent(
+            `Hi, I'm interested in your property listing: ${property.property_name}`
+          );
+          const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
+          window.open(whatsappUrl, "_blank");
+        } else {
+          console.error("Phone number not found in seller data:", sellerData);
+          alert("Owner's phone number is not available.");
+        }
+      } catch (error) {
+        console.error("Error in handleChatClick:", error);
+        alert("Failed to fetch owner's contact details.");
+      }
+    };
+    const handleContactClick = (e) => {
+      e.stopPropagation();
+      handleScheduleVisit(property);
+    };
     return (
       <div
         key={`property-${index}`}
         className="flex flex-col items-center p-1 md:flex-row rounded-2xl 
-               shadow-none  /* Default: no shadow */
-               lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  /* Shadow only on lg+ */
-               hover:shadow-none  /* No hover shadow by default */
-               lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  /* Hover shadow only on lg+ */
+               shadow-none  
+               lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  
+               hover:shadow-none  
+               lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  
                transition-shadow duration-300 bg-white cursor-pointer w-full"
         onClick={() => handleNavigation(property)}
         style={{ minHeight: "auto", height: "auto" }}
       >
         <div className="bg-[#ffff] rounded-[20px] p-3 w-full h-auto flex flex-col">
           <div className="flex flex-col lg:flex-row gap-8">
-            <div className="w-full h-auto lg:w-[300px] gap-2">
+            <div className="w-full h-auto lg:w-[400px] gap-2">
               <div className="rounded-lg overflow-hidden mb-4 relative">
                 <img
                   src={
@@ -411,34 +439,47 @@ const PropertyCard = memo(
                   </div>
                 )}
               </div>
-              <div className="grid md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleScheduleVisit(property);
-                  }}
-                  className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Schedule Visit
-                </p>
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleContactSeller(property);
-                  }}
-                  className="sm:flex-1 transition lg:text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Contact Seller
-                </p>
-                <p
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLike(property);
-                  }}
-                  className="sm:flex-1 transition text-[15px] bg-[#E28B6D] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                >
-                  Interest
-                </p>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-2 border-gray-200 border-1 rounded-xl shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 sm:justify-start justify-between w-full">
+                  <div className="flex justify-between items-center w-full sm:w-auto">
+                    <div className="flex gap-1 items-center">
+                      <img src={meetlogo} alt="WhatsApp" className="w-4 h-4" />
+                      <p className="text-gray-500 font-medium">Seller</p>
+                    </div>
+                    <p className="text-gray-500 font-medium text-sm sm:hidden">
+                      {property.user.name}
+                    </p>
+                  </div>
+                  <p className="text-gray-500 font-medium text-sm hidden sm:block">
+                    {property.user.name}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={handleChatClick}
+                    className="flex items-center justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
+                  >
+                    <img
+                      src={whatsappIcon}
+                      alt="WhatsApp"
+                      className="w-4 h-4"
+                    />
+                    Chat
+                  </button>
+                  <button
+                    onClick={handleContactClick}
+                    className="bg-blue-900 hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
+                    disabled={
+                      submittedState?.contact ||
+                      contacted.includes(property.unique_property_id)
+                    }
+                  >
+                    {contacted.includes(property.unique_property_id) ||
+                    submittedState?.contact
+                      ? "Submitted"
+                      : "Contact"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -458,6 +499,7 @@ function ListingsBody() {
   const [hasMore, setHasMore] = useState(true);
   const maxLimit = 50;
   const [likedProperties, setLikedProperties] = useState([]);
+  const [contacted, setContacted] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -508,8 +550,8 @@ function ListingsBody() {
               : searchData?.tab === "Rent"
               ? "Rent"
               : searchData?.tab === "Plot"
-              ? "Plot"
-              : "Commercial"
+              ? "Sell"
+              : "Sell"
           }&property_in=${searchData?.property_in || ""}&sub_type=${
             searchData?.sub_type === "Others" ? "" : searchData?.sub_type
           }&search=${searchData.location || ""}&bedrooms=${
@@ -520,15 +562,12 @@ function ListingsBody() {
             searchData?.occupancy || ""
           }&property_status=1`
         );
-
         const res = await response.json();
         const newData = res.properties || [];
-
         setData((prevData) => {
           const combined = reset ? newData : [...prevData, ...newData];
           return combined.slice(0, maxLimit);
         });
-
         setHasMore(
           newData.length > 0 &&
             (reset
@@ -545,12 +584,33 @@ function ListingsBody() {
     },
     [searchData, selected, loading]
   );
-
+  const fetchContactedProperties = async () => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      return;
+    }
+    const { userDetails } = JSON.parse(data);
+    try {
+      const response = await axios.get(
+        `${"http://localhost:5000"}/enquiry/v1/getUserContactSellers?user_id=${
+          userDetails.user_id
+        }`
+      );
+      const contacts = response.data || [];
+      const contactIds = contacts.results.map(
+        (contact) => contact.unique_property_id
+      );
+      setContacted(contactIds);
+    } catch (error) {
+      console.error("Failed to fetch liked properties:", error);
+    }
+  };
   useEffect(() => {
     setData([]);
     setPage(1);
     setHasMore(true);
     fetchProperties(1, true);
+    fetchContactedProperties();
   }, [
     searchData?.location,
     searchData?.bhk,
@@ -561,11 +621,9 @@ function ListingsBody() {
     searchData?.budget,
     selected,
   ]);
-
   useEffect(() => {
     if (page > 1) fetchProperties(page);
   }, [page]);
-
   const toggleReadMore = useCallback((index) => {
     setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
@@ -579,7 +637,7 @@ function ListingsBody() {
     [navigate]
   );
   const [selectedProperty, setSelectedProperty] = useState(null);
-
+  const [submittedStates, setSubmittedStates] = useState({});
   const { handleAPI } = useWhatsappHook(selectedProperty);
   const handleLike = useCallback(
     async (property) => {
@@ -619,9 +677,7 @@ function ListingsBody() {
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
-        await handleAPI(property);
       } catch (err) {
-        console.error("Error updating interest:", err);
         setLikedProperties((prev) =>
           isAlreadyLiked
             ? [...prev, property.unique_property_id]
@@ -631,6 +687,26 @@ function ListingsBody() {
     },
     [likedProperties]
   );
+  const [owner, setOwner] = useState("");
+  const getOwnerDetails = async (property) => {
+    try {
+      const response = await fetch(
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
+      );
+      const data = await response.json();
+      const propertydata = data.property_details;
+      const sellerdata = propertydata.seller_details;
+      if (response.ok) {
+        setOwner(sellerdata);
+        return sellerdata;
+      } else {
+        throw new Error("Failed to fetch owner details");
+      }
+    } catch (err) {
+      setError("Error fetching owner details");
+      throw err;
+    }
+  };
   const handleScheduleVisit = (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -641,28 +717,46 @@ function ListingsBody() {
       setShowLoginModal(true);
       return;
     }
+    const { userDetails } = JSON.parse(data);
     setSelectedProperty(property);
-    setModalOpen(true);
+    const alreadySubmitted = localStorage.getItem("visit_submitted") === "true";
+    const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
+    const isEmailMissing = !userDetails?.email || userDetails.email === "N/A";
+    const isMobileMissing =
+      !userDetails?.mobile || userDetails.mobile === "N/A";
+    if (
+      !isNameMissing &&
+      !isEmailMissing &&
+      !isMobileMissing &&
+      alreadySubmitted
+    ) {
+      handleModalSubmit(property);
+    } else {
+      setModalOpen(true);
+    }
   };
-  const handleModalSubmit = async (formData) => {
+  const handleModalSubmit = async (property) => {
     try {
       const { userDetails } = JSON.parse(localStorage.getItem("user"));
       const payload = {
-        property_id: selectedProperty.unique_property_id,
+        unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
-        name: formData.name,
-        mobile: formData.phone,
-        email: formData.email,
-        property_user_id: selectedProperty.user_id,
-        shedule_date: formData.date,
-        shedule_time: formData.time,
+        name: userDetails.name,
+        mobile: userDetails.phone,
+        email: userDetails.email,
       };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/scheduleVisit`, payload);
-      await handleAPI(selectedProperty);
-      toast.success("Visit Scheduled Successfully!");
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
+      await handleAPI(property);
+      localStorage.setItem("visit_submitted", "true");
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [property.unique_property_id]: {
+          ...prev[property.unique_property_id],
+          contact: true,
+        },
+      }));
       setModalOpen(false);
     } catch (err) {
-      console.error("Enquiry Failed:", err);
       toast.error("Something went wrong!");
     }
   };
@@ -684,6 +778,13 @@ function ListingsBody() {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [property.unique_property_id]: {
+          ...prev[property.unique_property_id],
+          chat: true,
+        },
+      }));
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -701,9 +802,12 @@ function ListingsBody() {
           readMoreStates={readMoreStates}
           expandedCards={expandedCards}
           likedProperties={likedProperties}
+          contacted={contacted}
           handleLike={handleLike}
           handleScheduleVisit={handleScheduleVisit}
           handleContactSeller={handleContactSeller}
+          submittedState={submittedStates[property.unique_property_id] || {}}
+          getOwnerDetails={getOwnerDetails}
         />
       ),
     }));
@@ -716,6 +820,8 @@ function ListingsBody() {
     handleNavigation,
     likedProperties,
     handleLike,
+    submittedStates,
+    getOwnerDetails,
   ]);
   const cards = useMemo(() => prepareCards(), [prepareCards]);
   const cache = new CellMeasurerCache({
@@ -762,7 +868,6 @@ function ListingsBody() {
   return (
     <div className="min-h-screen p-1 relative z-0 overflow-visible">
       <div className="flex flex-row items-center justify-between gap-2 mb-4 mt-2 px-2">
-        {/* Location Section */}
         <div className="flex items-center flex-shrink-0 max-w-[70%]">
           <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
           <p className="text-sm md:text-base text-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
@@ -780,8 +885,8 @@ function ListingsBody() {
             In {searchData?.location || "Hyderabad"}
           </p>
         </div>
-        <div className="relative inline-block text-left z-50 flex-shrink-0">
-          <div className="flex items-center gap-1">
+        <div className="relative flex flex-col text-left z-50 flex-shrink-0">
+          <div className="flex items-center gap-1 ">
             <p className="text-[#000000] text-sm whitespace-nowrap font-medium">
               Sort:
             </p>
@@ -815,7 +920,6 @@ function ListingsBody() {
           )}
         </div>
       </div>
-
       {data.length > 0 ? (
         <WindowScroller>
           {({ height, isScrolling, scrollTop }) => (
@@ -887,7 +991,6 @@ function ListingsBody() {
           </button>
         </div>
       )}
-
       {modalOpen && (
         <ScheduleFormModal
           isOpen={modalOpen}

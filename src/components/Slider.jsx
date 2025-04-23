@@ -115,7 +115,7 @@ const PropertyListing = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload);
       await handleAPI(property);
-      toast.success("Enquire submitted successfully!");
+      // toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);
       alert("Something went wrong while submitting enquiry");
@@ -315,20 +315,28 @@ const PropertyListing = () => {
                     className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700"
                     onClick={() => handleNavigation(property)}
                   >
-                    <div className="flex items-center">
-                      <FaBed className="mr-2" /> {property.bedrooms} Beds
-                    </div>
-                    <div className="flex items-center">
-                      <FaBath className="mr-2" /> {property.bathroom} Baths
-                    </div>
-                    <div className="flex items-center">
-                      <FaParking className="mr-2" /> {property.car_parking} Car
-                      Parking
-                    </div>
-                    <div className="flex items-center">
-                      <FaParking className="mr-2" /> {property.bike_parking}
-                      Bike Parking
-                    </div>
+                    {property?.bedrooms > 0 && (
+                      <div className="flex items-center">
+                        <FaBed className="mr-2" /> {property.bedrooms} Beds
+                      </div>
+                    )}
+                    {property?.bathroom > 0 && (
+                      <div className="flex items-center">
+                        <FaBath className="mr-2" /> {property.bathroom} Baths
+                      </div>
+                    )}
+                    {property?.car_parking > 0 && (
+                      <div className="flex items-center">
+                        <FaParking className="mr-2" /> {property.car_parking}{" "}
+                        Car Parking
+                      </div>
+                    )}
+                    {property?.bike_parking > 0 && (
+                      <div className="flex items-center">
+                        <FaParking className="mr-2" /> {property.bike_parking}{" "}
+                        Bike Parking
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <div className="text-lg font-bold text-[#1D3A76]">
