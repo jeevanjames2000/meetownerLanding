@@ -263,12 +263,12 @@ const Favourites = () => {
           const sellerData = await getOwnerDetails(property);
           console.log("sellerData: ", sellerData);
           const phone = sellerData?.mobile || sellerData?.phone;
-          console.log("phone: ", phone);
+
           if (phone) {
             const encodedMessage = encodeURIComponent(
               `Hi, I'm interested in your property listing: ${property.property_name}`
             );
-            const whatsappUrl = `https://wa.me/+91${6302816551}?text=${encodedMessage}`;
+            const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
             window.open(whatsappUrl, "_blank");
           } else {
             console.error("Phone number not found in seller data:", sellerData);
