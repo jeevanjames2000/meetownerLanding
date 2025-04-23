@@ -29,7 +29,7 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
+
   const [selectedCity, setSelectedCity] = useState(
     searchData?.city || "Hyderabad"
   );
@@ -90,15 +90,8 @@ const Header = () => {
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const toggleDropdown = (key) => {
-    console.log(
-      "Toggling dropdown for:",
-      key,
-      "Current activeDropdown:",
-      activeDropdown
-    );
     setActiveDropdown((prev) => {
       const newValue = prev === key ? null : key;
-      console.log("New activeDropdown value:", newValue);
       return newValue;
     });
   };
@@ -112,7 +105,7 @@ const Header = () => {
   const [selectedSubType, setSelectedSubType] = useState(
     searchData.sub_type || ""
   );
-  console.log("selectedSubType: ", selectedSubType);
+
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
   );

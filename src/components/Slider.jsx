@@ -15,7 +15,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
 import useWhatsappHook from "../utilities/useWhatsappHook";
-
 const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
@@ -91,7 +90,6 @@ const PropertyListing = () => {
     );
   }, [activeTab, dispatch]);
   const { handleAPI } = useWhatsappHook();
-
   const handleEnquireNow = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -115,7 +113,6 @@ const PropertyListing = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload);
       await handleAPI(property);
-      // toast.success("Enquire submitted successfully!");
     } catch (err) {
       console.error("Enquiry Failed:", err);
       alert("Something went wrong while submitting enquiry");
@@ -175,6 +172,54 @@ const PropertyListing = () => {
     },
     [navigate]
   );
+  const handleShare = (property) => {
+    const propertyId = property.unique_property_id;
+    const propertyNameSlug = property.property_name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+    const locationSlug = property.location_id
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+    const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
+    const category =
+      property.property_type === "Plot"
+        ? "plots"
+        : property.property_type === "Commercial"
+        ? "properties"
+        : "projects";
+    const shareUrl = `${window.location.origin}/${propertyFor}/${category}/${propertyId}_${propertyNameSlug}_in_${locationSlug}`;
+    const shareData = {
+      title: `${property.property_name} - ${property.location_id}`,
+      text: `Check out this ${property.bedrooms || ""} BHK ${
+        property.property_type
+      } for ${propertyFor} in ${property.location_id}! Price: ₹${
+        propertyFor === "rent"
+          ? formatPrice(property.monthly_rent)
+          : formatPrice(property.property_cost)
+      }${propertyFor === "rent" ? " / month" : ""}.`,
+      url: shareUrl,
+    };
+    if (navigator.share) {
+      navigator
+        .share(shareData)
+        .then(() => console.log("Property shared successfully"))
+        .catch((error) => console.error("Error sharing property:", error));
+    } else {
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => {
+          alert(
+            "Property link copied to clipboard! You can paste it to share."
+          );
+        })
+        .catch((error) => {
+          console.error("Error copying link:", error);
+          alert("Failed to copy link. Please copy this URL: " + shareUrl);
+        });
+    }
+  };
   return (
     <div className=" z-auto mx-auto px-4 py-1">
       <div className="mb-8">
@@ -297,7 +342,10 @@ const PropertyListing = () => {
                         className="p-1 w-7 h-7 bg-white rounded-2xl text-red-600 hover:text-red-500 cursor-pointer"
                       />
                     )}
-                    <IoShareSocialOutline className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500 cursor-pointer" />
+                    <IoShareSocialOutline
+                      onClick={() => handleShare(property)}
+                      className="p-1 w-7 h-7 bg-white rounded-2xl text-black hover:text-blue-500 cursor-pointer"
+                    />
                   </div>
                 </div>
                 <div className="p-4 cursor-pointer">

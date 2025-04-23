@@ -3,6 +3,7 @@ const propertySlice = createSlice({
   name: "property",
   initialState: {
     propertyDetails: [],
+    propertyName: "",
     liked: [],
     enquireNow: [],
     location: "",
@@ -41,6 +42,12 @@ const propertySlice = createSlice({
     setIntrestedProperties: (state, action) => {
       state.intrestedProperties = action.payload;
     },
+    setPropertyData: (state, action) => {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
   },
 });
 export const {
@@ -53,5 +60,6 @@ export const {
   setDeviceLocation,
   setTrendingProjects,
   setIntrestedProperties,
+  setPropertyData,
 } = propertySlice.actions;
 export default propertySlice.reducer;

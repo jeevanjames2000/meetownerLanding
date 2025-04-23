@@ -24,7 +24,8 @@ import Login from "../auth/Login";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-
+import whatsappIcon from "../assets/Images/whatsapp (3).png";
+import meetlogo from "../assets/Images/Favicon@10x.png";
 // Import only Pagination module
 import { Pagination } from "swiper/modules";
 
@@ -49,8 +50,10 @@ const Favourites = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchLikedProperties();
+    fetchContactedProperties();
   }, []);
   const toggleReadMore = (index) => {
     setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -64,7 +67,48 @@ const Favourites = () => {
   const handleClose = () => {
     setShowLoginModal(false);
   };
+  const [contacted, setContacted] = useState([]);
+
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [submittedStates, setSubmittedStates] = useState({});
+  const [owner, setOwner] = useState("");
+  const fetchContactedProperties = async () => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      return;
+    }
+    const { userDetails } = JSON.parse(data);
+    try {
+      const response = await axios.get(
+        `${"http://localhost:5000"}/enquiry/v1/getUserContactSellers?user_id=${
+          userDetails.user_id
+        }`
+      );
+      const contacts = response.data || [];
+      const contactIds = contacts.results.map(
+        (contact) => contact.unique_property_id
+      );
+      setContacted(contactIds);
+    } catch (error) {
+      console.error("Failed to fetch liked properties:", error);
+    }
+  };
+  const getOwnerDetails = async (property) => {
+    try {
+      const response = await fetch(
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.property_id}`
+      );
+      const data = await response.json();
+      const propertydata = data.property_details;
+      const sellerdata = propertydata.seller_details;
+      if (response.ok) {
+        setOwner(sellerdata);
+        return sellerdata;
+      } else {
+        throw new Error("Failed to fetch owner details");
+      }
+    } catch (err) {}
+  };
   const { handleAPI } = useWhatsappHook();
   const navigate = useNavigate();
   const handleNavigation = useCallback(
@@ -102,29 +146,7 @@ const Favourites = () => {
     },
     [likedProperties]
   );
-  const handleModalSubmit = async (formData) => {
-    try {
-      const { userDetails } = JSON.parse(localStorage.getItem("user"));
-      const payload = {
-        property_id: selectedProperty.unique_property_id,
-        user_id: userDetails.user_id,
-        name: formData.name,
-        mobile: formData.phone,
-        email: formData.email,
-        property_user_id: selectedProperty.user_id,
-        shedule_date: formData.date,
-        shedule_time: formData.time,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/scheduleVisit`, payload);
-      await handleAPI(selectedProperty);
-      setModalOpen(false);
-    } catch (err) {
-      console.error("Enquiry Failed:", err);
-      toast.error("Something went wrong!");
-    }
-  };
-  const handleScheduleVisit = async (property) => {
-    const propertyData = await getSingleProperty(property);
+  const handleScheduleVisit = (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
       toast.info("Please Login to Schedule Visits!", {
@@ -134,12 +156,51 @@ const Favourites = () => {
       setShowLoginModal(true);
       return;
     }
-    setSelectedProperty(propertyData);
-    setModalOpen(true);
+    const { userDetails } = JSON.parse(data);
+    setSelectedProperty(property);
+    const alreadySubmitted = localStorage.getItem("visit_submitted") === "true";
+    const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
+    const isEmailMissing = !userDetails?.email || userDetails.email === "N/A";
+    const isMobileMissing =
+      !userDetails?.mobile || userDetails.mobile === "N/A";
+    if (
+      !isNameMissing &&
+      !isEmailMissing &&
+      !isMobileMissing &&
+      alreadySubmitted
+    ) {
+      handleModalSubmit(property);
+    } else {
+      setModalOpen(true);
+    }
+  };
+  const handleModalSubmit = async (property) => {
+    try {
+      const { userDetails } = JSON.parse(localStorage.getItem("user"));
+      const payload = {
+        unique_property_id: property.unique_property_id,
+        user_id: userDetails.user_id,
+        name: userDetails.name,
+        mobile: userDetails.phone,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
+      await handleAPI(property);
+      localStorage.setItem("visit_submitted", "true");
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [property.unique_property_id]: {
+          ...prev[property.unique_property_id],
+          contact: true,
+        },
+      }));
+      setModalOpen(false);
+    } catch (err) {
+      toast.error("Something went wrong!");
+    }
   };
   const handleContactSeller = async (property) => {
-    const propertyData = await getSingleProperty(property);
-    setSelectedProperty(property);
+    console.log("propertyss: ", property);
     try {
       const data = localStorage.getItem("user");
       if (!data) {
@@ -156,7 +217,14 @@ const Favourites = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(propertyData);
+      await handleAPI(property);
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [property.property_id]: {
+          ...prev[property.property_id],
+          chat: true,
+        },
+      }));
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -173,10 +241,13 @@ const Favourites = () => {
       likedProperties,
       handleLike,
       handleScheduleVisit,
+      submittedState,
+      contacted,
       handleContactSeller,
     }) => {
       const showReadMore = readMoreStates[index];
       const shortDescription = property.description?.slice(0, 180);
+      console.log("property: ", property);
       const formatToIndianCurrency = (value) => {
         if (!value || isNaN(value)) return "N/A";
         const numValue = parseFloat(value);
@@ -185,6 +256,32 @@ const Favourites = () => {
         if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
         if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
         return numValue.toString();
+      };
+      const handleChatClick = async (e) => {
+        e.stopPropagation();
+        try {
+          const sellerData = await getOwnerDetails(property);
+          console.log("sellerData: ", sellerData);
+          const phone = sellerData?.mobile || sellerData?.phone;
+          console.log("phone: ", phone);
+          if (phone) {
+            const encodedMessage = encodeURIComponent(
+              `Hi, I'm interested in your property listing: ${property.property_name}`
+            );
+            const whatsappUrl = `https://wa.me/+91${6302816551}?text=${encodedMessage}`;
+            window.open(whatsappUrl, "_blank");
+          } else {
+            console.error("Phone number not found in seller data:", sellerData);
+            alert("Owner's phone number is not available.");
+          }
+        } catch (error) {
+          console.error("Error in handleChatClick:", error);
+          alert("Failed to fetch owner's contact details.");
+        }
+      };
+      const handleContactClick = (e) => {
+        e.stopPropagation();
+        handleScheduleVisit(property);
       };
 
       return (
@@ -370,34 +467,31 @@ const Favourites = () => {
                     </span>
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <p
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleScheduleVisit(property);
-                    }}
-                    className="sm:flex-1 transition text-[15px] bg-[#59788E] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={handleChatClick}
+                    className="flex items-center justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
                   >
-                    Schedule Visit
-                  </p>
-                  <p
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleContactSeller(property);
-                    }}
-                    className="sm:flex-1 transition text-[15px] bg-[#84A3B7] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
+                    <img
+                      src={whatsappIcon}
+                      alt="WhatsApp"
+                      className="w-4 h-4"
+                    />
+                    Chat
+                  </button>
+                  <button
+                    onClick={handleContactClick}
+                    className="bg-blue-900 hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
+                    disabled={
+                      submittedState?.contact ||
+                      contacted.includes(property.unique_property_id)
+                    }
                   >
-                    Contact Seller
-                  </p>
-                  <p
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(property);
-                    }}
-                    className="sm:flex-1 transition text-[15px] bg-[#E28B6D] rounded-[50px] px-4 py-2 text-[#ffffff] font-medium text-center"
-                  >
-                    Interest
-                  </p>
+                    {contacted.includes(property.unique_property_id) ||
+                    submittedState?.contact
+                      ? "Submitted"
+                      : "Contact"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -445,6 +539,11 @@ const Favourites = () => {
                   handleLike={handleLike}
                   handleScheduleVisit={handleScheduleVisit}
                   handleContactSeller={handleContactSeller}
+                  submittedState={
+                    submittedStates[property.unique_property_id] || {}
+                  }
+                  contacted={contacted}
+                  getOwnerDetails={getOwnerDetails}
                 />
               </SwiperSlide>
             ))}

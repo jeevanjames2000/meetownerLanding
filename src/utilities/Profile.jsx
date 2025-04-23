@@ -125,7 +125,7 @@ export default function ProfilePage() {
           <div className="relative">
             <img
               src={`${config.awsApiUrl}/${user.photo}`}
-              alt="User Profile"
+              alt="Image"
               crossOrigin="anonymous"
               className="w-40 h-40 rounded-full shadow-md object-contain"
             />

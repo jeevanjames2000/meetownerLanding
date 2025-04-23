@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import Favourites from "./components/favourites";
 import ProfileWrapper from "./profile/ProfileWrapper";
+import { HelmetProvider } from "react-helmet-async";
 
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -78,21 +79,23 @@ function Home() {
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginWrapper />} />
-          <Route path="/listings" element={<Listings />} />
-          <Route path="/property" element={<Property />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/terms" element={<TermsAndConditions />} />
-          <Route path="/favourites" element={<Favourites />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/privacy" element={<PrivacyAndPolicies />} />
-          <Route path="/profile" element={<ProfileWrapper />} />
-        </Routes>
-      </Router>
+      <HelmetProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginWrapper />} />
+            <Route path="/listings" element={<Listings />} />
+            <Route path="/property" element={<Property />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/favourites" element={<Favourites />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<PrivacyAndPolicies />} />
+            <Route path="/profile" element={<ProfileWrapper />} />
+          </Routes>
+        </Router>
+      </HelmetProvider>
     </Provider>
   );
 }

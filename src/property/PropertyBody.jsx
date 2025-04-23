@@ -21,6 +21,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import config from "../../config";
+import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import {
   FaBorderAll,
   FaBuilding,
@@ -113,6 +114,23 @@ const PropertyBody = () => {
       0
     );
     return fallbackIcons[hash % fallbackIcons.length];
+  };
+  const getOwnerDetails = async (property) => {
+    try {
+      const response = await fetch(
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
+      );
+      const data = await response.json();
+      const propertydata = data.property_details;
+      const sellerdata = propertydata.seller_details;
+      if (response.ok) {
+        return sellerdata;
+      } else {
+        throw new Error("Failed to fetch owner details");
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
   const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
   const [isExpanded, setIsExpanded] = useState(false);
@@ -304,7 +322,36 @@ const PropertyBody = () => {
       icon: <FaRupeeSign />,
     });
   }
-
+  const handleChatClick = async (e) => {
+    e.stopPropagation();
+    const data = localStorage.getItem("user");
+    if (!data) {
+      toast.info("Please Login to Schedule Visits!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setShowLoginModal(true);
+      return;
+    }
+    try {
+      const sellerData = await getOwnerDetails(property);
+      console.log("sellerData: ", sellerData);
+      const phone = sellerData?.mobile || sellerData?.phone;
+      if (phone) {
+        const encodedMessage = encodeURIComponent(
+          `Hi, I'm interested in your property listing: ${property.property_name}`
+        );
+        const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
+        window.open(whatsappUrl, "_blank");
+      } else {
+        console.error("Phone number not found in seller data:", sellerData);
+        alert("Owner's phone number is not available.");
+      }
+    } catch (error) {
+      console.error("Error in handleChatClick:", error);
+      alert("Failed to fetch owner's contact details.");
+    }
+  };
   return (
     <div className="relative p-6 w-full mx-auto  bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
@@ -448,14 +495,23 @@ const PropertyBody = () => {
               <p>RERA</p>
             </span>
           </div>
-          <button
-            onClick={() => {
-              handleContactSeller();
-            }}
-            className="bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-4 py-2 rounded-lg mt-2"
-          >
-            Contact Developer
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={handleChatClick}
+              className="bg-transparent flex items-center gap-1  text-green-500 border cursor-pointer border-green-500 text-sm px-4 py-2 rounded-lg mt-2"
+            >
+              <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4" />
+              Chat
+            </button>
+            <button
+              onClick={() => {
+                handleContactSeller();
+              }}
+              className="bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-4 py-2 cursor-pointer rounded-lg mt-2"
+            >
+              Contact
+            </button>
+          </div>
         </div>
       </div>
       <div className="mt-6">
@@ -512,16 +568,18 @@ const PropertyBody = () => {
           <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
             Floor Plan
           </h2>
-          <img
-            src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
-            alt="FloorPlan"
-            crossOrigin="anonymous"
-            className="rounded-lg shadow-md w-full object-contain h-100"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
-            }}
-          />
+          <div className="bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-6 py-5 hover:shadow-md transition">
+            <img
+              src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
+              alt="FloorPlan"
+              crossOrigin="anonymous"
+              className="w-full object-contain h-100"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
+              }}
+            />
+          </div>
         </div>
       )}
       {facilitiesList && (
@@ -529,7 +587,7 @@ const PropertyBody = () => {
           <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
             Amenities
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 border border-gray-500 rounded-lg">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-6 py-5 hover:shadow-md transition">
             {facilitiesList.map((facility, index) => (
               <div
                 key={index}
@@ -555,7 +613,7 @@ const PropertyBody = () => {
           <p className="text-left text-sm text-gray-600 mb-4">
             {property?.google_address}
           </p>
-          <div className="bg-white rounded-xl border border-gray-300 shadow-sm px-4 py-3 hover:shadow-md transition">
+          <div className="bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-4 py-3 hover:shadow-md transition">
             <h2 className="text-xl text-center font-semibold text-indigo-800 mb-2">
               Around This Property
             </h2>
@@ -606,7 +664,7 @@ const PropertyBody = () => {
         <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
           Explore Map
         </h2>
-        <div className="w-full h-64 rounded overflow-hidden shadow">
+        <div className="w-full h-74 rounded overflow-hidden shadow">
           <iframe
             width="100%"
             height="100%"

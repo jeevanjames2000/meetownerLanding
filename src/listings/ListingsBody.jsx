@@ -6,29 +6,12 @@ import React, {
   memo,
   useMemo,
 } from "react";
-import {
-  MapPin,
-  ChevronDown,
-  ChevronUp,
-  Ruler,
-  Home,
-  CreditCard,
-  Key,
-  ShieldCheck,
-  Building2,
-  Building,
-} from "lucide-react";
+import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import meetlogo from "../assets/Images/Favicon@10x.png";
-import {
-  FaHeart,
-  FaPhoneAlt,
-  FaShareAlt,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+import { FaPhoneAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -47,9 +30,8 @@ import config from "../../config";
 import axios from "axios";
 import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
-import Login from "../auth/Login";
 import useWhatsappHook from "../utilities/useWhatsappHook";
-import { debounce } from "lodash";
+import { setPropertyData } from "../../store/slices/propertyDetails";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -220,6 +202,7 @@ const PropertyCard = memo(
     submittedState,
     contacted,
     getOwnerDetails,
+    setShowLoginModal,
   }) => {
     const formatToIndianCurrency = (value) => {
       if (!value || isNaN(value)) return "N/A";
@@ -231,6 +214,15 @@ const PropertyCard = memo(
     };
     const handleChatClick = async (e) => {
       e.stopPropagation();
+      const data = localStorage.getItem("user");
+      if (!data) {
+        toast.info("Please Login to Schedule Visits!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setShowLoginModal(true);
+        return;
+      }
       try {
         const sellerData = await getOwnerDetails(property);
         const phone = sellerData?.mobile || sellerData?.phone;
@@ -444,9 +436,11 @@ const PropertyCard = memo(
                   <div className="flex justify-between items-center w-full sm:w-auto">
                     <div className="flex gap-1 items-center">
                       <img src={meetlogo} alt="WhatsApp" className="w-4 h-4" />
-                      <p className="text-gray-500 font-medium">Seller</p>
+                      <p className="text-blue-900 font-medium text-xs">
+                        Seller
+                      </p>
                     </div>
-                    <p className="text-gray-500 font-medium text-sm sm:hidden">
+                    <p className="text-gray-500 font-medium text-md sm:hidden">
                       {property.user.name}
                     </p>
                   </div>
@@ -457,7 +451,7 @@ const PropertyCard = memo(
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={handleChatClick}
-                    className="flex items-center justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
+                    className="flex items-center cursor-pointer justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
                   >
                     <img
                       src={whatsappIcon}
@@ -468,7 +462,7 @@ const PropertyCard = memo(
                   </button>
                   <button
                     onClick={handleContactClick}
-                    className="bg-blue-900 hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
+                    className="bg-blue-900 cursor-pointer hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
                     disabled={
                       submittedState?.contact ||
                       contacted.includes(property.unique_property_id)
@@ -488,9 +482,10 @@ const PropertyCard = memo(
     );
   }
 );
-function ListingsBody() {
+function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
@@ -502,11 +497,6 @@ function ListingsBody() {
   const [contacted, setContacted] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const modalRef = useRef(null);
-  const handleClose = () => {
-    setShowLoginModal(false);
-  };
   const navigate = useNavigate();
   const options = [
     "Relevance",
@@ -554,7 +544,7 @@ function ListingsBody() {
               : "Sell"
           }&property_in=${searchData?.property_in || ""}&sub_type=${
             searchData?.sub_type === "Others" ? "" : searchData?.sub_type
-          }&search=${searchData.location || ""}&bedrooms=${
+          }&search=${searchData.city || ""}&bedrooms=${
             searchData?.bhk || ""
           }&property_cost=${
             searchData?.budget || ""
@@ -630,11 +620,37 @@ function ListingsBody() {
   const toggleFacilities = useCallback((index) => {
     setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
+  const dispatch = useDispatch();
   const handleNavigation = useCallback(
     (property) => {
-      navigate("/property", { state: property });
+      dispatch(
+        setPropertyData({
+          propertyName: property.property_name,
+          location: property.location_id,
+        })
+      );
+      const propertyFor = selected === "Rent" ? "rent" : "buy";
+      const category =
+        searchData?.sub_type === "Apartment" ||
+        searchData?.sub_type === "Individual house"
+          ? `${property.bedrooms}BHK`
+          : searchData?.sub_type === "Plot"
+          ? "Plot"
+          : "Property";
+      const propertyId = property.unique_property_id;
+      const propertyNameSlug = property.property_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const locationSlug = property.location_id
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${propertyId}`;
+
+      navigate(`/property?${seoUrl}`, { state: property });
     },
-    [navigate]
+    [navigate, dispatch, searchData, selected]
   );
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [submittedStates, setSubmittedStates] = useState({});
@@ -808,6 +824,7 @@ function ListingsBody() {
           handleContactSeller={handleContactSeller}
           submittedState={submittedStates[property.unique_property_id] || {}}
           getOwnerDetails={getOwnerDetails}
+          setShowLoginModal={setShowLoginModal}
         />
       ),
     }));
@@ -882,7 +899,7 @@ function ListingsBody() {
               : searchData?.tab === "Rent"
               ? "Rent"
               : "Sell"}{" "}
-            In {searchData?.location || "Hyderabad"}
+            In {searchData?.city || "Hyderabad"}
           </p>
         </div>
         <div className="relative flex flex-col text-left z-50 flex-shrink-0">
@@ -1004,18 +1021,6 @@ function ListingsBody() {
           className="fixed bottom-5 right-5 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg cursor-pointer hover:bg-gray-100 transition z-10"
         >
           <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
-        </div>
-      )}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
-          <div ref={modalRef} className="relative w-[90%] max-w-sm">
-            <Login
-              setShowLoginModal={setShowLoginModal}
-              showLoginModal={showLoginModal}
-              onClose={handleClose}
-              modalRef={modalRef}
-            />
-          </div>
         </div>
       )}
     </div>

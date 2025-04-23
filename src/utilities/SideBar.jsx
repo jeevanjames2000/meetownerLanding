@@ -191,7 +191,6 @@ const Sidebar = ({
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      // toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }
@@ -199,12 +198,21 @@ const Sidebar = ({
   useEffect(() => {}, [isLoggedIn, user, Data]);
   const navigate = useNavigate();
   const handleRoute = () => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      toast.info("Please Login!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setShowLoginModal(true);
+      return;
+    }
     navigate("/profile");
   };
   return (
     <div
       ref={sidebarRef}
-      className={`fixed top-0 right-0 z-[9999]  h-full pb-10 w-64 bg-white z-50 shadow-lg transform transition-transform duration-300 ${
+      className={`fixed top-0 right-0 z-[9999]  h-full pb-10 w-64 bg-white  shadow-lg transform transition-transform duration-300 ${
         menuOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >

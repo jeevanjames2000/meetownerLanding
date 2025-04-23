@@ -126,7 +126,6 @@ export default function SearchBar() {
             : selectedTab === "Commercial"
             ? "Others"
             : "Apartment",
-
         location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
@@ -159,7 +158,44 @@ export default function SearchBar() {
   }, [searchInput, location]);
   const navigate = useNavigate();
   const handleNavigation = () => {
-    navigate("/listings");
+    const propertyFor = selected === "Rent" ? "rent" : "sale";
+    const propertyType = (() => {
+      switch (tabs[activeTab]) {
+        case "Plot":
+          return "plots";
+        case "Commercial":
+          return "commercial-properties";
+        case "Rent":
+        case "Buy":
+        default:
+          return "apartments";
+      }
+    })();
+    const citySlug = location
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+    const locationSlug = searchInput
+      ? searchInput
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^_|_$)/g, "")
+      : "";
+    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${
+      locationSlug ? `_${locationSlug}` : ""
+    }`;
+    const params = {
+      city: location,
+      property_for: selected === "Rent" ? "Rent" : "Sell",
+      property_type:
+        tabs[activeTab] === "Plot"
+          ? "Plot"
+          : tabs[activeTab] === "Commercial"
+          ? "Commercial"
+          : "Apartment",
+      location: searchInput,
+    };
+    navigate(`/listings${seoUrl}`, { state: params });
   };
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
