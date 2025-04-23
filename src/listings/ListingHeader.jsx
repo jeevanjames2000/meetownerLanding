@@ -92,6 +92,7 @@ const Header = () => {
   const toggleDropdown = (key) => {
     setActiveDropdown((prev) => {
       const newValue = prev === key ? null : key;
+
       return newValue;
     });
   };

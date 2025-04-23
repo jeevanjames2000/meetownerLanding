@@ -485,6 +485,7 @@ const PropertyCard = memo(
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
+
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
@@ -543,7 +544,7 @@ function ListingsBody({ setShowLoginModal }) {
               : "Sell"
           }&property_in=${searchData?.property_in || ""}&sub_type=${
             searchData?.sub_type === "Others" ? "" : searchData?.sub_type
-          }&search=${searchData.city || ""}&bedrooms=${
+          }&search=${searchData.location || ""}&bedrooms=${
             searchData?.bhk || ""
           }&property_cost=${
             searchData?.budget || ""
@@ -898,7 +899,7 @@ function ListingsBody({ setShowLoginModal }) {
               : searchData?.tab === "Rent"
               ? "Rent"
               : "Sell"}{" "}
-            In {searchData?.city || "Hyderabad"}
+            In {searchData?.location || "Hyderabad"}
           </p>
         </div>
         <div className="relative flex flex-col text-left z-50 flex-shrink-0">
