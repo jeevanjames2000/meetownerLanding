@@ -553,7 +553,7 @@ function ListingsBody({ setShowLoginModal }) {
           `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
         );
         const liked = response.data.favourites || [];
-        const likedIds = liked.map((fav) => fav.property_id);
+        const likedIds = liked.map((fav) => fav.unique_property_id);
         setLikedProperties(likedIds);
       } catch (error) {
         console.error("Failed to fetch liked properties:", error);
@@ -685,6 +685,7 @@ function ListingsBody({ setShowLoginModal }) {
   const { handleAPI } = useWhatsappHook(selectedProperty);
   const handleLike = useCallback(
     async (property) => {
+      console.log("property: ", property);
       const data = localStorage.getItem("user");
       if (!data) {
         toast.info("Please Login to Save Property!");
@@ -701,26 +702,11 @@ function ListingsBody({ setShowLoginModal }) {
           : [...prev, property.unique_property_id]
       );
       const payload = {
-        property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        name: userDetails.name,
-        email: userDetails.email,
-        mobile: userDetails.mobile,
-        property_name: property.property_name,
-        property_image: property.image,
-        property_cost: property.property_cost,
-        property_type: property.property_type,
-        property_in: property.property_in,
-        sub_type: property.sub_type,
-        facilities: property.facilities,
-        facing: property.facing,
-        description: property.description,
-        bathroom: property.bathroom,
-        parking: property.parking,
-        car_parking: property.car_parking,
-        builtup_area: property.builtup_area,
-        builtup_unit: property.builtup_unit,
-        created_user_id: property.user_id,
+        User_user_id: userDetails.user_id,
+        userName: userDetails.name,
+        userEmail: userDetails?.email || "N/A",
+        userMobile: userDetails.mobile,
+        ...property,
         status: isAlreadyLiked ? 1 : 0,
       };
       try {
