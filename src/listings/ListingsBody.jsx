@@ -32,6 +32,7 @@ import ScheduleFormModal from "../utilities/ScheduleForm";
 import { toast } from "react-toastify";
 import useWhatsappHook from "../utilities/useWhatsappHook";
 import { setPropertyData } from "../../store/slices/propertyDetails";
+import Breadcrumb from "../utilities/BreadCrumb";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -215,9 +216,7 @@ const PropertyCard = memo(
     const handleChatClick = async (e) => {
       e.stopPropagation();
       const data = localStorage.getItem("user");
-
       const userData = JSON.parse(data);
-
       if (!data) {
         toast.info("Please Login to Schedule Visits!", {
           position: "top-right",
@@ -228,7 +227,6 @@ const PropertyCard = memo(
       }
       try {
         const sellerData = await getOwnerDetails(property);
-
         const phone = sellerData?.mobile || sellerData?.phone;
         const name = sellerData?.name || "";
         if (phone) {
@@ -260,7 +258,6 @@ const PropertyCard = memo(
           const encodedMessage = encodeURIComponent(
             `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
           );
-
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
         } else {
@@ -354,7 +351,7 @@ const PropertyCard = memo(
                   </div>
                 </div>
                 <div className="flex flex-col lg:flex-row justify-between">
-                  <p className="text-[#A4A4A4] font-bold text-base md:text-[18px]">
+                  <p className="text-[#1D3A76] font-bold text-base md:text-[18px]">
                     {property.property_name}
                   </p>
                   <p className="text-[#1D3A76] font-semibold text-[18px]">
@@ -473,9 +470,29 @@ const PropertyCard = memo(
                 <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 sm:justify-start justify-between w-full">
                   <div className="flex justify-between items-center w-full sm:w-auto">
                     <div className="flex gap-1 items-center">
-                      <img src={meetlogo} alt="WhatsApp" className="w-4 h-4" />
-                      <p className="text-blue-900 font-medium text-xs">
-                        Seller
+                      <img src={meetlogo} alt="WhatsApp" className="w-5 h-5" />
+                      <p
+                        className={`font-medium text-xs ${
+                          property?.user?.user_type === 3
+                            ? "text-blue-900"
+                            : property?.user?.user_type === 4
+                            ? "text-purple-600"
+                            : property?.user?.user_type === 5
+                            ? "text-green-600"
+                            : property?.user?.user_type === 6
+                            ? "text-orange-500"
+                            : "text-blue-900"
+                        }`}
+                      >
+                        {property?.user?.user_type === 3
+                          ? "Builder"
+                          : property?.user?.user_type === 4
+                          ? "Agent"
+                          : property?.user?.user_type === 5
+                          ? "Owner"
+                          : property?.user?.user_type === 6
+                          ? "Channel Partner"
+                          : "Seller"}
                       </p>
                     </div>
                     <p className="text-gray-500 font-medium text-md sm:hidden">
@@ -520,6 +537,70 @@ const PropertyCard = memo(
     );
   }
 );
+const SkeletonPropertyCard = () => {
+  return (
+    <div className="flex flex-col  items-center p-4 rounded-2xl shadow-md bg-white w-full animate-pulse">
+      <div className="w-full flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-[400px]">
+          <div className="w-full h-50 bg-gray-200 rounded-md" />
+        </div>
+
+        <div className="flex-1 flex flex-col">
+          <div className="mb-3 text-left">
+            <div className="flex flex-col md:flex-row justify-between md:items-center">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="flex items-center gap-2 my-2 md:my-0">
+                <div className="w-7 h-7 bg-gray-200 rounded-2xl" />
+                <div className="w-5 h-5 bg-gray-200 rounded" />
+                <div className="h-4 bg-gray-200 rounded w-16" />
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row justify-between">
+              <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
+              <div className="h-5 bg-gray-200 rounded w-1/3" />
+            </div>
+          </div>
+
+          <div className="mb-4 flex-1">
+            <div className="flex flex-wrap gap-2 mb-2">
+              <div className="h-4 bg-gray-200 rounded w-24" />
+              <div className="h-4 bg-gray-200 rounded w-24" />
+              <div className="h-4 bg-gray-200 rounded w-24" />
+            </div>
+            <div className="flex flex-wrap items-center gap-1">
+              <div className="h-4 bg-gray-200 rounded w-20" />
+              <div className="h-4 bg-gray-200 rounded w-20" />
+              <div className="h-4 bg-gray-200 rounded w-20" />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              <div className="h-4 bg-gray-200 rounded w-20" />
+              <div className="h-4 bg-gray-200 rounded w-20" />
+              <div className="h-4 bg-gray-200 rounded w-20" />
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-2 border border-gray-200 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 sm:justify-start justify-between w-full">
+              <div className="flex justify-between items-center w-full sm:w-auto">
+                <div className="flex gap-1 items-center">
+                  <div className="w-5 h-5 bg-gray-200 rounded" />
+                  <div className="h-4 bg-gray-200 rounded w-16" />
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-24 sm:hidden" />
+              </div>
+              <div className="h-4 bg-gray-200 rounded w-24 hidden sm:block" />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="h-10 bg-gray-200 rounded-full w-24" />
+              <div className="h-10 bg-gray-200 rounded-full w-24" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
@@ -529,7 +610,7 @@ function ListingsBody({ setShowLoginModal }) {
   const [readMoreStates, setReadMoreStates] = useState({});
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const maxLimit = 50;
+  const maxLimit = 70;
   const [likedProperties, setLikedProperties] = useState([]);
   const [contacted, setContacted] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -566,6 +647,7 @@ function ListingsBody({ setShowLoginModal }) {
       if (loading) return;
       try {
         setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const response = await fetch(
           `${
             config.awsApiUrl
@@ -665,7 +747,6 @@ function ListingsBody({ setShowLoginModal }) {
         })
       );
       const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-
       const propertyId = property.unique_property_id;
       const propertyNameSlug = property.property_name
         .toLowerCase()
@@ -722,7 +803,7 @@ function ListingsBody({ setShowLoginModal }) {
     [likedProperties]
   );
   const [owner, setOwner] = useState("");
-  const getOwnerDetails = async (property) => {
+  const getOwnerDetails = useCallback(async (property) => {
     try {
       const response = await fetch(
         `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
@@ -731,103 +812,136 @@ function ListingsBody({ setShowLoginModal }) {
       const propertydata = data.property_details;
       const sellerdata = propertydata.seller_details;
       if (response.ok) {
-        setOwner(sellerdata);
         return sellerdata;
       } else {
         throw new Error("Failed to fetch owner details");
       }
     } catch (err) {
-      setError("Error fetching owner details");
+      console.error("Error fetching owner details:", err);
       throw err;
     }
-  };
-  const handleScheduleVisit = (property) => {
-    const data = localStorage.getItem("user");
-    if (!data) {
-      toast.info("Please Login to Schedule Visits!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      setShowLoginModal(true);
-      return;
-    }
-    const { userDetails } = JSON.parse(data);
-    setSelectedProperty(property);
-    const alreadySubmitted = localStorage.getItem("visit_submitted") === "true";
-    const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
-    const isEmailMissing = !userDetails?.email || userDetails.email === "N/A";
-    const isMobileMissing =
-      !userDetails?.mobile || userDetails.mobile === "N/A";
-    if (
-      !isNameMissing &&
-      !isEmailMissing &&
-      !isMobileMissing &&
-      alreadySubmitted
-    ) {
-      handleModalSubmit(property);
-    } else {
-      setModalOpen(true);
-    }
-  };
-  const handleModalSubmit = async (property) => {
-    try {
-      const { userDetails } = JSON.parse(localStorage.getItem("user"));
-      const payload = {
-        unique_property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        name: userDetails.name,
-        mobile: userDetails.phone,
-        email: userDetails.email,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(property);
-      localStorage.setItem("visit_submitted", "true");
-      setSubmittedStates((prev) => ({
-        ...prev,
-        [property.unique_property_id]: {
-          ...prev[property.unique_property_id],
-          contact: true,
-        },
-      }));
-      setModalOpen(false);
-    } catch (err) {
-      toast.error("Something went wrong!");
-    }
-  };
-  const handleContactSeller = async (property) => {
-    try {
+  }, []);
+  const handleModalSubmit = useCallback(
+    async (property) => {
+      try {
+        const { userDetails } = JSON.parse(localStorage.getItem("user"));
+        const payload = {
+          unique_property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          name: userDetails.name,
+          mobile: userDetails.phone,
+          email: userDetails.email,
+        };
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(property);
+        localStorage.setItem("visit_submitted", "true");
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [property.unique_property_id]: {
+            ...prev[property.unique_property_id],
+            contact: true,
+          },
+        }));
+        setModalOpen(false);
+        toast.success("Successfully contacted seller!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } catch (err) {
+        toast.error("Something went wrong!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    },
+    [handleAPI, setSubmittedStates, setModalOpen]
+  );
+  const handleScheduleVisit = useCallback(
+    (property) => {
       const data = localStorage.getItem("user");
       if (!data) {
-        toast.info("Please Login to Contact!");
+        toast.info("Please Login to Schedule Visits!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
         setShowLoginModal(true);
         return;
       }
       const { userDetails } = JSON.parse(data);
-      const payload = {
-        unique_property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        fullname: userDetails.name,
-        mobile: userDetails.mobile,
-        email: userDetails.email,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(property);
-      setSubmittedStates((prev) => ({
-        ...prev,
-        [property.unique_property_id]: {
-          ...prev[property.unique_property_id],
-          chat: true,
-        },
-      }));
-    } catch (err) {
-      toast.error("Something went wrong while submitting enquiry");
-    }
-  };
+      setSelectedProperty(property);
+      const alreadySubmitted =
+        localStorage.getItem("visit_submitted") === "true";
+      const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
+      const isEmailMissing = !userDetails?.email || userDetails.email === "N/A";
+      const isMobileMissing =
+        !userDetails?.mobile || userDetails.mobile === "N/A";
+      if (
+        !isNameMissing &&
+        !isEmailMissing &&
+        !isMobileMissing &&
+        alreadySubmitted
+      ) {
+        handleModalSubmit(property);
+      } else {
+        setModalOpen(true);
+      }
+    },
+    [setShowLoginModal, setSelectedProperty, handleModalSubmit, setModalOpen]
+  );
+  const handleContactSeller = useCallback(
+    async (property) => {
+      try {
+        const data = localStorage.getItem("user");
+        if (!data) {
+          toast.info("Please Login to Contact!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          setShowLoginModal(true);
+          return;
+        }
+        const { userDetails } = JSON.parse(data);
+        const payload = {
+          unique_property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          fullname: userDetails.name,
+          mobile: userDetails.mobile,
+          email: userDetails.email,
+        };
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(property);
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [property.unique_property_id]: {
+            ...prev[property.unique_property_id],
+            chat: true,
+          },
+        }));
+        toast.success("Successfully contacted seller!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } catch (err) {
+        toast.error("Something went wrong while submitting enquiry", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    },
+    [handleAPI, setShowLoginModal, setSubmittedStates]
+  );
   const prepareCards = useCallback(() => {
-    return data.map((property, index) => ({
+    const propertyCards = data.map((property, index) => ({
       type: "property",
       content: (
         <PropertyCard
+          key={`property-${index}`}
           property={property}
           index={index}
           toggleReadMore={toggleReadMore}
@@ -846,22 +960,40 @@ function ListingsBody({ setShowLoginModal }) {
         />
       ),
     }));
+    if (loading && hasMore) {
+      return [
+        ...propertyCards,
+        ...Array(2)
+          .fill()
+          .map((_, index) => ({
+            type: "skeleton",
+            content: <SkeletonPropertyCard key={`skeleton-${index}`} />,
+          })),
+      ];
+    }
+    return propertyCards;
   }, [
     data,
+    loading,
+    hasMore,
     readMoreStates,
     expandedCards,
     toggleReadMore,
     toggleFacilities,
     handleNavigation,
     likedProperties,
+    contacted,
     handleLike,
+    handleScheduleVisit,
+    handleContactSeller,
     submittedStates,
     getOwnerDetails,
+    setShowLoginModal,
   ]);
   const cards = useMemo(() => prepareCards(), [prepareCards]);
   const cache = new CellMeasurerCache({
     fixedWidth: true,
-    defaultHeight: 400,
+    defaultHeight: 500,
   });
   const rowRenderer = ({ index, key, style, parent }) => {
     const item = cards[index];
@@ -902,10 +1034,10 @@ function ListingsBody({ setShowLoginModal }) {
   };
   return (
     <div className="min-h-screen p-1 relative z-0 overflow-visible">
-      <div className="flex flex-row items-center justify-between gap-2 mb-4 mt-2 px-2">
-        <div className="flex items-center flex-shrink-0 max-w-[70%]">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-1 mt-2 px-2">
+        <div className="flex items-center flex-grow overflow-hidden min-w-0">
           <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
-          <p className="text-sm md:text-base text-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
+          <p className="text-sm md:text-base whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"
               ? "Commercial"
               : searchData?.property_in === "Plot"
@@ -920,13 +1052,14 @@ function ListingsBody({ setShowLoginModal }) {
             In {searchData?.location || "Hyderabad"}
           </p>
         </div>
-        <div className="relative flex flex-col text-left z-50 flex-shrink-0">
-          <div className="flex items-center gap-1 ">
+        <div className="relative  flex flex-row  text-left z-50 flex-shrink-0 ">
+          <Breadcrumb />
+          <div className="flex items-center gap-2">
             <p className="text-[#000000] text-sm whitespace-nowrap font-medium">
-              Sort:
+              Sort by
             </p>
             <div
-              className="bg-[#F5F5F5] border border-[#2C4D60] rounded-lg cursor-pointer px-2 py-1 pr-6 flex items-center"
+              className="bg-[#F5F5F5] border border-[#2C4D60] w-30  rounded-lg cursor-pointer px-4 py-1  flex items-center relative"
               onClick={() => setIsOpen(!isOpen)}
             >
               <span className="text-xs md:text-sm text-gray-800">
@@ -936,7 +1069,7 @@ function ListingsBody({ setShowLoginModal }) {
             </div>
           </div>
           {isOpen && (
-            <div className="absolute mt-2 right-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div className="absolute top-10 right-0 w-50 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
               {options.map((option) => (
                 <div
                   key={option}
@@ -985,31 +1118,41 @@ function ListingsBody({ setShowLoginModal }) {
         </div>
       ) : null}
       {loading && hasMore && (
-        <div className="w-full py-4 flex justify-center items-center gap-2">
-          <svg
-            className="animate-spin h-5 w-5 text-[#1D3A76]"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          <span className="text-[#1D3A76] font-medium">
-            Loading more properties...
-          </span>
-        </div>
+        <>
+          <div className="flex flex-col gap-4">
+            {Array(2)
+              .fill(0)
+              .map((_id, index) => (
+                <SkeletonPropertyCard key={index} />
+              ))}
+          </div>
+
+          <div className="w-full py-4 flex justify-center items-center gap-2">
+            <svg
+              className="animate-spin h-5 w-5 text-[#1D3A76]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span className="text-[#1D3A76] font-medium">
+              Loading more properties...
+            </span>
+          </div>
+        </>
       )}
       {!hasMore && data.length > 0 && (
         <div className="w-full py-4 text-center text-[#1D3A76] font-medium">

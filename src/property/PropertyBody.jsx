@@ -423,24 +423,27 @@ const PropertyBody = () => {
   const shortText = description.slice(0, 320);
   const toggleReadMore = () => setIsExpanded(!isExpanded);
   return (
-    <div className="relative p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
+    <div className="relative p-1 0 lg:p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
+      <h1 className="text-blue-900 font-bold text-left lg:text-center uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
-      <p className="text-gray-700 text-left">
-        <h2 className="text-xl mb-2 text-left font-bold text-gray-400">
+      <div className="text-gray-700 text-justify">
+        <h2 className="text-xl mb-2 font-bold text-gray-400 text-left">
           Property Description
         </h2>
-        {isExpanded || !isLong ? description : `${shortText}... `}
-        {isLong && (
-          <span
-            onClick={toggleReadMore}
-            className="text-blue-600 cursor-pointer"
-          >
-            {isExpanded ? "Read Less" : "Read More..."}
-          </span>
-        )}
-      </p>
+        <p>
+          {isExpanded || !isLong ? description : `${shortText}... `}
+          {isLong && (
+            <span
+              onClick={toggleReadMore}
+              className="text-blue-600 cursor-pointer"
+            >
+              {isExpanded ? "Read Less" : "Read More..."}
+            </span>
+          )}
+        </p>
+      </div>
+
       <div className="flex flex-col border-b pb-2 mb-2">
         <div className="flex justify-between items-center w-full flex-wrap gap-4">
           <h3 className="text-2xl font-bold text-indigo-900">
@@ -561,19 +564,17 @@ const PropertyBody = () => {
               <p>RERA</p>
             </span>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-wrap justify-between sm:flex-nowrap gap-1 mt-4 sm:mt-2">
             <button
               onClick={handleChatClick}
-              className="bg-transparent flex items-center gap-1  text-green-500 border cursor-pointer border-green-500 text-sm px-4 py-2 rounded-lg mt-2"
+              className="w-[45%] bg-transparent flex items-center justify-center gap-1 text-green-500 border cursor-pointer border-green-500 text-sm px-6 py-2 rounded-lg"
             >
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4" />
               Chat
             </button>
             <button
-              onClick={() => {
-                handleContactSeller();
-              }}
-              className="bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-4 py-2 cursor-pointer rounded-lg mt-2"
+              onClick={handleContactSeller}
+              className="w-[45%] bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-6 py-2 cursor-pointer rounded-lg"
             >
               Contact
             </button>
@@ -639,7 +640,7 @@ const PropertyBody = () => {
               src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
               alt="FloorPlan"
               crossOrigin="anonymous"
-              className="w-full object-contain h-100"
+              className="w-full object- h-auto"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
@@ -648,6 +649,7 @@ const PropertyBody = () => {
           </div>
         </div>
       )}
+
       {facilitiesList && (
         <div>
           <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
