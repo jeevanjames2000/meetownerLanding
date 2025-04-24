@@ -766,7 +766,6 @@ function ListingsBody({ setShowLoginModal }) {
   const { handleAPI } = useWhatsappHook(selectedProperty);
   const handleLike = useCallback(
     async (property) => {
-      console.log("property: ", property);
       const data = localStorage.getItem("user");
       if (!data) {
         toast.info("Please Login to Save Property!");

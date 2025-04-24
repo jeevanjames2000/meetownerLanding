@@ -12,7 +12,7 @@ const Login = ({ onClose }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose(); // Close modal
+        onClose();
       }
     };
 
@@ -175,7 +175,7 @@ const Login = ({ onClose }) => {
         dispatch(setLoggedIn(true));
         toast.success("Login successful!");
         setMessage("Login successful!");
-        navigate("/");
+        // navigate(redirectPath || "/");
         setError("");
         onClose();
       } else {
