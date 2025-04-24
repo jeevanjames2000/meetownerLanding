@@ -14,7 +14,7 @@ const Property = () => {
   return (
     <>
       <PropertyHeader />
-      <div className="flex flex-col lg:flex-row w-full justify-between h-auto p-5 pt-26 sm:pt-24 md:pt-24 lg:pt-20 gap-3">
+      <div className="flex flex-col lg:flex-row w-full justify-between h-auto p-5 pt-20 sm:pt-20 md:pt-20 lg:pt-20 gap-3">
         <div className="w-full lg:w-[70%]">
           <Breadcrumb />
           <PropertyBody />

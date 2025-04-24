@@ -31,14 +31,13 @@ const PropertyAds = () => {
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(true);
 
-  // Fetch property data if accessing directly via URL
   useEffect(() => {
     const fetchPropertyFromQueryParams = async () => {
       if (!location.state) {
         try {
           setLoading(true);
           const url = window.location.href;
-          const idMatch = url.match(/Id=([^&]*)/);
+          const idMatch = url.match(/Id_([^&]*)/);
 
           if (idMatch && idMatch[1]) {
             const propertyId = idMatch[1];

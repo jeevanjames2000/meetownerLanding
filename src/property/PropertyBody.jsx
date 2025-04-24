@@ -274,6 +274,7 @@ const PropertyBody = () => {
   const handleChatClick = async (e) => {
     e.stopPropagation();
     const data = localStorage.getItem("user");
+    const userData = JSON.parse(data);
     if (!data) {
       toast.info("Please Login to Schedule Visits!", {
         position: "top-right",
@@ -285,6 +286,8 @@ const PropertyBody = () => {
     try {
       const sellerData = await getPropertyDetails(property);
       const phone = sellerData?.mobile || sellerData?.phone;
+      const name = sellerData?.name || "";
+
       if (phone) {
         const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
         const category =
@@ -312,20 +315,18 @@ const PropertyBody = () => {
         const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
         const fullUrl = `${window.location.origin}/property?${seoUrl}`;
         const encodedMessage = encodeURIComponent(
-          `Hi, I'm interested in this property: ${property.property_name} ${fullUrl}`
+          `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
         );
         const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
         window.open(whatsappUrl, "_blank");
       } else {
-        console.error("Phone number not found in seller data:", sellerData);
         toast.error("Owner's phone number is not available.", {
           position: "top-right",
           autoClose: 3000,
         });
       }
     } catch (error) {
-      console.error("Error in handleChatClick:", error);
-      toast.error("Failed to fetch owner's contact details.", {
+      toast.error("Failed to get owner's contact details.", {
         position: "top-right",
         autoClose: 3000,
       });

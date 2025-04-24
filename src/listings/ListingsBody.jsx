@@ -215,6 +215,9 @@ const PropertyCard = memo(
     const handleChatClick = async (e) => {
       e.stopPropagation();
       const data = localStorage.getItem("user");
+
+      const userData = JSON.parse(data);
+
       if (!data) {
         toast.info("Please Login to Schedule Visits!", {
           position: "top-right",
@@ -225,8 +228,9 @@ const PropertyCard = memo(
       }
       try {
         const sellerData = await getOwnerDetails(property);
-        console.log("sellerData: ", sellerData);
+
         const phone = sellerData?.mobile || sellerData?.phone;
+        const name = sellerData?.name || "";
         if (phone) {
           const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
           const category =
@@ -254,8 +258,9 @@ const PropertyCard = memo(
           const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
           const fullUrl = `${window.location.origin}/property?${seoUrl}`;
           const encodedMessage = encodeURIComponent(
-            `Hi, I'm interested in this property: ${property.property_name}\n${fullUrl}`
+            `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
           );
+
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
         } else {
@@ -281,11 +286,11 @@ const PropertyCard = memo(
       <div
         key={`property-${index}`}
         className="flex flex-col items-center p-1 md:flex-row rounded-2xl 
-               shadow-none  
-               lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  
-               hover:shadow-none  
-               lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  
-               transition-shadow duration-300 bg-white cursor-pointer w-full"
+             shadow-[0_2px_10px_rgba(0,0,0,0.1)]  
+             lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  
+             hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)]  
+             lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  
+             transition-shadow duration-300 bg-white cursor-pointer w-full"
         onClick={() => handleNavigation(property)}
         style={{ minHeight: "auto", height: "auto" }}
       >
@@ -388,7 +393,8 @@ const PropertyCard = memo(
                           10
                         )}`,
                       property?.possession_status === "Immediate" &&
-                        "Ready to move",
+                        "Immediate",
+                      property?.possession_status === "Future" && "Future",
                     ]
                       .filter(Boolean)
                       .map((item, index, arr) => (
@@ -705,6 +711,10 @@ function ListingsBody({ setShowLoginModal }) {
         property_cost: property.property_cost,
         property_type: property.property_type,
         property_in: property.property_in,
+        sub_type: property.sub_type,
+        facilities: property.facilities,
+        facing: property.facing,
+        description: property.description,
         bathroom: property.bathroom,
         parking: property.parking,
         car_parking: property.car_parking,

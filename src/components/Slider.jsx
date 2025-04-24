@@ -20,6 +20,7 @@ const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
   const [property, setProperty] = useState([]);
+
   const navigate = useNavigate();
 
   const formatPrice = (price) => {
@@ -65,7 +66,7 @@ const PropertyListing = () => {
         const data = await response.data;
         const liked = data.favourites;
         if (liked && Array.isArray(liked)) {
-          const likedIds = liked.map((fav) => fav.property_id);
+          const likedIds = liked.map((fav) => fav.unique_property_id);
           setLikedProperties(likedIds);
         }
       } catch (error) {
@@ -118,7 +119,9 @@ const PropertyListing = () => {
     }
   };
   const handleLike = async (property) => {
+    console.log("property: ", property);
     const data = localStorage.getItem("user");
+
     if (!data) {
       toast.info("Please Login to Save Property!", {
         position: "top-right",
@@ -127,6 +130,7 @@ const PropertyListing = () => {
       return;
     }
     const { userDetails } = JSON.parse(data);
+    console.log("userDetails: ", userDetails);
     const isAlreadyLiked = likedProperties.includes(
       property.unique_property_id
     );
@@ -135,23 +139,13 @@ const PropertyListing = () => {
         ? prev.filter((id) => id !== property.unique_property_id)
         : [...prev, property.unique_property_id]
     );
+    console.log("isAlreadyLiked: ", isAlreadyLiked);
     const payload = {
-      property_id: property.unique_property_id,
-      user_id: userDetails.user_id,
-      name: userDetails.name,
-      email: userDetails.email,
-      mobile: userDetails.mobile,
-      property_name: property.property_name,
-      property_image: property.image,
-      property_cost: property.property_cost,
-      property_type: property.property_type,
-      property_in: property.property_in,
-      bathroom: property.bathroom,
-      parking: property.parking,
-      car_parking: property.car_parking,
-      builtup_area: property.builtup_area,
-      builtup_unit: property.builtup_unit,
-      created_user_id: property.user_id,
+      User_user_id: userDetails.user_id,
+      userName: userDetails.name,
+      userEmail: userDetails?.email || "N/A",
+      userMobile: userDetails.mobile,
+      ...property,
       status: isAlreadyLiked ? 1 : 0,
     };
     try {

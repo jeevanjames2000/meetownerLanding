@@ -25,12 +25,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
-import meetlogo from "../assets/Images/Favicon@10x.png";
-// Import only Pagination module
 import { Pagination } from "swiper/modules";
 
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
+  console.log("likedProperties: ", likedProperties);
   const [loading, setLoading] = useState(true);
   const [readMoreStates, setReadMoreStates] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
@@ -94,9 +93,10 @@ const Favourites = () => {
     }
   };
   const getOwnerDetails = async (property) => {
+    console.log("property: ", property);
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.property_id}`
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
       );
       const data = await response.json();
       const propertydata = data.property_details;
@@ -117,13 +117,7 @@ const Favourites = () => {
     },
     [navigate]
   );
-  const getSingleProperty = async (property) => {
-    const res = await fetch(
-      `${config.awsApiUrl}/listings/v1/getSinleProperty?unique_property_id=${property.property_id}`
-    );
-    const data = await res.json();
-    return data.property;
-  };
+
   const handleLike = useCallback(
     async (property) => {
       const data = localStorage.getItem("user");
@@ -133,8 +127,8 @@ const Favourites = () => {
       }
       const { userDetails } = JSON.parse(data);
       const payload = {
-        property_id: property.property_id,
-        user_id: userDetails.user_id,
+        unique_property_id: property.unique_property_id,
+        User_user_id: userDetails.user_id,
         status: 1,
       };
       try {
@@ -209,7 +203,7 @@ const Favourites = () => {
       }
       const { userDetails } = JSON.parse(data);
       const payload = {
-        unique_property_id: property.property_id,
+        unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
         fullname: userDetails.name,
         mobile: userDetails.mobile,
@@ -219,8 +213,8 @@ const Favourites = () => {
       await handleAPI(property);
       setSubmittedStates((prev) => ({
         ...prev,
-        [property.property_id]: {
-          ...prev[property.property_id],
+        [property.unique_property_id]: {
+          ...prev[property.unique_property_id],
           chat: true,
         },
       }));
@@ -232,21 +226,14 @@ const Favourites = () => {
     ({
       property,
       index,
-      toggleReadMore,
-      toggleFacilities,
       handleNavigation,
-      readMoreStates,
       expandedCards,
-      likedProperties,
       handleLike,
       handleScheduleVisit,
       submittedState,
       contacted,
-      handleContactSeller,
+      getOwnerDetails,
     }) => {
-      const showReadMore = readMoreStates[index];
-      const shortDescription = property.description?.slice(0, 180);
-
       const formatToIndianCurrency = (value) => {
         if (!value || isNaN(value)) return "N/A";
         const numValue = parseFloat(value);
@@ -258,24 +245,69 @@ const Favourites = () => {
       };
       const handleChatClick = async (e) => {
         e.stopPropagation();
+        const data = localStorage.getItem("user");
+
+        const userData = JSON.parse(data);
+
+        if (!data) {
+          toast.info("Please Login to Schedule Visits!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          setShowLoginModal(true);
+          return;
+        }
         try {
           const sellerData = await getOwnerDetails(property);
 
           const phone = sellerData?.mobile || sellerData?.phone;
-
+          const name = sellerData?.name || "";
           if (phone) {
+            const propertyFor =
+              property.property_for === "Rent" ? "rent" : "buy";
+            const category =
+              property.sub_type === "Apartment" ||
+              property.sub_type === "Individual house"
+                ? `${property.bedrooms}BHK`
+                : property.sub_type === "Plot"
+                ? "Plot"
+                : "Property";
+            const propertyId = property.unique_property_id;
+            const propertyNameSlug = property.property_name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "_")
+              .replace(/(^-|-$)/g, "");
+            const locationSlug = property.location_id
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "_")
+              .replace(/(^-|-$)/g, "");
+            const citySlug = property.city
+              ? property.city
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "_")
+                  .replace(/(^-|-$)/g, "")
+              : "hyderabad";
+            const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
+            const fullUrl = `${window.location.origin}/property?${seoUrl}`;
             const encodedMessage = encodeURIComponent(
-              `Hi, I'm interested in your property listing: ${property.property_name}`
+              `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
             );
+
             const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
             window.open(whatsappUrl, "_blank");
           } else {
             console.error("Phone number not found in seller data:", sellerData);
-            alert("Owner's phone number is not available.");
+            toast.error("Owner's phone number is not available.", {
+              position: "top-right",
+              autoClose: 3000,
+            });
           }
         } catch (error) {
           console.error("Error in handleChatClick:", error);
-          alert("Failed to fetch owner's contact details.");
+          toast.error("Failed to fetch owner's contact details.", {
+            position: "top-right",
+            autoClose: 3000,
+          });
         }
       };
       const handleContactClick = (e) => {
@@ -295,15 +327,15 @@ const Favourites = () => {
                 <div className="rounded-lg overflow-hidden mb-4 relative">
                   <img
                     src={
-                      property.property_image
-                        ? `https://api.meetowner.in/uploads/${property.property_image}`
+                      property.image
+                        ? `https://api.meetowner.in/uploads/${property.image}`
                         : `https://placehold.co/600x400?text=${
-                            property?.property_name || "No Image Found"
+                            property?.image || "No Image Found"
                           }`
                     }
                     alt="Property"
                     crossOrigin="anonymous"
-                    className="w-full h-60 object-cover rounded-md"
+                    className="w-full h-50 max-h-60 object-cover rounded-md"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = `https://placehold.co/600x400?text=${
@@ -313,10 +345,10 @@ const Favourites = () => {
                   />
                 </div>
               </div>
-              <div className="flex-1 max-w-full md:max-w-[550px]">
+              <div className="flex-1 max-w-full md:max-w-[450px]">
                 <div className="mb-3 text-left">
                   <div className="flex justify-between items-center">
-                    <p className="text-[#A4A4A4] font-semibold text-[18px]">
+                    <p className="text-blue-900 font-bold text-[18px]">
                       {property.property_name}
                     </p>
                     <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium">
@@ -334,7 +366,7 @@ const Favourites = () => {
                   <div className="flex justify-between">
                     <p className="text-[#1D3A76] font-semibold text-[18px]">
                       {property.project_name || ""}{" "}
-                      <span className="text-[#A4A4A4] font-medium text-[15px]">
+                      <span className="text-blue-900 font-medium text-[15px]">
                         Rs: {formatToIndianCurrency(property.property_cost)}{" "}
                         {property.price_negotiable && " (Negotiable)"}
                       </span>
@@ -347,24 +379,10 @@ const Favourites = () => {
                   </div>
                 </div>
                 <div className="mb-4 relative">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-1">
                     <h4 className="text-[#A4A4A4] font-medium text-[15px]">
                       Property Details
                     </h4>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFacilities(index);
-                      }}
-                      className="text-[#1D3A76] cursor-pointer hover:text-[#A4A4A4] font-medium rounded-[5px] text-sm flex items-center gap-1"
-                    >
-                      {expandedCards[index] ? "Show Less" : "Show All"}
-                      {expandedCards[index] ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
                   </div>
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 w-full">
                     {(expandedCards[index]
@@ -394,19 +412,6 @@ const Favourites = () => {
                             icon: <Building className="w-4 h-4" />,
                             title: "Sub Type",
                             value: property?.sub_type || "N/A",
-                          },
-                          {
-                            icon: <CreditCard className="w-4 h-4" />,
-                            title: "Loan Facility",
-                            value:
-                              property?.loan_facility === "Yes"
-                                ? "Available"
-                                : "Not Available",
-                          },
-                          {
-                            icon: <ShieldCheck className="w-4 h-4" />,
-                            title: "Furnishing Status",
-                            value: property?.furnished_status || "N/A",
                           },
                         ]
                       : [
@@ -450,23 +455,8 @@ const Favourites = () => {
                     ))}
                   </div>
                 </div>
-                <div className="mb-4">
-                  <p className="text-[#A4A4A4] text-sm text-left">
-                    {showReadMore
-                      ? property.description
-                      : `${shortDescription}... `}
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleReadMore(index);
-                      }}
-                      className="text-[#1D3A76] font-normal cursor-pointer"
-                    >
-                      {showReadMore ? "Read Less..." : "Read More..."}
-                    </span>
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
+
+                <div className="flex flex-row align-middle justify-end sm:flex-row gap-2">
                   <button
                     onClick={handleChatClick}
                     className="flex items-center justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
@@ -514,14 +504,13 @@ const Favourites = () => {
     <>
       <Header />
       <div className="flex">
-        <div className="flex-1 px-4 md:px-10 py-6">
+        <div className="flex-1 px-4 md:px-10 py-6 pb-10">
           <Swiper
             modules={[Pagination]}
             direction="vertical"
             spaceBetween={24}
             slidesPerView={2}
-            pagination={{ clickable: true }}
-            className="w-full h-[600px]"
+            className="w-full h-[500px]"
             style={{ overflowY: "auto", overscrollBehavior: "contain" }}
           >
             {likedProperties.map((property, index) => (
@@ -541,6 +530,7 @@ const Favourites = () => {
                   submittedState={
                     submittedStates[property.unique_property_id] || {}
                   }
+                  setShowLoginModal={setShowLoginModal}
                   contacted={contacted}
                   getOwnerDetails={getOwnerDetails}
                 />
