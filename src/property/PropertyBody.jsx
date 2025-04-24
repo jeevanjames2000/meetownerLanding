@@ -1,3 +1,11 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Building,
   ChevronUp,
@@ -9,31 +17,17 @@ import {
   PawPrint,
   Phone,
   ShieldCheck,
-  TreePalm,
+  Palmtree as TreePalm,
   Users,
   Waves,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { BiBasketball } from "react-icons/bi";
-import { useLocation } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import config from "../../config";
-import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import {
   FaBorderAll,
-  FaBuilding,
   FaExpandArrowsAlt,
-  FaCalendarAlt,
   FaDoorOpen,
   FaRupeeSign,
-  FaThLarge,
   FaHome,
   FaRulerCombined,
-} from "react-icons/fa";
-import {
   FaSchool,
   FaHospital,
   FaShoppingCart,
@@ -44,6 +38,11 @@ import {
   FaHotel,
   FaUniversity,
   FaMapMarkerAlt,
+  FaAngleLeft,
+  FaAngleRight,
+  FaBasketballBall,
+  FaCogs,
+  FaShieldAlt,
 } from "react-icons/fa";
 import {
   FaBatteryFull,
@@ -59,20 +58,101 @@ import {
   FaWater,
   FaWifi,
 } from "react-icons/fa6";
-import Login from "../auth/Login";
-import { toast } from "react-toastify";
-import axios from "axios";
-import useWhatsappHook from "../utilities/useWhatsappHook";
-import {
-  FaAngleLeft,
-  FaAngleRight,
-  FaBasketballBall,
-  FaCogs,
-  FaShieldAlt,
-} from "react-icons/fa";
 import { MdOutlineVerified } from "react-icons/md";
+import whatsappIcon from "../assets/Images/whatsapp (3).png";
+import Login from "../auth/Login";
+import useWhatsappHook from "../utilities/useWhatsappHook";
+import config from "../../config";
 const PropertyBody = () => {
-  const { state: property } = useLocation();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const modalRef = useRef(null);
+  const { handleAPI } = useWhatsappHook();
+  const [property, setProperty] = useState(location.state);
+  const [loading, setLoading] = useState(!location.state);
+  const [error, setError] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [floorplan, setFloorPlan] = useState("");
+  const [images, setImages] = useState([]);
+  const [mainImage, setMainImage] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [aroundProperty, setAroundProperty] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  useEffect(() => {
+    const fetchPropertyFromQueryParams = async () => {
+      if (!location.state) {
+        try {
+          setLoading(true);
+          const url = window.location.href;
+          const idMatch = url.match(/Id_([^&]*)/);
+          if (idMatch && idMatch[1]) {
+            const propertyId = idMatch[1];
+            const response = await fetch(
+              `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${propertyId}`
+            );
+            if (!response.ok) {
+              throw new Error("Failed to fetch property details");
+            }
+            const data = await response.json();
+            if (data && data.property_details) {
+              setProperty(data.property_details);
+            } else {
+              throw new Error("Invalid property data received");
+            }
+          } else {
+            throw new Error("Property ID not found in URL");
+          }
+        } catch (err) {
+          console.error("Error fetching property:", err);
+          setError(err.message || "Failed to load property details");
+          toast.error("Failed to load property details");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchPropertyFromQueryParams();
+  }, [location.state]);
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (property?.unique_property_id) {
+        try {
+          const floorPlansResponse = await fetch(
+            `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${property.unique_property_id}`
+          );
+          const floorPlansData = await floorPlansResponse.json();
+          setFloorPlan(floorPlansData[0]);
+          const imagesResponse = await fetch(
+            `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property.unique_property_id}`
+          );
+          const imagesData = await imagesResponse.json();
+          setImages(imagesData.images);
+          setMainImage(imagesData.images[0]?.url);
+          const aroundResponse = await fetch(
+            `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${property.unique_property_id}`
+          );
+          const aroundData = await aroundResponse.json();
+          setAroundProperty(aroundData.results);
+        } catch (error) {
+          console.error("Error fetching property data:", error);
+        }
+      }
+    };
+    fetchPropertyData();
+  }, [property?.unique_property_id]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
@@ -115,10 +195,10 @@ const PropertyBody = () => {
     );
     return fallbackIcons[hash % fallbackIcons.length];
   };
-  const getOwnerDetails = async (property) => {
+  const getPropertyDetails = async (propertyData) => {
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${propertyData.unique_property_id}`
       );
       const data = await response.json();
       const propertydata = data.property_details;
@@ -128,67 +208,11 @@ const PropertyBody = () => {
       } else {
         throw new Error("Failed to fetch owner details");
       }
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   };
-  const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
-  const [isExpanded, setIsExpanded] = useState(false);
-  const toggleReadMore = () => setIsExpanded(!isExpanded);
-  const description = property?.description || "";
-  const isLong = description.length > 320;
-  const shortText = description.slice(0, 320);
-  const [floorplan, setFloorPlan] = useState("");
-  const [images, setImages] = useState([]);
-  const [mainImage, setMainImage] = useState("");
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const modalRef = useRef(null);
   const handleClose = () => {
     setShowLoginModal(false);
   };
-  const fetchPropertyimages = async () => {
-    setImages([]);
-    try {
-      const response = await fetch(
-        `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property?.unique_property_id}`
-      );
-      const data = await response.json();
-      setMainImage(data.images[0].url);
-      setImages(data.images);
-    } catch (err) {
-      console.error("Failed to fetch properties:", err);
-    }
-  };
-  const [aroundProperty, setAroundProperty] = useState("");
-  const fetchAroundThisProperty = async () => {
-    try {
-      const response = await fetch(
-        `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${property?.unique_property_id}`
-      );
-      const data = await response.json();
-      setAroundProperty(data.results);
-    } catch (error) {
-      console.error("Failed to fetch floor plans:", error);
-    }
-  };
-  useEffect(() => {
-    const fetchFloorPlans = async () => {
-      try {
-        const response = await fetch(
-          `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${property?.unique_property_id}`
-        );
-        const data = await response.json();
-        setFloorPlan(data[0]);
-      } catch (error) {
-        console.error("Failed to fetch floor plans:", error);
-      }
-    };
-    if (property?.unique_property_id) {
-      fetchFloorPlans();
-      fetchPropertyimages();
-      fetchAroundThisProperty();
-    }
-  }, [property?.unique_property_id]);
   const formatToIndianCurrency = (value) => {
     if (!value || isNaN(value)) return "N/A";
     const numValue = parseFloat(value);
@@ -197,18 +221,9 @@ const PropertyBody = () => {
     if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
     return numValue.toString();
   };
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const { handleAPI } = useWhatsappHook();
   const handleContactSeller = async () => {
     try {
       const data = localStorage.getItem("user");
@@ -231,12 +246,6 @@ const PropertyBody = () => {
       toast.error("Something went wrong while submitting enquiry");
     }
   };
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes("school") || lowerTitle.includes("college"))
@@ -262,66 +271,6 @@ const PropertyBody = () => {
     if (isNaN(d)) return "";
     return d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${d} m`;
   };
-  const overviewItems = [
-    {
-      label: "Project Area",
-      value: `${property.total_project_area} Acres`,
-      icon: <FaBorderAll />,
-    },
-    ...(property.sub_type === "Plot" || property.sub_type === "Land"
-      ? [
-          {
-            label: "Plot Area",
-            value: `${property.plot_area} Sq.yd`,
-            icon: <FaExpandArrowsAlt />,
-          },
-          {
-            label: "Sizes",
-            value: `${property.length_area} ${property.area_units} - ${property.width_area} ${property.area_units}`,
-            icon: <FaRulerCombined />,
-          },
-        ]
-      : []),
-    ...(property.sub_type === "Apartment" ||
-    property.sub_type === "Independent Villa"
-      ? [
-          {
-            label: "Built-up Area",
-            value: `${property.builtup_area} Sq.ft`,
-            icon: <FaHome />,
-          },
-        ]
-      : []),
-    {
-      label:
-        property.occupancy === "Under Construction"
-          ? "Possession Starts"
-          : "Occupancy Status",
-      value: ["Apartment", "Independent House", "Independent Villa"].includes(
-        property?.sub_type
-      )
-        ? property.occupancy === "Under Construction"
-          ? "Under Construction"
-          : "Ready to Move"
-        : property?.sub_type === "Plot"
-        ? property.occupancy === "Future"
-          ? "Future"
-          : "Immediate"
-        : "",
-      icon: <FaDoorOpen />,
-    },
-  ];
-
-  if (
-    property.property_for === "Rent" &&
-    property.property_in === "Commercial"
-  ) {
-    overviewItems.unshift({
-      label: "Expected Monthly Rent",
-      value: `₹ ${property.expected_rent}`,
-      icon: <FaRupeeSign />,
-    });
-  }
   const handleChatClick = async (e) => {
     e.stopPropagation();
     const data = localStorage.getItem("user");
@@ -334,26 +283,146 @@ const PropertyBody = () => {
       return;
     }
     try {
-      const sellerData = await getOwnerDetails(property);
-      console.log("sellerData: ", sellerData);
+      const sellerData = await getPropertyDetails(property);
       const phone = sellerData?.mobile || sellerData?.phone;
       if (phone) {
+        const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
+        const category =
+          property.sub_type === "Apartment" ||
+          property.sub_type === "Individual house"
+            ? `${property.bedrooms}BHK`
+            : property.sub_type === "Plot"
+            ? "Plot"
+            : "Property";
+        const propertyId = property.unique_property_id;
+        const propertyNameSlug = property.property_name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^-|-$)/g, "");
+        const locationSlug = property.location_id
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^-|-$)/g, "");
+        const citySlug = property.city
+          ? property.city
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "_")
+              .replace(/(^-|-$)/g, "")
+          : "hyderabad";
+        const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id=${propertyId}`;
+        const fullUrl = `${window.location.origin}/property?${seoUrl}`;
         const encodedMessage = encodeURIComponent(
-          `Hi, I'm interested in your property listing: ${property.property_name}`
+          `Hi, I'm interested in this property: ${property.property_name} ${fullUrl}`
         );
         const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
         window.open(whatsappUrl, "_blank");
       } else {
         console.error("Phone number not found in seller data:", sellerData);
-        alert("Owner's phone number is not available.");
+        toast.error("Owner's phone number is not available.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     } catch (error) {
       console.error("Error in handleChatClick:", error);
-      alert("Failed to fetch owner's contact details.");
+      toast.error("Failed to fetch owner's contact details.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
+  const overviewItems = [
+    {
+      label: "Project Area",
+      value: `${property?.total_project_area} Acres`,
+      icon: <FaBorderAll />,
+    },
+    ...(property?.sub_type === "Plot" || property?.sub_type === "Land"
+      ? [
+          {
+            label: "Plot Area",
+            value: `${property?.plot_area} Sq.yd`,
+            icon: <FaExpandArrowsAlt />,
+          },
+          {
+            label: "Sizes",
+            value: `${property?.length_area} ${property?.area_units} - ${property?.width_area} ${property?.area_units}`,
+            icon: <FaRulerCombined />,
+          },
+        ]
+      : []),
+    ...(property?.sub_type === "Apartment" ||
+    property?.sub_type === "Independent Villa"
+      ? [
+          {
+            label: "Built-up Area",
+            value: `${property?.builtup_area} Sq.ft`,
+            icon: <FaHome />,
+          },
+        ]
+      : []),
+    {
+      label:
+        property?.occupancy === "Under Construction"
+          ? "Possession Starts"
+          : "Occupancy Status",
+      value: ["Apartment", "Independent House", "Independent Villa"].includes(
+        property?.sub_type
+      )
+        ? property?.occupancy === "Under Construction"
+          ? "Under Construction"
+          : "Ready to Move"
+        : property?.sub_type === "Plot"
+        ? property?.occupancy === "Future"
+          ? "Future"
+          : "Immediate"
+        : "",
+      icon: <FaDoorOpen />,
+    },
+  ];
+  if (
+    property?.property_for === "Rent" &&
+    property?.property_in === "Commercial"
+  ) {
+    overviewItems.unshift({
+      label: "Expected Monthly Rent",
+      value: `₹ ${property?.expected_rent}`,
+      icon: <FaRupeeSign />,
+    });
+  }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-900"></div>
+        <p className="ml-3 text-lg font-medium text-blue-900">
+          Loading property details...
+        </p>
+      </div>
+    );
+  }
+  if (error || !property) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-4">
+          <p className="font-bold">Error loading property</p>
+          <p>{error || "Property information not available"}</p>
+        </div>
+        <button
+          onClick={() => window.history.back()}
+          className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+  const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
+  const description = property?.description || "";
+  const isLong = description.length > 320;
+  const shortText = description.slice(0, 320);
+  const toggleReadMore = () => setIsExpanded(!isExpanded);
   return (
-    <div className="relative p-6 w-full mx-auto  bg-white rounded-xl shadow-md space-y-4">
+    <div className="relative p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
@@ -385,10 +454,6 @@ const PropertyBody = () => {
                   : property?.property_cost
               )?.toLocaleString()}
             </p>
-            {/* <p className="text-sm text-gray-700">
-              - ₹ {parseInt(property?.builtup_unit)?.toLocaleString()} /
-              {property?.area_units}
-            </p> */}
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
@@ -609,7 +674,6 @@ const PropertyBody = () => {
           <h2 className="text-xl text-left font-semibold text-indigo-800 ">
             Property Location
           </h2>
-
           <p className="text-left text-sm text-gray-600 mb-4">
             {property?.google_address}
           </p>

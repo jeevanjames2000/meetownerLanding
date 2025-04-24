@@ -227,18 +227,49 @@ const PropertyCard = memo(
         const sellerData = await getOwnerDetails(property);
         const phone = sellerData?.mobile || sellerData?.phone;
         if (phone) {
+          const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
+          const category =
+            property.sub_type === "Apartment" ||
+            property.sub_type === "Individual house"
+              ? `${property.bedrooms}BHK`
+              : property.sub_type === "Plot"
+              ? "Plot"
+              : "Property";
+          const propertyId = property.unique_property_id;
+          const propertyNameSlug = property.property_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/(^-|-$)/g, "");
+          const locationSlug = property.location_id
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/(^-|-$)/g, "");
+          const citySlug = property.city
+            ? property.city
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "_")
+                .replace(/(^-|-$)/g, "")
+            : "hyderabad";
+          const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id=${propertyId}`;
+          const fullUrl = `${window.location.origin}/property?${seoUrl}`;
           const encodedMessage = encodeURIComponent(
-            `Hi, I'm interested in your property listing: ${property.property_name}`
+            `Hi, I'm interested in this property: ${property.property_name}\n${fullUrl}`
           );
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
         } else {
           console.error("Phone number not found in seller data:", sellerData);
-          alert("Owner's phone number is not available.");
+          toast.error("Owner's phone number is not available.", {
+            position: "top-right",
+            autoClose: 3000,
+          });
         }
       } catch (error) {
         console.error("Error in handleChatClick:", error);
-        alert("Failed to fetch owner's contact details.");
+        toast.error("Failed to fetch owner's contact details.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     };
     const handleContactClick = (e) => {
@@ -485,7 +516,6 @@ const PropertyCard = memo(
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
-
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
@@ -582,9 +612,7 @@ function ListingsBody({ setShowLoginModal }) {
     const { userDetails } = JSON.parse(data);
     try {
       const response = await axios.get(
-        `${"http://localhost:5000"}/enquiry/v1/getUserContactSellers?user_id=${
-          userDetails.user_id
-        }`
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails.user_id}`
       );
       const contacts = response.data || [];
       const contactIds = contacts.results.map(
@@ -629,14 +657,8 @@ function ListingsBody({ setShowLoginModal }) {
           location: property.location_id,
         })
       );
-      const propertyFor = selected === "Rent" ? "rent" : "buy";
-      const category =
-        searchData?.sub_type === "Apartment" ||
-        searchData?.sub_type === "Individual house"
-          ? `${property.bedrooms}BHK`
-          : searchData?.sub_type === "Plot"
-          ? "Plot"
-          : "Property";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+
       const propertyId = property.unique_property_id;
       const propertyNameSlug = property.property_name
         .toLowerCase()
@@ -646,8 +668,7 @@ function ListingsBody({ setShowLoginModal }) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${propertyId}`;
-
+      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
       navigate(`/property?${seoUrl}`, { state: property });
     },
     [navigate, dispatch, searchData, selected]

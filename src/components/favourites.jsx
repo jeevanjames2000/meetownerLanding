@@ -200,7 +200,6 @@ const Favourites = () => {
     }
   };
   const handleContactSeller = async (property) => {
-    console.log("propertyss: ", property);
     try {
       const data = localStorage.getItem("user");
       if (!data) {
@@ -247,7 +246,7 @@ const Favourites = () => {
     }) => {
       const showReadMore = readMoreStates[index];
       const shortDescription = property.description?.slice(0, 180);
-      console.log("property: ", property);
+
       const formatToIndianCurrency = (value) => {
         if (!value || isNaN(value)) return "N/A";
         const numValue = parseFloat(value);
@@ -261,7 +260,7 @@ const Favourites = () => {
         e.stopPropagation();
         try {
           const sellerData = await getOwnerDetails(property);
-          console.log("sellerData: ", sellerData);
+
           const phone = sellerData?.mobile || sellerData?.phone;
 
           if (phone) {

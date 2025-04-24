@@ -16,6 +16,8 @@ import { toast } from "react-toastify";
 import Login from "../auth/Login";
 import { useNavigate } from "react-router-dom";
 import useWhatsappHook from "../utilities/useWhatsappHook";
+import { useDispatch, useSelector } from "react-redux";
+import { setPropertyData } from "../../store/slices/propertyDetails";
 
 const formatPrice = (price) => {
   if (price >= 10000000) {
@@ -80,15 +82,75 @@ const DealProperties = () => {
     setShowLoginModal(false);
   };
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const searchData = useSelector((state) => state.search);
+
   const handleNavigation = useCallback(
     (property) => {
-      navigate("/property", { state: property });
+      dispatch(
+        setPropertyData({
+          propertyName: property.property_name,
+          location: property.location_id,
+        })
+      );
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+
+      const propertyId = property.unique_property_id;
+      const propertyNameSlug = property.property_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const locationSlug = property.location_id
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+      navigate(`/property?${seoUrl}`, { state: property });
     },
-    [navigate]
+    [navigate, dispatch, searchData]
   );
   const handleNavigate = () => {
-    navigate("/listings");
+    const propertyFor = searchData?.tab === "Rent" ? "rent" : "sale";
+
+    const propertyType = (() => {
+      switch (searchData?.sub_type) {
+        case "Plot":
+          return "plots";
+        case "Commercial":
+          return "commercial-properties";
+        case "Rent":
+        case "Buy":
+        default:
+          return "apartments";
+      }
+    })();
+    const citySlug = searchData.location
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+    const locationSlug = searchData.city
+      ? searchData.city
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^_|_$)/g, "")
+      : "";
+    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${
+      locationSlug ? `_${locationSlug}` : ""
+    }`;
+    const params = {
+      city: searchData.location,
+      property_for: searchData?.property_for === "Rent" ? "Rent" : "Sell",
+      property_type:
+        searchData.tab === "Plot"
+          ? "Plot"
+          : searchData.tab === "Commercial"
+          ? "Commercial"
+          : "Apartment",
+      location: searchData.location,
+    };
+    navigate(`/listings${seoUrl}`, { state: params });
   };
+
   return (
     <div className="px-4 py-12">
       <div className="relative flex items-center mb-4 justify-between">

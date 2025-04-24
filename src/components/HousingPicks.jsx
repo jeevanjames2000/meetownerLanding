@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
+import { setPropertyData } from "../../store/slices/propertyDetails";
+import { useDispatch, useSelector } from "react-redux";
 
 const HousingPicks = () => {
   const [progress, setProgress] = useState(0);
@@ -55,12 +57,34 @@ const HousingPicks = () => {
     fetchLatestProperties();
   }, []);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const searchData = useSelector((state) => state.search);
+
   const handleNavigation = useCallback(
     (property) => {
-      navigate("/property", { state: property });
+      dispatch(
+        setPropertyData({
+          propertyName: property.property_name,
+          location: property.location_id,
+        })
+      );
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+
+      const propertyId = property.unique_property_id;
+      const propertyNameSlug = property.property_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const locationSlug = property.location_id
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+      navigate(`/property?${seoUrl}`, { state: property });
     },
-    [navigate]
+    [navigate, dispatch, searchData]
   );
+
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");

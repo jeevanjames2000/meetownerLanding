@@ -4,6 +4,8 @@ import config from "../../config";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Login from "../auth/Login";
+import { setPropertyData } from "../../store/slices/propertyDetails";
+import { useDispatch, useSelector } from "react-redux";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
@@ -23,12 +25,34 @@ const ListingAds = () => {
     fetchLatestProperties();
   }, []);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const searchData = useSelector((state) => state.search);
+
   const handleNavigation = useCallback(
     (property) => {
-      navigate("/property", { state: property });
+      dispatch(
+        setPropertyData({
+          propertyName: property.property_name,
+          location: property.location_id,
+        })
+      );
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+
+      const propertyId = property.unique_property_id;
+      const propertyNameSlug = property.property_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const locationSlug = property.location_id
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^-|-$)/g, "");
+      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+      navigate(`/property?${seoUrl}`, { state: property });
     },
-    [navigate]
+    [navigate, dispatch, searchData]
   );
+
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const handleClose = () => {
@@ -67,7 +91,7 @@ const ListingAds = () => {
   return (
     <>
       <div className="hidden sticky right-0 top-20 lg:block md:block h-auto z-0 bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
-        <div className="relative rounded-lg">
+        <div className="relative rounded-lg cursor-pointer">
           <img
             src={`https://api.meetowner.in/uploads/${property[2]?.image}`}
             alt="Featured Property"
@@ -106,7 +130,7 @@ const ListingAds = () => {
                 <div className="bg-[#1D3A76] text-white text-xs font-medium py-2 px-4 text-center">
                   Latest Property
                 </div>
-                <div className="bg-gray-50 rounded-b-lg overflow-hidden">
+                <div className="bg-gray-50 rounded-b-lg overflow-hidden cursor-pointer">
                   <img
                     src={
                       item.image

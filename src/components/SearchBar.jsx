@@ -158,7 +158,8 @@ export default function SearchBar() {
   }, [searchInput, location]);
   const navigate = useNavigate();
   const handleNavigation = () => {
-    const propertyFor = selected === "Rent" ? "rent" : "sale";
+    const propertyFor = tabs[activeTab] === "Rent" ? "rent" : "sale";
+
     const propertyType = (() => {
       switch (tabs[activeTab]) {
         case "Plot":
