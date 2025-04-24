@@ -225,6 +225,7 @@ const PropertyCard = memo(
       }
       try {
         const sellerData = await getOwnerDetails(property);
+        console.log("sellerData: ", sellerData);
         const phone = sellerData?.mobile || sellerData?.phone;
         if (phone) {
           const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
@@ -250,7 +251,7 @@ const PropertyCard = memo(
                 .replace(/[^a-z0-9]+/g, "_")
                 .replace(/(^-|-$)/g, "")
             : "hyderabad";
-          const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id=${propertyId}`;
+          const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
           const fullUrl = `${window.location.origin}/property?${seoUrl}`;
           const encodedMessage = encodeURIComponent(
             `Hi, I'm interested in this property: ${property.property_name}\n${fullUrl}`
