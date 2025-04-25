@@ -223,23 +223,18 @@ const PropertyListing = () => {
     navigate(`/listings${seoUrl}`, { state: params });
   };
   const handleShare = (property) => {
+    const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+
     const propertyId = property.unique_property_id;
     const propertyNameSlug = property.property_name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
+      .replace(/(^-|-$)/g, "");
     const locationSlug = property.location_id
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
-    const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
-    const category =
-      property.property_type === "Plot"
-        ? "plots"
-        : property.property_type === "Commercial"
-        ? "properties"
-        : "projects";
-    const shareUrl = `${window.location.origin}/${propertyFor}/${category}/${propertyId}_${propertyNameSlug}_in_${locationSlug}`;
+      .replace(/(^-|-$)/g, "");
+    const seoUrl = `/property?${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
     const shareData = {
       title: `${property.property_name} - ${property.location_id}`,
       text: `Check out this ${property.bedrooms || ""} BHK ${
@@ -249,7 +244,7 @@ const PropertyListing = () => {
           ? formatPrice(property.monthly_rent)
           : formatPrice(property.property_cost)
       }${propertyFor === "rent" ? " / month" : ""}.`,
-      url: shareUrl,
+      url: seoUrl,
     };
     if (navigator.share) {
       navigator

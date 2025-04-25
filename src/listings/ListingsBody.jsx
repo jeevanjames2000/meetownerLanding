@@ -261,7 +261,6 @@ const PropertyCard = memo(
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
         } else {
-          console.error("Phone number not found in seller data:", sellerData);
           toast.error("Owner's phone number is not available.", {
             position: "top-right",
             autoClose: 3000,
@@ -842,10 +841,7 @@ function ListingsBody({ setShowLoginModal }) {
       }));
       setModalOpen(false);
     } catch (err) {
-      toast.error("Something went wrong!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      console.log("err: ", err);
     }
   }, [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]);
   const handleScheduleVisit = useCallback(

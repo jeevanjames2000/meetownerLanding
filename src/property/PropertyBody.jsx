@@ -243,7 +243,7 @@ const PropertyBody = () => {
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
     } catch (err) {
-      toast.error("Something went wrong while submitting enquiry");
+      console.log("err: ", err);
     }
   };
   const getPlaceIcon = (title) => {

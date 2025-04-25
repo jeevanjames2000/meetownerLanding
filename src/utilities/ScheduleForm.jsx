@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import config from "../../config";
-
 export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
   const [userDetails, setUserDetails] = useState(null);
   const [agreeToTerms, setAgreeToTerms] = useState(true);
   const [agreeCall, setAgreeCall] = useState(true);
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,7 +12,6 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
     date: "",
     time: "",
   });
-
   useEffect(() => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -33,28 +30,21 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
       phone: userDetails.mobile || "",
     }));
   }, []);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       let updatedUserDetails = { ...storedUser.userDetails };
-
-      // Check if the user info is missing
       const missingName =
         !updatedUserDetails?.name || updatedUserDetails.name === "N/A";
       const missingEmail =
         !updatedUserDetails?.email || updatedUserDetails.email === "N/A";
       const missingMobile =
         !updatedUserDetails?.mobile || updatedUserDetails.mobile === "N/A";
-
-      // If anything is missing, update it via API
       if (missingName || missingEmail || missingMobile) {
         const updatePayload = {
           id: updatedUserDetails.user_id,
@@ -62,33 +52,26 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
           email: formData.email,
           mobile: formData.phone,
         };
-
         const res = await fetch(`${config.awsApiUrl}/user/v1/updateUser`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatePayload),
         });
-
         if (!res.ok) throw new Error("Failed to update user");
-
         const updatedUser = await res.json();
-
         updatedUserDetails = {
           ...updatedUserDetails,
           name: updatedUser.name || formData.name,
           email: updatedUser.email || formData.email,
           mobile: updatedUser.mobile || formData.phone,
         };
-
-        // Update localStorage
         const newUserData = {
           ...storedUser,
           userDetails: updatedUserDetails,
         };
         localStorage.setItem("user", JSON.stringify(newUserData));
+        onClose();
       }
-
-      // Proceed with form submission
       onSubmit({
         ...formData,
         name: updatedUserDetails.name,
@@ -100,9 +83,7 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
       toast.error("Something went wrong while saving your details.");
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 top-10 flex items-center justify-center z-100 bg-opacity-50">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 relative">
