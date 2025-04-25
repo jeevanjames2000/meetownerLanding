@@ -790,6 +790,7 @@ function ListingsBody({ setShowLoginModal }) {
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
+      
       } catch (err) {
         setLikedProperties((prev) =>
           isAlreadyLiked
@@ -831,6 +832,7 @@ function ListingsBody({ setShowLoginModal }) {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(selectedProperty);
+      fetchContactedProperties();
       localStorage.setItem("visit_submitted", "true");
       setSubmittedStates((prev) => ({
         ...prev,
