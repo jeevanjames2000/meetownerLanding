@@ -29,7 +29,6 @@ import { Pagination } from "swiper/modules";
 
 const Favourites = () => {
   const [likedProperties, setLikedProperties] = useState([]);
-  console.log("likedProperties: ", likedProperties);
   const [loading, setLoading] = useState(true);
   const [readMoreStates, setReadMoreStates] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
@@ -93,7 +92,6 @@ const Favourites = () => {
     }
   };
   const getOwnerDetails = async (property) => {
-    console.log("property: ", property);
     try {
       const response = await fetch(
         `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`

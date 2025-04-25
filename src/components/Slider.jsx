@@ -119,7 +119,6 @@ const PropertyListing = () => {
     }
   };
   const handleLike = async (property) => {
-    console.log("property: ", property);
     const data = localStorage.getItem("user");
 
     if (!data) {
@@ -130,7 +129,6 @@ const PropertyListing = () => {
       return;
     }
     const { userDetails } = JSON.parse(data);
-    console.log("userDetails: ", userDetails);
     const isAlreadyLiked = likedProperties.includes(
       property.unique_property_id
     );
@@ -139,7 +137,6 @@ const PropertyListing = () => {
         ? prev.filter((id) => id !== property.unique_property_id)
         : [...prev, property.unique_property_id]
     );
-    console.log("isAlreadyLiked: ", isAlreadyLiked);
     const payload = {
       User_user_id: userDetails.user_id,
       userName: userDetails.name,

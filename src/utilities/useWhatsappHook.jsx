@@ -43,8 +43,8 @@ const useWhatsappHook = (selectedPropertyId) => {
       const payload = {
         name: userDetails?.name,
         mobile: userDetails?.mobile,
-        ownerName: ownerData?.name,
-        ownerMobile: ownerData?.mobile,
+        ownerName: userDetails?.name,
+        ownerMobile: userDetails?.mobile,
         property_name: property?.property_name,
         sub_type: property?.sub_type,
         google_address: property?.google_address,

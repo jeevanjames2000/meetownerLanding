@@ -610,7 +610,7 @@ function ListingsBody({ setShowLoginModal }) {
   const [readMoreStates, setReadMoreStates] = useState({});
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const maxLimit = 70;
+  const maxLimit = 500;
   const [likedProperties, setLikedProperties] = useState([]);
   const [contacted, setContacted] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -801,7 +801,7 @@ function ListingsBody({ setShowLoginModal }) {
     },
     [likedProperties]
   );
-  const [owner, setOwner] = useState("");
+
   const getOwnerDetails = useCallback(async (property) => {
     try {
       const response = await fetch(
@@ -820,46 +820,37 @@ function ListingsBody({ setShowLoginModal }) {
       throw err;
     }
   }, []);
-  const handleModalSubmit = useCallback(
-    async (property) => {
-      try {
-        const { userDetails } = JSON.parse(localStorage.getItem("user"));
-        const payload = {
-          unique_property_id: property.unique_property_id,
-          user_id: userDetails.user_id,
-          name: userDetails.name,
-          mobile: userDetails.phone,
-          email: userDetails.email,
-        };
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-          payload
-        );
-        await handleAPI(property);
-        localStorage.setItem("visit_submitted", "true");
-        setSubmittedStates((prev) => ({
-          ...prev,
-          [property.unique_property_id]: {
-            ...prev[property.unique_property_id],
-            contact: true,
-          },
-        }));
-        setModalOpen(false);
-        toast.success("Successfully contacted seller!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      } catch (err) {
-        toast.error("Something went wrong!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      }
-    },
-    [handleAPI, setSubmittedStates, setModalOpen]
-  );
+  const handleModalSubmit = useCallback(async () => {
+    try {
+      const { userDetails } = JSON.parse(localStorage.getItem("user"));
+      const payload = {
+        unique_property_id: selectedProperty.unique_property_id,
+        user_id: userDetails.user_id,
+        name: userDetails.name,
+        mobile: userDetails.phone,
+        email: userDetails.email,
+      };
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
+      await handleAPI(selectedProperty);
+      localStorage.setItem("visit_submitted", "true");
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [selectedProperty.unique_property_id]: {
+          ...prev[selectedProperty.unique_property_id],
+          contact: true,
+        },
+      }));
+      setModalOpen(false);
+    } catch (err) {
+      toast.error("Something went wrong!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  }, [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]);
   const handleScheduleVisit = useCallback(
     (property) => {
+      setSelectedProperty(property);
       const data = localStorage.getItem("user");
       if (!data) {
         toast.info("Please Login to Schedule Visits!", {
@@ -870,7 +861,6 @@ function ListingsBody({ setShowLoginModal }) {
         return;
       }
       const { userDetails } = JSON.parse(data);
-      setSelectedProperty(property);
       const alreadySubmitted =
         localStorage.getItem("visit_submitted") === "true";
       const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
@@ -883,7 +873,7 @@ function ListingsBody({ setShowLoginModal }) {
         !isMobileMissing &&
         alreadySubmitted
       ) {
-        handleModalSubmit(property);
+        handleModalSubmit(selectedProperty);
       } else {
         setModalOpen(true);
       }
@@ -989,7 +979,14 @@ function ListingsBody({ setShowLoginModal }) {
     getOwnerDetails,
     setShowLoginModal,
   ]);
-  const cards = useMemo(() => prepareCards(), [prepareCards]);
+  const cards = useMemo(() => {
+    const baseCards = data.slice(0); // avoid mutating
+    if (loading && hasMore) {
+      return [...baseCards, ...Array(2).fill({ type: "skeleton" })];
+    }
+    return baseCards;
+  }, [data, loading, hasMore]);
+
   const cache = new CellMeasurerCache({
     fixedWidth: true,
     defaultHeight: 500,
@@ -1002,6 +999,7 @@ function ListingsBody({ setShowLoginModal }) {
         columnIndex={0}
         rowIndex={index}
         parent={parent}
+        key={key}
       >
         {({ measure, registerChild }) => (
           <div
@@ -1014,12 +1012,41 @@ function ListingsBody({ setShowLoginModal }) {
             }}
             className="w-full flex justify-center px-2"
           >
-            <div className="w-full">{item.content}</div>
+            <div className="w-full">
+              {item.type === "skeleton" ? (
+                <SkeletonPropertyCard />
+              ) : (
+                <PropertyCard
+                  property={item}
+                  index={index}
+                  toggleReadMore={toggleReadMore}
+                  toggleFacilities={toggleFacilities}
+                  handleNavigation={handleNavigation}
+                  readMoreStates={readMoreStates}
+                  expandedCards={expandedCards}
+                  likedProperties={likedProperties}
+                  contacted={contacted}
+                  handleLike={handleLike}
+                  handleScheduleVisit={handleScheduleVisit}
+                  handleContactSeller={handleContactSeller}
+                  submittedState={
+                    submittedStates[item.unique_property_id] || {}
+                  }
+                  getOwnerDetails={getOwnerDetails}
+                  setShowLoginModal={setShowLoginModal}
+                />
+              )}
+            </div>
           </div>
         )}
       </CellMeasurer>
     );
   };
+
+  const MemoizedRowRenderer = React.memo(rowRenderer, (prev, next) => {
+    return prev.index === next.index;
+  });
+
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
@@ -1102,7 +1129,7 @@ function ListingsBody({ setShowLoginModal }) {
                   deferredMeasurementCache={cache}
                   rowHeight={cache.rowHeight}
                   rowRenderer={rowRenderer}
-                  overscanRowCount={2}
+                  overscanRowCount={4}
                 />
               )}
             </AutoSizer>
