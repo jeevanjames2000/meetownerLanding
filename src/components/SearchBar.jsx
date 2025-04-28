@@ -16,6 +16,7 @@ import {
   chennaiLocalities,
   mumbaiLocalities,
   puneLocalities,
+  vikarabadLocalities,
 } from "../components/customCities";
 import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,6 +36,7 @@ export default function SearchBar() {
     Chennai: chennaiLocalities,
     Mumbai: mumbaiLocalities,
     Pune: puneLocalities,
+    Vikarabad: vikarabadLocalities,
   };
   const [activeTab, setActiveTab] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -92,16 +94,23 @@ export default function SearchBar() {
     "Mumbai",
     "Navi Mumbai",
     "Hyderabad",
+    "Warangal",
+    "Nizamabad",
+    "Karimnagar",
+    "Khammam",
+    "Ramagundam",
+    "Mahabubnagar",
     "Bengaluru",
     "Chennai",
     "Kolkata",
     "Coimbatore",
     "Ahmedabad",
-    "Visakhapatanam",
+    "Visakhapatnam",
     "Vijayawada",
     "Guntur",
     "Rajamundry",
     "Eluru",
+    "Vikarabad",
   ];
   const currentLocalities = cityLocalitiesMap[location] || [];
   const filteredLocalities = currentLocalities.filter((locality) =>

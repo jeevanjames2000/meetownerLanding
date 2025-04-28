@@ -213,6 +213,11 @@ const PropertyCard = memo(
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     };
+    const formatValue = (value) => {
+      return value % 1 === 0
+        ? parseInt(value)
+        : parseFloat(value).toFixed(2).replace(/\.00$/, "");
+    };
     const handleChatClick = async (e) => {
       e.stopPropagation();
       const data = localStorage.getItem("user");
@@ -373,12 +378,18 @@ const PropertyCard = memo(
                     {[
                       property.sub_type === "Plot"
                         ? property.plot_area
-                          ? `${property.plot_area} ${property?.area_units} Plot area`
+                          ? `${formatValue(property.plot_area)} ${
+                              property?.area_units
+                            } Plot area`
                           : property.carpet_area
-                          ? `${property.carpet_area} ${property?.area_units} Carpet area`
+                          ? `${formatValue(property.carpet_area)} ${
+                              property?.area_units
+                            } Carpet area`
                           : null
                         : property.builtup_area
-                        ? `${property.builtup_area} ${property?.area_units} Builtup area`
+                        ? `${formatValue(property.builtup_area)} ${
+                            property?.area_units
+                          } Builtup area`
                         : null,
                       property?.investor_property === "Yes" &&
                         "Investor Property",
@@ -790,7 +801,6 @@ function ListingsBody({ setShowLoginModal }) {
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
-      
       } catch (err) {
         setLikedProperties((prev) =>
           isAlreadyLiked

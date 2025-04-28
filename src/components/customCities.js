@@ -11,6 +11,23 @@ const customHydCities = [
   "Secunderabad",
   "Kukatpally",
 ];
+const vikarabadLocalities = [
+  "Shivaram Nagar Colony",
+  "Kanyalaalbagh Colony",
+  "Vidhyanagar",
+  "Alampally",
+  "B.T.S Colony",
+  "New Gunj",
+  "APHB Colony",
+  "Ananthagiri Road Area",
+  "Railway Station Area",
+  "Vikar Manzil Area",
+  "Sultan Manzil Area",
+  "Gangaram",
+  "Teachers Colony",
+  "P&T Colony",
+  "Ashok Nagar",
+];
 const vizagLocalities = [
   "Most Searched",
   "MVP Colony",
@@ -82,4 +99,5 @@ export {
   chennaiLocalities,
   mumbaiLocalities,
   puneLocalities,
+  vikarabadLocalities,
 };

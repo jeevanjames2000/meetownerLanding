@@ -271,6 +271,11 @@ const PropertyBody = () => {
     if (isNaN(d)) return "";
     return d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${d} m`;
   };
+  const formatValue = (value) => {
+    return value % 1 === 0
+      ? parseInt(value)
+      : parseFloat(value).toFixed(2).replace(/\.00$/, "");
+  };
   const handleChatClick = async (e) => {
     e.stopPropagation();
     const data = localStorage.getItem("user");
@@ -287,7 +292,6 @@ const PropertyBody = () => {
       const sellerData = await getPropertyDetails(property);
       const phone = sellerData?.mobile || sellerData?.phone;
       const name = sellerData?.name || "";
-
       if (phone) {
         const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
         const category =
@@ -335,19 +339,30 @@ const PropertyBody = () => {
   const overviewItems = [
     {
       label: "Project Area",
-      value: `${property?.total_project_area} Acres`,
+      value: `${
+        parseFloat(property?.total_project_area).toFixed(2).endsWith(".00")
+          ? parseInt(property?.total_project_area)
+          : property?.total_project_area
+      } Acres`,
       icon: <FaBorderAll />,
     },
     ...(property?.sub_type === "Plot" || property?.sub_type === "Land"
       ? [
           {
             label: "Plot Area",
-            value: `${property?.plot_area} Sq.yd`,
+            value: `${formatValue(property?.plot_area)} Sq.yd`,
             icon: <FaExpandArrowsAlt />,
           },
           {
-            label: "Sizes",
-            value: `${property?.length_area} ${property?.area_units} - ${property?.width_area} ${property?.area_units}`,
+            label: "Dimensions",
+            value: (
+              <span>
+                <strong className="text-blue-900">L</strong>-
+                {formatValue(property?.length_area)} x{" "}
+                <strong className="text-blue-900">W</strong>-
+                {formatValue(property?.width_area)}
+              </span>
+            ),
             icon: <FaRulerCombined />,
           },
         ]
@@ -357,7 +372,7 @@ const PropertyBody = () => {
       ? [
           {
             label: "Built-up Area",
-            value: `${property?.builtup_area} Sq.ft`,
+            value: `${formatValue(property?.builtup_area)} Sq.ft`,
             icon: <FaHome />,
           },
         ]
@@ -387,7 +402,7 @@ const PropertyBody = () => {
   ) {
     overviewItems.unshift({
       label: "Expected Monthly Rent",
-      value: `₹ ${property?.expected_rent}`,
+      value: `₹ ${formatValue(property?.expected_rent)}`,
       icon: <FaRupeeSign />,
     });
   }
@@ -443,7 +458,6 @@ const PropertyBody = () => {
           )}
         </p>
       </div>
-
       <div className="flex flex-col border-b pb-2 mb-2">
         <div className="flex justify-between items-center w-full flex-wrap gap-4">
           <h3 className="text-2xl font-bold text-indigo-900">
@@ -498,7 +512,8 @@ const PropertyBody = () => {
               <>
                 <span className="border-l h-4 border-gray-300"></span>
                 <span>
-                  Built-up Area: {property.builtup_area} {property.area_units}
+                  Built-up Area: {formatValue(property.builtup_area)}{" "}
+                  {property.area_units}
                 </span>
               </>
             )}
@@ -506,7 +521,8 @@ const PropertyBody = () => {
               <>
                 <span className="border-l h-4 border-gray-300"></span>
                 <span>
-                  Plot Area: {property.plot_area} {property.area_units}
+                  Plot Area: {formatValue(property.plot_area)}{" "}
+                  {property.area_units}
                 </span>
               </>
             )}
@@ -649,7 +665,6 @@ const PropertyBody = () => {
           </div>
         </div>
       )}
-
       {facilitiesList && (
         <div>
           <h2 className="text-xl text-left font-semibold text-indigo-800 mb-2">
