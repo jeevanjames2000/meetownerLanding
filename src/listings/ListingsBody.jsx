@@ -751,48 +751,74 @@ function ListingsBody({ setShowLoginModal }) {
   const dispatch = useDispatch();
   const handleNavigation = useCallback(
     async (property) => {
-      const data = localStorage.getItem("user");
-      const { userDetails } = JSON.parse(data);
+      let userDetails = null;
+
+      try {
+        const data = localStorage.getItem("user");
+        if (data) {
+          const parsedData = JSON.parse(data);
+          userDetails = parsedData?.userDetails || null;
+        }
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+        userDetails = null;
+      }
+
       if (userDetails?.user_id) {
         const viewData = {
-          user_id: userDetails?.user_id  || "N/A",
-          property_id: property.unique_property_id  || "N/A",
-          name: userDetails?.name || "N/A",
-          mobile: userDetails?.mobile || "N/A",
-          email: userDetails?.email || "N/A",
-          property_name: property.property_name  || "N/A",
+          user_id: userDetails.user_id,
+          property_id: property?.unique_property_id || "N/A",
+          name: userDetails.name || "N/A",
+          mobile: userDetails.mobile || "N/A",
+          email: userDetails.email || "N/A",
+          property_name: property?.property_name || "N/A",
         };
 
         try {
           await axios.post(
-            "https://api.meetowner.in/listings/v1/propertyViewed",
+            `${config.awsApiUrl}/listings/v1/propertyViewed`,
             viewData
           );
         } catch (error) {
-          console.error("Failed to record property view:", error);
+          console.error("Failed to record property view:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+          });
         }
       }
 
-      dispatch(
-        setPropertyData({
-          propertyName: property.property_name,
-          location: property.location_id,
-        })
-      );
+      try {
+        dispatch(
+          setPropertyData({
+            propertyName: property?.property_name || "N/A",
+            location: property?.location_id || "N/A",
+          })
+        );
 
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-      const propertyId = property.unique_property_id;
-      const propertyNameSlug = property.property_name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const locationSlug = property.location_id
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+        const propertyFor = property?.property_for === "Rent" ? "Rent" : "Buy";
+        const propertyId = property?.unique_property_id || "N/A";
+        const bedrooms = property?.bedrooms || "N/A";
+        const propertyNameSlug = (property?.property_name || "unknown")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^-|-$)/g, "");
+        const locationSlug = (property?.location_id || "unknown")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/(^-|-$)/g, "");
+        const typeSegment =
+          property?.sub_type === "Apartment"
+            ? `${bedrooms}_BHK_${property.sub_type}`
+            : property?.sub_type || "";
 
-      navigate(`/property?${seoUrl}`, { state: property });
+        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${
+          searchData?.city || "unknown"
+        }_Id_${propertyId}`;
+        navigate(`/property?${seoUrl}`, { state: property });
+      } catch (navError) {
+        console.error("Navigation error:", navError);
+      }
     },
     [navigate, dispatch, searchData, selected]
   );
@@ -877,9 +903,7 @@ function ListingsBody({ setShowLoginModal }) {
         },
       }));
       setModalOpen(false);
-    } catch (err) {
-      console.log("err: ", err);
-    }
+    } catch (err) {}
   }, [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]);
   const handleScheduleVisit = useCallback(
     (property) => {
