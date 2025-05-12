@@ -283,6 +283,7 @@ const PropertyCard = memo(
       e.stopPropagation();
       handleScheduleVisit(property);
     };
+
     return (
       <div
         key={`property-${index}`}
@@ -749,13 +750,36 @@ function ListingsBody({ setShowLoginModal }) {
   }, []);
   const dispatch = useDispatch();
   const handleNavigation = useCallback(
-    (property) => {
+    async (property) => {
+      const data = localStorage.getItem("user");
+      const { userDetails } = JSON.parse(data);
+      if (userDetails?.user_id) {
+        const viewData = {
+          user_id: userDetails?.user_id  || "N/A",
+          property_id: property.unique_property_id  || "N/A",
+          name: userDetails?.name || "N/A",
+          mobile: userDetails?.mobile || "N/A",
+          email: userDetails?.email || "N/A",
+          property_name: property.property_name  || "N/A",
+        };
+
+        try {
+          await axios.post(
+            "https://api.meetowner.in/listings/v1/propertyViewed",
+            viewData
+          );
+        } catch (error) {
+          console.error("Failed to record property view:", error);
+        }
+      }
+
       dispatch(
         setPropertyData({
           propertyName: property.property_name,
           location: property.location_id,
         })
       );
+
       const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
       const propertyId = property.unique_property_id;
       const propertyNameSlug = property.property_name
@@ -767,6 +791,7 @@ function ListingsBody({ setShowLoginModal }) {
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/(^-|-$)/g, "");
       const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+
       navigate(`/property?${seoUrl}`, { state: property });
     },
     [navigate, dispatch, searchData, selected]
@@ -933,62 +958,9 @@ function ListingsBody({ setShowLoginModal }) {
     },
     [handleAPI, setShowLoginModal, setSubmittedStates]
   );
-  const prepareCards = useCallback(() => {
-    const propertyCards = data.map((property, index) => ({
-      type: "property",
-      content: (
-        <PropertyCard
-          key={`property-${index}`}
-          property={property}
-          index={index}
-          toggleReadMore={toggleReadMore}
-          toggleFacilities={toggleFacilities}
-          handleNavigation={handleNavigation}
-          readMoreStates={readMoreStates}
-          expandedCards={expandedCards}
-          likedProperties={likedProperties}
-          contacted={contacted}
-          handleLike={handleLike}
-          handleScheduleVisit={handleScheduleVisit}
-          handleContactSeller={handleContactSeller}
-          submittedState={submittedStates[property.unique_property_id] || {}}
-          getOwnerDetails={getOwnerDetails}
-          setShowLoginModal={setShowLoginModal}
-        />
-      ),
-    }));
-    if (loading && hasMore) {
-      return [
-        ...propertyCards,
-        ...Array(2)
-          .fill()
-          .map((_, index) => ({
-            type: "skeleton",
-            content: <SkeletonPropertyCard key={`skeleton-${index}`} />,
-          })),
-      ];
-    }
-    return propertyCards;
-  }, [
-    data,
-    loading,
-    hasMore,
-    readMoreStates,
-    expandedCards,
-    toggleReadMore,
-    toggleFacilities,
-    handleNavigation,
-    likedProperties,
-    contacted,
-    handleLike,
-    handleScheduleVisit,
-    handleContactSeller,
-    submittedStates,
-    getOwnerDetails,
-    setShowLoginModal,
-  ]);
+
   const cards = useMemo(() => {
-    const baseCards = data.slice(0); // avoid mutating
+    const baseCards = data.slice(0);
     if (loading && hasMore) {
       return [...baseCards, ...Array(2).fill({ type: "skeleton" })];
     }
@@ -1050,10 +1022,6 @@ function ListingsBody({ setShowLoginModal }) {
       </CellMeasurer>
     );
   };
-
-  const MemoizedRowRenderer = React.memo(rowRenderer, (prev, next) => {
-    return prev.index === next.index;
-  });
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
