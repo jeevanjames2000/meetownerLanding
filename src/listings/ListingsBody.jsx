@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import useWhatsappHook from "../utilities/useWhatsappHook";
 import { setPropertyData } from "../../store/slices/propertyDetails";
 import Breadcrumb from "../utilities/BreadCrumb";
+import { FaHouse } from "react-icons/fa6";
 const AdsCard = memo(() => {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
@@ -68,7 +69,7 @@ const AdsCard = memo(() => {
     [navigate]
   );
   return (
-    <div className="bg-white rounded-lg shadow-md relative p-2 mb-4 md:mb-4 max-w-6xl mx-auto mt-8">
+    <div className="bg-white rounded-lg shadow-md relative p-2  max-w-4xl mt-8">
       <h2 className="text-xl text-left md:text-xl font-semibold text-[#1E2A53] mb-4">
         Featured Projects Based on your search
       </h2>
@@ -89,11 +90,11 @@ const AdsCard = memo(() => {
           768: { slidesPerView: 1 },
           1024: { slidesPerView: 1 },
         }}
-        className="pb-10 overflow-hidden h-[350px]"
+        className="pb-0 overflow-hidden h-[250px]"
       >
         {property?.map((project, index) => (
           <SwiperSlide key={index}>
-            <div className="rounded-2xl border border-gray-200 p-2 md:p-2 relative bg-white flex flex-col md:flex-row items-center gap-8">
+            <div className="rounded-2xl border gap-2 border-gray-200 p-2 md:p-2 relative bg-white flex flex-col md:flex-row items-center ">
               <div className="w-full md:w-1/2">
                 <img
                   src={
@@ -105,7 +106,7 @@ const AdsCard = memo(() => {
                   }
                   alt="Property"
                   crossOrigin="anonymous"
-                  className="w-full h-70 object-cover rounded-md"
+                  className="w-full h-50 object-contain rounded-md"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = `https://placehold.co/600x400?text=${
@@ -119,11 +120,11 @@ const AdsCard = memo(() => {
                 onClick={() => handleNavigation(project)}
               >
                 <div className="flex flex-row justify-between items-center">
-                  <p className="text-sm text-left md:text-2xl font-bold text-gray-500">
+                  <p className="text-md text-left md:text-lg font-bold text-gray-500">
                     Rs:{" "}
                     {formatToIndianCurrency(project?.property_cost) || "N/A"}
                   </p>
-                  <h3 className="text-2xl text-left  font-bold text-blue-900 mt-1 ">
+                  <h3 className="text-lg text-left  font-bold text-blue-900 mt-1 ">
                     {project?.property_name}
                   </h3>
                 </div>
@@ -132,30 +133,10 @@ const AdsCard = memo(() => {
                     ? project?.description.slice(0, 150) + "..."
                     : project?.description}
                 </p>
-                <div className="flex flex-wrap gap-4 mb-6">
-                  <div className="bg-white shadow rounded-md px-4 py-2">
-                    <p className="text-xs text-gray-500">Possession Date</p>
-                    <p className="font-semibold text-[#1E2A53]">
-                      {project?.possession_status}
-                    </p>
-                  </div>
-                  <div className="bg-white shadow rounded-md px-4 py-2">
-                    <p className="text-xs text-gray-500">Facing</p>
-                    <p className="font-semibold text-[#1E2A53]">
-                      {project?.facing}
-                    </p>
-                  </div>
-                  <div className="bg-white shadow rounded-md px-4 py-2">
-                    <p className="text-xs text-gray-500">Bedrooms</p>
-                    <p className="font-semibold text-[#1E2A53]">
-                      {project?.bedroom}
-                    </p>
-                  </div>
-                </div>
                 <div className="flex justify-end items-center">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-[#EC8F6A] hover:bg-[#e07955] text-white rounded-xl shadow">
-                    <FaPhoneAlt />
-                    Contact Developer
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#243cc2] hover:bg-[#fefefe] text-white rounded-xl shadow">
+                    <FaHouse />
+                    View Property
                   </button>
                 </div>
               </div>
@@ -179,9 +160,9 @@ const AdsCard = memo(() => {
           </button>
         </div>
       </Swiper>
-      <div className="mt-2 flex justify-center items-center gap-2 text-sm text-[#1E2A53] font-medium">
+      <div className="flex justify-center items-center gap-2 text-sm text-[#1E2A53] font-medium">
         <img
-          src="/src/assets/Images/Favicon@10x.png"
+          src={meetlogo}
           alt="Meet Owner"
           crossOrigin="anonymous"
           className="w-6 h-6"
@@ -283,7 +264,6 @@ const PropertyCard = memo(
       e.stopPropagation();
       handleScheduleVisit(property);
     };
-
     return (
       <div
         key={`property-${index}`}
@@ -510,8 +490,10 @@ const PropertyCard = memo(
                       {property.user.name}
                     </p>
                   </div>
-                  <p className="text-gray-500 font-medium text-sm hidden sm:block">
-                    {property.user.name}
+                  <p className="text-gray-500 font-semibold text-sm hidden sm:block">
+                    {property.user.name.length > 10
+                      ? property.user.name.slice(0, 10) + "..."
+                      : property.user.name}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -555,7 +537,6 @@ const SkeletonPropertyCard = () => {
         <div className="w-full lg:w-[400px]">
           <div className="w-full h-50 bg-gray-200 rounded-md" />
         </div>
-
         <div className="flex-1 flex flex-col">
           <div className="mb-3 text-left">
             <div className="flex flex-col md:flex-row justify-between md:items-center">
@@ -566,13 +547,11 @@ const SkeletonPropertyCard = () => {
                 <div className="h-4 bg-gray-200 rounded w-16" />
               </div>
             </div>
-
             <div className="flex flex-col lg:flex-row justify-between">
               <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
               <div className="h-5 bg-gray-200 rounded w-1/3" />
             </div>
           </div>
-
           <div className="mb-4 flex-1">
             <div className="flex flex-wrap gap-2 mb-2">
               <div className="h-4 bg-gray-200 rounded w-24" />
@@ -590,7 +569,6 @@ const SkeletonPropertyCard = () => {
               <div className="h-4 bg-gray-200 rounded w-20" />
             </div>
           </div>
-
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-2 border border-gray-200 rounded-xl shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 sm:justify-start justify-between w-full">
               <div className="flex justify-between items-center w-full sm:w-auto">
@@ -752,7 +730,6 @@ function ListingsBody({ setShowLoginModal }) {
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
-
       try {
         const data = localStorage.getItem("user");
         if (data) {
@@ -763,7 +740,6 @@ function ListingsBody({ setShowLoginModal }) {
         console.error("Error parsing localStorage data:", error);
         userDetails = null;
       }
-
       if (userDetails?.user_id) {
         const viewData = {
           user_id: userDetails.user_id,
@@ -773,7 +749,6 @@ function ListingsBody({ setShowLoginModal }) {
           email: userDetails.email || "N/A",
           property_name: property?.property_name || "N/A",
         };
-
         try {
           await axios.post(
             `${config.awsApiUrl}/listings/v1/propertyViewed`,
@@ -787,7 +762,6 @@ function ListingsBody({ setShowLoginModal }) {
           });
         }
       }
-
       try {
         dispatch(
           setPropertyData({
@@ -795,7 +769,6 @@ function ListingsBody({ setShowLoginModal }) {
             location: property?.location_id || "N/A",
           })
         );
-
         const propertyFor = property?.property_for === "Rent" ? "Rent" : "Buy";
         const propertyId = property?.unique_property_id || "N/A";
         const bedrooms = property?.bedrooms || "N/A";
@@ -811,7 +784,6 @@ function ListingsBody({ setShowLoginModal }) {
           property?.sub_type === "Apartment"
             ? `${bedrooms}_BHK_${property.sub_type}`
             : property?.sub_type || "";
-
         const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${
           searchData?.city || "unknown"
         }_Id_${propertyId}`;
@@ -862,7 +834,6 @@ function ListingsBody({ setShowLoginModal }) {
     },
     [likedProperties]
   );
-
   const getOwnerDetails = useCallback(async (property) => {
     try {
       const response = await fetch(
@@ -982,7 +953,6 @@ function ListingsBody({ setShowLoginModal }) {
     },
     [handleAPI, setShowLoginModal, setSubmittedStates]
   );
-
   const cards = useMemo(() => {
     const baseCards = data.slice(0);
     if (loading && hasMore) {
@@ -990,7 +960,6 @@ function ListingsBody({ setShowLoginModal }) {
     }
     return baseCards;
   }, [data, loading, hasMore]);
-
   const cache = new CellMeasurerCache({
     fixedWidth: true,
     defaultHeight: 500,
@@ -1046,7 +1015,6 @@ function ListingsBody({ setShowLoginModal }) {
       </CellMeasurer>
     );
   };
-
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
@@ -1136,7 +1104,7 @@ function ListingsBody({ setShowLoginModal }) {
           )}
         </WindowScroller>
       ) : !loading ? (
-        <div className="text-center">
+        <div className="text-center mt-10">
           <h1 className="text-2xl text-gray-500 font-bold">
             No Properties Found!
           </h1>
@@ -1152,7 +1120,6 @@ function ListingsBody({ setShowLoginModal }) {
                 <SkeletonPropertyCard key={index} />
               ))}
           </div>
-
           <div className="w-full py-4 flex justify-center items-center gap-2">
             <svg
               className="animate-spin h-5 w-5 text-[#1D3A76]"

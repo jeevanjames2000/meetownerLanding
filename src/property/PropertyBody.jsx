@@ -583,14 +583,14 @@ const PropertyBody = () => {
           <div className="flex flex-wrap justify-between sm:flex-nowrap gap-1 mt-4 sm:mt-2">
             <button
               onClick={handleChatClick}
-              className="w-[45%] bg-transparent flex items-center justify-center gap-1 text-green-500 border cursor-pointer border-green-500 text-sm px-6 py-2 rounded-lg"
+              className="w-[45%] h-10 bg-transparent flex items-center justify-center gap-1 text-green-500 border cursor-pointer border-green-500 text-sm px-6 py-2 rounded-lg"
             >
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4" />
               Chat
             </button>
             <button
               onClick={handleContactSeller}
-              className="w-[45%] bg-[#EC6F51] hover:bg-[#d85e43] text-white text-sm px-6 py-2 cursor-pointer rounded-lg"
+              className="w-[45%] h-10 bg-[#EC6F51]  items-center hover:bg-[#d85e43] text-white text-sm px-6 py-2 cursor-pointer rounded-lg"
             >
               Contact
             </button>

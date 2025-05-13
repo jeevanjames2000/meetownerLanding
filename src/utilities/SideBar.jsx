@@ -41,7 +41,6 @@ const Sidebar = ({
   const toggleSection = (section) => {
     setOpenSection((prev) => (prev === section ? null : section));
   };
-
   const getRecentActivity = (apiData, reduxData) => {
     if (apiData?.length) return apiData;
     if (reduxData?.length) return reduxData;
@@ -59,7 +58,6 @@ const Sidebar = ({
         );
         const data = await response.data;
         const liked = data.favourites;
-
         if (liked && Array.isArray(liked)) {
           setLikedProperties(liked);
         }
@@ -95,8 +93,8 @@ const Sidebar = ({
             <div className="bg-white rounded-lg border p-2 shadow-sm w-[150px]">
               <img
                 src={
-                  item.property_image
-                    ? `https://api.meetowner.in/uploads/${item.property_image}`
+                  item.image
+                    ? `https://api.meetowner.in/uploads/${item.image}`
                     : `https://placehold.co/600x400?text=${
                         item?.property_name || "No Image Found"
                       }`
@@ -131,7 +129,6 @@ const Sidebar = ({
       </Swiper>
     );
   };
-
   const faq = [
     {
       title: "How secure is my data with MeetOwner?",
@@ -154,13 +151,11 @@ const Sidebar = ({
     },
   ];
   const recentData = getRecentActivity(likedProperties, intrested);
-
   const sidebarItems = [
     {
       title: "Recent Activity",
       content: <RecentActivitySwiper data={recentData} />,
     },
-
     {
       title: "Download App",
       content: (
@@ -289,5 +284,4 @@ const Sidebar = ({
     </div>
   );
 };
-
 export default Sidebar;
