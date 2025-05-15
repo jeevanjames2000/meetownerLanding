@@ -26,7 +26,7 @@ import MeetOwner from "../assets/Images/WhatsApp Image 2025-04-12 at 3.44.38 PM.
 import ad1 from "../assets/Images/1440x566 Hallmark Skyrena.jpg";
 import ad2 from "../assets/Images/1440x566 Hallmark Sunnyside.jpg";
 import ad3 from "../assets/Images/1440x566 Hallmark Treasor.jpg";
-import ad4 from "../assets/Images/1440x566 The Square.jpg";
+
 export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
   const cityLocalitiesMap = {
@@ -120,6 +120,24 @@ export default function SearchBar() {
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
   const dispatch = useDispatch();
+  const [mediaList, setMediaList] = useState([
+    {
+      id: 1,
+      order: 1,
+      video_url: ad1,
+    },
+    {
+      id: 2,
+      order: 2,
+      video_url: ad2,
+    },
+    {
+      id: 3,
+      order: 3,
+      video_url: ad3,
+    },
+  ]);
+  console.log("mediaList: ", mediaList);
   useEffect(() => {
     const selectedTab = tabs[activeTab];
     dispatch(
@@ -149,6 +167,28 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
+  const fetchMedia = async () => {
+    try {
+      const response = await fetch(
+        "https://api.meetowner.in/adAssets/v1/getAds?ads_page=main_slider"
+      );
+      const data = await response.json();
+      if (data.ads?.length > 0) {
+        console.log("data.ads: ", data.ads);
+        const formatted = data.ads
+          .sort((a, b) => a.ads_order - b.ads_order)
+          .map((item) => ({
+            id: item.id,
+            order: item.ads_order,
+            video_url: `https://api.meetowner.in/${item.image}`,
+          }));
+        setMediaList(formatted);
+      }
+    } catch (error) {
+      console.error("Error fetching ads:", error);
+      setIsError(true);
+    }
+  };
   useEffect(() => {
     if (searchInput.trim() === "") {
       setLocalities([]);
@@ -227,28 +267,7 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-  const [mediaList, setMediaList] = useState([
-    {
-      id: 1,
-      order: 1,
-      video_url: ad1,
-    },
-    {
-      id: 2,
-      order: 2,
-      video_url: ad2,
-    },
-    {
-      id: 3,
-      order: 3,
-      video_url: ad3,
-    },
-    {
-      id: 4,
-      order: 4,
-      video_url: ad4,
-    },
-  ]);
+
   const [isError, setIsError] = useState(false);
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
@@ -258,7 +277,9 @@ export default function SearchBar() {
   const filteredLocations = locations.filter((loc) =>
     loc.toLowerCase().includes(city.toLowerCase())
   );
+
   useEffect(() => {
+    fetchMedia();
     const handleClickOutside = (event) => {
       if (
         containerRef.current &&

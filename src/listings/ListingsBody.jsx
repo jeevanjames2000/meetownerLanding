@@ -480,7 +480,7 @@ const PropertyCard = memo(
                           : property?.user?.user_type === 4
                           ? "Agent"
                           : property?.user?.user_type === 5
-                          ? "Owner"
+                          ? "Owner"  
                           : property?.user?.user_type === 6
                           ? "Channel Partner"
                           : "Seller"}

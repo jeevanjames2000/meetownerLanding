@@ -9,18 +9,21 @@ import { useDispatch, useSelector } from "react-redux";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
+  const [data, setData] = useState([]);
+  console.log("property: ", property);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/listings/v1/getRandomPropertiesAds`
+        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads`
       );
       const data = await response.json();
-      setProperty(data.results);
+      setProperty(data.ads);
     } catch (err) {
       console.error("Failed to fetch properties:", err);
     }
   };
+
   useEffect(() => {
     fetchLatestProperties();
   }, []);
@@ -93,15 +96,20 @@ const ListingAds = () => {
       <div className="hidden sticky right-0 top-20 lg:block md:block h-auto z-0 bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg cursor-pointer">
           <img
-            src={`https://api.meetowner.in/uploads/${property[2]?.image}`}
+            src={
+              property[2]?.property_data?.image
+                ? `https://api.meetowner.in/uploads/${property[2].property_data.image}`
+                : `https://via.placeholder.com/400x200?text=No+Image`
+            }
             alt="Featured Property"
             crossOrigin="anonymous"
             className="w-full h-44 object-cover rounded-md"
           />
+
           <div className="absolute bottom-2 right-2 flex md:flex-col lg:flex-row justify-center  gap-2">
             <p
               onClick={() => {
-                handleNavigation(property[2]);
+                handleNavigation(property[2].property_data);
               }}
               className="bg-inherit text-[#fff] font-normal hover:bg-white cursor-pointer hover:text-black px-2 rounded-lg border-1 border-[#ffffff] transition"
             >
@@ -109,7 +117,7 @@ const ListingAds = () => {
             </p>
             <p
               onClick={() => {
-                handleContactSeller(property[2]);
+                handleContactSeller(property[2].property_data);
               }}
               className="bg-inherit text-[#fff] font-normal px-2 hover:bg-white hover:text-black cursor-pointer rounded-lg border-1 border-[#ffffff] transition"
             >
@@ -124,7 +132,7 @@ const ListingAds = () => {
                 key={item.id || i}
                 className="relative rounded-xl shadow-lg overflow-hidden"
                 onClick={() => {
-                  handleNavigation(item);
+                  handleNavigation(item.property_data);
                 }}
               >
                 <div className="bg-[#1D3A76] text-white text-xs font-medium py-2 px-4 text-center">
@@ -133,20 +141,25 @@ const ListingAds = () => {
                 <div className="bg-gray-50 rounded-b-lg overflow-hidden cursor-pointer">
                   <img
                     src={
-                      item.image
-                        ? `https://api.meetowner.in/uploads/${item.image}`
+                      item.property_data?.image
+                        ? `https://api.meetowner.in/uploads/${item.property_data.image}`
                         : `https://via.placeholder.com/400x200?text=No+Image`
                     }
                     crossOrigin="anonymous"
-                    alt={item.property_name || `Property ${i + 1}`}
+                    alt={
+                      item.property_data?.property_name || `Property ${i + 1}`
+                    }
                     className="w-full h-32 object-cover"
                   />
                   <div className="p-4 text-left">
                     <p className="font-bold text-gray-900">
-                      ₹{formatToIndianCurrency(item.property_cost || 0)}
+                      ₹
+                      {formatToIndianCurrency(
+                        item.property_data?.property_cost || 0
+                      )}
                     </p>
                     <h4 className="font-normal text-md">
-                      {item.property_name || "Unnamed Property"}
+                      {item.property_data?.property_name || "Unnamed Property"}
                     </h4>
                   </div>
                 </div>

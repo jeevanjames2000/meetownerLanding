@@ -78,9 +78,7 @@ const Favourites = () => {
     const { userDetails } = JSON.parse(data);
     try {
       const response = await axios.get(
-        `${"http://localhost:5000"}/enquiry/v1/getUserContactSellers?user_id=${
-          userDetails.user_id
-        }`
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails.user_id}`
       );
       const contacts = response.data || [];
       const contactIds = contacts.results.map(
