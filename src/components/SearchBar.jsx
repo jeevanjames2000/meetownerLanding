@@ -87,6 +87,7 @@ export default function SearchBar() {
   const [selected, setSelected] = useState("Buy");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [location, setLocation] = useState("Hyderabad");
+  console.log("location: ", location);
   const locations = [
     "Top Cities",
     "Delhi",
@@ -137,7 +138,6 @@ export default function SearchBar() {
       video_url: ad3,
     },
   ]);
-  console.log("mediaList: ", mediaList);
   useEffect(() => {
     const selectedTab = tabs[activeTab];
     dispatch(
@@ -170,7 +170,7 @@ export default function SearchBar() {
   const fetchMedia = async () => {
     try {
       const response = await fetch(
-        "https://api.meetowner.in/adAssets/v1/getAds?ads_page=main_slider"
+        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=main_slider&city=${location}`
       );
       const data = await response.json();
       if (data.ads?.length > 0) {
@@ -290,7 +290,7 @@ export default function SearchBar() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [location]);
   return (
     <div
       className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"
