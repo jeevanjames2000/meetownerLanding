@@ -9,13 +9,13 @@ import { useDispatch, useSelector } from "react-redux";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
-  const [data, setData] = useState([]);
   console.log("property: ", property);
+  const searchData = useSelector((state) => state.search);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
       const response = await fetch(
-        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads`
+        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city=${searchData.city}`
       );
       const data = await response.json();
       setProperty(data.ads);
@@ -26,10 +26,9 @@ const ListingAds = () => {
 
   useEffect(() => {
     fetchLatestProperties();
-  }, []);
+  }, [searchData]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const searchData = useSelector((state) => state.search);
 
   const handleNavigation = useCallback(
     (property) => {
@@ -91,6 +90,9 @@ const ListingAds = () => {
       toast.error("Something went wrong while submitting enquiry");
     }
   };
+  if (property.length === 0) {
+    return;
+  }
   return (
     <>
       <div className="hidden sticky right-0 top-20 lg:block md:block h-auto z-0 bg-white  p-3 rounded-xl shadow-lg overflow-hidden">

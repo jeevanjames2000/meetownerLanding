@@ -29,9 +29,10 @@ import ad3 from "../assets/Images/1440x566 Hallmark Treasor.jpg";
 
 export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
+  const searchData = useSelector((state) => state.search);
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
-    Visakhapatanam: vizagLocalities,
+    Visakhapatnam: vizagLocalities,
     Bengaluru: bengaluruLocalities,
     Chennai: chennaiLocalities,
     Mumbai: mumbaiLocalities,
@@ -41,7 +42,7 @@ export default function SearchBar() {
   const [activeTab, setActiveTab] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(searchData.city || "");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const videoRefs = useRef([]);
@@ -86,7 +87,7 @@ export default function SearchBar() {
   };
   const [selected, setSelected] = useState("Buy");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [location, setLocation] = useState("Hyderabad");
+  const [location, setLocation] = useState(searchData.location || "");
   console.log("location: ", location);
   const locations = [
     "Top Cities",
@@ -114,6 +115,7 @@ export default function SearchBar() {
     "Vikarabad",
   ];
   const currentLocalities = cityLocalitiesMap[location] || [];
+  console.log("currentLocalities: ", currentLocalities);
   const filteredLocalities = currentLocalities.filter((locality) =>
     locality.toLowerCase().includes(searchInput.toLowerCase())
   );
@@ -153,7 +155,7 @@ export default function SearchBar() {
             : selectedTab === "Commercial"
             ? "Others"
             : "Apartment",
-        location: searchInput,
+        location: searchInput || location,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
       })
@@ -174,7 +176,6 @@ export default function SearchBar() {
       );
       const data = await response.json();
       if (data.ads?.length > 0) {
-        console.log("data.ads: ", data.ads);
         const formatted = data.ads
           .sort((a, b) => a.ads_order - b.ads_order)
           .map((item) => ({
@@ -273,7 +274,7 @@ export default function SearchBar() {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
   const containerRef = useRef(null);
-  const [city, setCity] = useState("Hyderabad");
+  const [city, setCity] = useState(searchData.city || "");
   const filteredLocations = locations.filter((loc) =>
     loc.toLowerCase().includes(city.toLowerCase())
   );
@@ -366,6 +367,11 @@ export default function SearchBar() {
                     value={city}
                     onChange={(e) => {
                       setCity(e.target.value);
+                      dispatch(
+                        setSearchData({
+                          location: e.target.value,
+                        })
+                      );
                       if (!isLocationOpen) setIsLocationOpen(true);
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -379,6 +385,12 @@ export default function SearchBar() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setCity("");
+                        dispatch(
+                          setSearchData({
+                            location: "",
+                            city: "",
+                          })
+                        );
                       }}
                     />
                   )}

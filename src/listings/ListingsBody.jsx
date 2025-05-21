@@ -238,7 +238,7 @@ const PropertyCard = memo(
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "_")
                 .replace(/(^-|-$)/g, "")
-            : "hyderabad";
+            : "";
           const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
           const fullUrl = `${window.location.origin}/property?${seoUrl}`;
           const encodedMessage = encodeURIComponent(
@@ -480,7 +480,7 @@ const PropertyCard = memo(
                           : property?.user?.user_type === 4
                           ? "Agent"
                           : property?.user?.user_type === 5
-                          ? "Owner"  
+                          ? "Owner"
                           : property?.user?.user_type === 6
                           ? "Channel Partner"
                           : "Seller"}
@@ -658,7 +658,7 @@ function ListingsBody({ setShowLoginModal }) {
             searchData?.budget || ""
           }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
             searchData?.occupancy || ""
-          }&property_status=1`
+          }&property_status=1&city_id=${searchData.city}`
         );
         const res = await response.json();
         const newData = res.properties || [];
@@ -680,7 +680,7 @@ function ListingsBody({ setShowLoginModal }) {
         setLoading(false);
       }
     },
-    [searchData, selected, loading]
+    [searchData, searchData.city, selected, loading]
   );
   const fetchContactedProperties = async () => {
     const data = localStorage.getItem("user");
@@ -1043,7 +1043,7 @@ function ListingsBody({ setShowLoginModal }) {
               : searchData?.tab === "Rent"
               ? "Rent"
               : "Sell"}{" "}
-            In {searchData?.location || "Hyderabad"}
+            In {searchData?.city || ""}
           </p>
         </div>
         <div className="relative  flex flex-row  text-left z-50 flex-shrink-0 ">

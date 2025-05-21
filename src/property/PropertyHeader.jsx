@@ -44,7 +44,7 @@ const PropertyHeader = () => {
     "Kolkata",
     "Coimbatore",
     "Ahmedabad",
-    "Visakhapatanam",
+    "Visakhapatnam",
     "Vijayawada",
     "Guntur",
     "Rajamundry",
@@ -52,7 +52,7 @@ const PropertyHeader = () => {
   ];
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
-    Visakhapatanam: vizagLocalities,
+    Visakhapatnam: vizagLocalities,
     Bengaluru: bengaluruLocalities,
     Chennai: chennaiLocalities,
     Mumbai: mumbaiLocalities,

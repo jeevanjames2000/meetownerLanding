@@ -2,13 +2,13 @@ import { createSlice } from "@reduxjs/toolkit";
 const searchSlice = createSlice({
   name: "search",
   initialState: {
-    city: "Hyderabad",
+    city: "",
     tab: "Buy",
     property_for: "Sell",
     property_in: "",
     bhk: null,
     budget: "",
-    sub_type: "Apartment",
+    sub_type: "",
     plot_subType: "Buy",
     commercial_subType: "Buy",
     occupancy: "",

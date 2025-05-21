@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -25,16 +25,15 @@ import {
 } from "../components/customCities";
 import { useNavigate } from "react-router-dom";
 import { IoCloseCircleOutline } from "react-icons/io5";
+import { debounce } from "lodash";
 
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
 
-  const [selectedCity, setSelectedCity] = useState(
-    searchData?.city || "Hyderabad"
-  );
+  const [selectedCity, setSelectedCity] = useState(searchData?.city || "");
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-  const [location, setLocation] = useState("Hyderabad");
+  const [location, setLocation] = useState(searchData.city || "");
   const locations = [
     "Top Cities",
     "Delhi",
@@ -47,7 +46,7 @@ const Header = () => {
     "Kolkata",
     "Coimbatore",
     "Ahmedabad",
-    "Visakhapatanam",
+    "Visakhapatnam",
     "Vijayawada",
     "Guntur",
     "Rajamundry",
@@ -55,7 +54,7 @@ const Header = () => {
   ];
   const cityLocalitiesMap = {
     Hyderabad: customHydCities,
-    Visakhapatanam: vizagLocalities,
+    Visakhapatnam: vizagLocalities,
     Bengaluru: bengaluruLocalities,
     Chennai: chennaiLocalities,
     Mumbai: mumbaiLocalities,
@@ -215,13 +214,16 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const debouncedDispatch = useCallback(
+    debounce((value) => {
+      dispatch(setSearchData({ location: value }));
+    }, 3000), // 1000ms = 1 second
+    []
+  );
+
   const handleValueChange = (value) => {
     setSearchInput(value);
-    dispatch(
-      setSearchData({
-        location: value,
-      })
-    );
+    debouncedDispatch(value);
   };
   const navigate = useNavigate();
   const handleRouteHome = () => {
@@ -273,6 +275,8 @@ const Header = () => {
                             onClick={() => {
                               if (!isDisabled) {
                                 setLocation(option);
+                                dispatch(setCity(option));
+                                dispatch(setSearchData({ location: option }));
                                 setIsLocationOpen(false);
                                 setSearchInput("");
                                 setIsSearchDropdownOpen(false);
