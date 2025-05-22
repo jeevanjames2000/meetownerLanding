@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
-  console.log("property: ", property);
   const searchData = useSelector((state) => state.search);
   const fetchLatestProperties = async () => {
     setProperty([]);

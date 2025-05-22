@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -9,15 +9,6 @@ import {
 } from "react-icons/io5";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import { FaLocationCrosshairs } from "react-icons/fa6";
-import {
-  vizagLocalities,
-  bengaluruLocalities,
-  customHydCities,
-  chennaiLocalities,
-  mumbaiLocalities,
-  puneLocalities,
-  vikarabadLocalities,
-} from "../components/customCities";
 import { setSearchData } from "../../store/slices/searchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -26,23 +17,14 @@ import MeetOwner from "../assets/Images/WhatsApp Image 2025-04-12 at 3.44.38 PM.
 import ad1 from "../assets/Images/1440x566 Hallmark Skyrena.jpg";
 import ad2 from "../assets/Images/1440x566 Hallmark Sunnyside.jpg";
 import ad3 from "../assets/Images/1440x566 Hallmark Treasor.jpg";
-
+import axios from "axios";
 export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
   const searchData = useSelector((state) => state.search);
-  const cityLocalitiesMap = {
-    Hyderabad: customHydCities,
-    Visakhapatnam: vizagLocalities,
-    Bengaluru: bengaluruLocalities,
-    Chennai: chennaiLocalities,
-    Mumbai: mumbaiLocalities,
-    Pune: puneLocalities,
-    Vikarabad: vikarabadLocalities,
-  };
   const [activeTab, setActiveTab] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [searchInput, setSearchInput] = useState(searchData.city || "");
+  const [searchInput, setSearchInput] = useState("");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const videoRefs = useRef([]);
@@ -87,38 +69,9 @@ export default function SearchBar() {
   };
   const [selected, setSelected] = useState("Buy");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [location, setLocation] = useState(searchData.location || "");
-  console.log("location: ", location);
-  const locations = [
-    "Top Cities",
-    "Delhi",
-    "Pune",
-    "Mumbai",
-    "Navi Mumbai",
-    "Hyderabad",
-    "Warangal",
-    "Nizamabad",
-    "Karimnagar",
-    "Khammam",
-    "Ramagundam",
-    "Mahabubnagar",
-    "Bengaluru",
-    "Chennai",
-    "Kolkata",
-    "Coimbatore",
-    "Ahmedabad",
-    "Visakhapatnam",
-    "Vijayawada",
-    "Guntur",
-    "Rajamundry",
-    "Eluru",
-    "Vikarabad",
-  ];
-  const currentLocalities = cityLocalitiesMap[location] || [];
-  console.log("currentLocalities: ", currentLocalities);
-  const filteredLocalities = currentLocalities.filter((locality) =>
-    locality.toLowerCase().includes(searchInput.toLowerCase())
-  );
+  const [location, setLocation] = useState(searchData.city || "");
+  const [citiesList, setCitiesList] = useState([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
   const options = ["Buy", "Rent"];
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
@@ -155,7 +108,7 @@ export default function SearchBar() {
             : selectedTab === "Commercial"
             ? "Others"
             : "Apartment",
-        location: searchInput || location,
+        location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
       })
@@ -190,26 +143,43 @@ export default function SearchBar() {
       setIsError(true);
     }
   };
-  useEffect(() => {
-    if (searchInput.trim() === "") {
-      setLocalities([]);
-      return;
+  const fetchCities = async () => {
+    setIsLoadingCities(true);
+    try {
+      const response = await axios.get(
+        "https://api.meetowner.in/api/v1/getAllCities"
+      );
+      const activeCities = response.data?.filter(
+        (city) => city.status === "active"
+      );
+      const cityNames = activeCities.map((item) => item.city);
+      setCitiesList(cityNames);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      setIsError(true);
+    } finally {
+      setIsLoadingCities(false);
     }
+  };
+  useEffect(() => {
+    if (!location) return;
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/api/v1/search?query=${searchInput}&city=${location}`
+          `${config.awsApiUrl}/api/v1/search?city=${location}&query=${searchInput}`
         );
         const data = await response.json();
-        setLocalities(data);
-      } catch (err) {}
+        setLocalities([{ locality: "Most Searched" }, ...data]);
+      } catch (err) {
+        console.error("Failed to fetch localities:", err);
+        setLocalities([]);
+      }
     };
     fetchLocalities();
   }, [searchInput, location]);
   const navigate = useNavigate();
   const handleNavigation = () => {
     const propertyFor = tabs[activeTab] === "Rent" ? "rent" : "sale";
-
     const propertyType = (() => {
       switch (tabs[activeTab]) {
         case "Plot":
@@ -268,19 +238,18 @@ export default function SearchBar() {
     );
   };
   const [localites, setLocalities] = useState([]);
-
   const [isError, setIsError] = useState(false);
   const isVideo = (url) => {
     return url?.match(/\.(mp4|webm|ogg)$/i);
   };
   const containerRef = useRef(null);
   const [city, setCity] = useState(searchData.city || "");
-  const filteredLocations = locations.filter((loc) =>
+  const filteredLocations = citiesList.filter((loc) =>
     loc.toLowerCase().includes(city.toLowerCase())
   );
-
   useEffect(() => {
     fetchMedia();
+    fetchCities();
     const handleClickOutside = (event) => {
       if (
         containerRef.current &&
@@ -355,7 +324,6 @@ export default function SearchBar() {
         </div>
         <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
-            {}
             <div className="relative w-auto inline-block">
               <div
                 className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76] cursor-pointer"
@@ -402,30 +370,25 @@ export default function SearchBar() {
                   className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
                   onWheel={(e) => e.stopPropagation()}
                 >
-                  {filteredLocations.length > 0 ? (
-                    filteredLocations.map((option) => {
-                      const isDisabled = option === "Top Cities";
-                      return (
-                        <li
-                          key={option}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setLocation(option);
-                              setCity(option);
-                              setIsLocationOpen(false);
-                              setSearchInput("");
-                            }
-                          }}
-                          className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
-                            isDisabled
-                              ? "text-gray-400 cursor-default"
-                              : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
-                          }`}
-                        >
-                          {option}
-                        </li>
-                      );
-                    })
+                  {isLoadingCities ? (
+                    <li className="px-3 py-2 text-gray-400 text-sm">
+                      Loading...
+                    </li>
+                  ) : filteredLocations.length > 0 ? (
+                    filteredLocations.map((option) => (
+                      <li
+                        key={option}
+                        onClick={() => {
+                          setLocation(option);
+                          setCity(option);
+                          setIsLocationOpen(false);
+                          setSearchInput("");
+                        }}
+                        className="px-3 py-1 text-left rounded-md hover:bg-[#1D3A76] hover:text-white cursor-pointer transition-all duration-200"
+                      >
+                        {option}
+                      </li>
+                    ))
                   ) : (
                     <li className="px-3 py-2 text-gray-400 text-sm">
                       No results found
@@ -437,7 +400,6 @@ export default function SearchBar() {
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
-            {}
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
@@ -462,15 +424,15 @@ export default function SearchBar() {
               {isSearchDropdownOpen && (
                 <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
                   {searchInput.trim() === "" ? (
-                    filteredLocalities.length > 0 ? (
-                      filteredLocalities.map((locality) => {
-                        const isDisabled = locality === "Most Searched";
+                    localites.length > 0 ? (
+                      localites.map((item) => {
+                        const isDisabled = item.locality === "Most Searched";
                         return (
                           <li
-                            key={locality}
+                            key={item.locality}
                             onClick={() => {
                               if (!isDisabled) {
-                                setSearchInput(locality);
+                                setSearchInput(item.locality);
                                 setIsSearchDropdownOpen(false);
                               }
                             }}
@@ -481,12 +443,14 @@ export default function SearchBar() {
                             }`}
                           >
                             <div className="flex justify-between">
-                              <div>{locality}</div>
+                              <div>{item.locality}</div>
                               <p
                                 className="text-sm text-gray-300"
                                 style={{
                                   display:
-                                    locality === "Most Searched" ? "none" : "",
+                                    item.locality === "Most Searched"
+                                      ? "none"
+                                      : "",
                                 }}
                               >
                                 Locality

@@ -8,85 +8,59 @@ import config from "../../config";
 import {
   setBHK,
   setBudget,
-  setCity,
   setOccupancy,
   setPropertyIn,
   setSearchData,
   setSubType,
   setTab,
 } from "../../store/slices/searchSlice";
-import {
-  vizagLocalities,
-  bengaluruLocalities,
-  customHydCities,
-  chennaiLocalities,
-  mumbaiLocalities,
-  puneLocalities,
-} from "../components/customCities";
 import { useNavigate } from "react-router-dom";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { debounce } from "lodash";
-
+import axios from "axios";
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-
-  const [selectedCity, setSelectedCity] = useState(searchData?.city || "");
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const [location, setLocation] = useState(searchData.city || "");
-  const locations = [
-    "Top Cities",
-    "Delhi",
-    "Pune",
-    "Mumbai",
-    "Navi Mumbai",
-    "Hyderabad",
-    "Bengaluru",
-    "Chennai",
-    "Kolkata",
-    "Coimbatore",
-    "Ahmedabad",
-    "Visakhapatnam",
-    "Vijayawada",
-    "Guntur",
-    "Rajamundry",
-    "Eluru",
-  ];
-  const cityLocalitiesMap = {
-    Hyderabad: customHydCities,
-    Visakhapatnam: vizagLocalities,
-    Bengaluru: bengaluruLocalities,
-    Chennai: chennaiLocalities,
-    Mumbai: mumbaiLocalities,
-    Pune: puneLocalities,
-  };
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const currentLocalities = cityLocalitiesMap[location] || [];
-  const filteredLocalities = currentLocalities.filter((locality) =>
-    locality.toLowerCase().includes(searchInput.toLowerCase())
-  );
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
-
-  useEffect(() => {
-    if (searchInput.trim() === "") {
-      setLocalities([]);
-      return;
+  const [citiesList, setCitiesList] = useState([]);
+  const fetchCities = async () => {
+    try {
+      const response = await axios.get(
+        "https://api.meetowner.in/api/v1/getAllCities"
+      );
+      const activeCities = response.data?.filter(
+        (city) => city.status === "active"
+      );
+      const cityNames = activeCities.map((item) => item.city);
+      setCitiesList(cityNames);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
     }
+  };
+  useEffect(() => {
+    fetchCities();
+  }, []);
+  useEffect(() => {
+    if (!location) return;
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/api/v1/search?query=${searchInput}&city=${location}`
+          `${config.awsApiUrl}/api/v1/search?city=${location}&query=${searchInput}`
         );
         const data = await response.json();
         setLocalities(data);
-      } catch (err) {}
+      } catch (err) {
+        console.error("Failed to fetch localities:", err);
+        setLocalities([]);
+      }
     };
     fetchLocalities();
   }, [searchInput, location]);
-
   const [activeDropdown, setActiveDropdown] = useState(null);
   const toggleDropdown = (key) => {
     setActiveDropdown((prev) => {
@@ -94,7 +68,6 @@ const Header = () => {
       return newValue;
     });
   };
-
   const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
   const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
   const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
@@ -104,11 +77,9 @@ const Header = () => {
   const [selectedSubType, setSelectedSubType] = useState(
     searchData.sub_type || ""
   );
-
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
   );
-
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
@@ -133,7 +104,6 @@ const Header = () => {
     }
     return ["Property Type"];
   };
-
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
     BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
@@ -163,7 +133,6 @@ const Header = () => {
     Type: setSubType,
     Status: setOccupancy,
   };
-
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
     BHK: setSelectedBHK,
@@ -172,7 +141,6 @@ const Header = () => {
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
   };
-
   const labelToStoreKeyMap = {
     Buy: "tab",
     BHK: "bhk",
@@ -181,12 +149,10 @@ const Header = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
-
   const handleClear = () => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
   };
-
   const getSelectedLabel = (label) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
@@ -199,7 +165,6 @@ const Header = () => {
     });
     return typeof match === "object" ? match.label : match || options[0];
   };
-
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -217,10 +182,9 @@ const Header = () => {
   const debouncedDispatch = useCallback(
     debounce((value) => {
       dispatch(setSearchData({ location: value }));
-    }, 3000), // 1000ms = 1 second
+    }, 3000),
     []
   );
-
   const handleValueChange = (value) => {
     setSearchInput(value);
     debouncedDispatch(value);
@@ -229,7 +193,6 @@ const Header = () => {
   const handleRouteHome = () => {
     navigate("/");
   };
-
   return (
     <>
       <header
@@ -267,7 +230,7 @@ const Header = () => {
                   </div>
                   {isLocationOpen && (
                     <ul className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50">
-                      {locations.map((option) => {
+                      {citiesList.map((option) => {
                         const isDisabled = option === "Top Cities";
                         return (
                           <li
@@ -275,8 +238,12 @@ const Header = () => {
                             onClick={() => {
                               if (!isDisabled) {
                                 setLocation(option);
-                                dispatch(setCity(option));
-                                dispatch(setSearchData({ location: option }));
+                                dispatch(
+                                  setSearchData({
+                                    location: option,
+                                    city: option,
+                                  })
+                                );
                                 setIsLocationOpen(false);
                                 setSearchInput("");
                                 setIsSearchDropdownOpen(false);
@@ -360,7 +327,6 @@ const Header = () => {
              md:text-left md:placeholder:text-left 
              focus:outline-none focus:ring-0"
                 />
-
                 <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2">
                   {searchInput && (
                     <button
@@ -378,18 +344,18 @@ const Header = () => {
                 </div>
                 {isSearchDropdownOpen && (
                   <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto z-50">
-                    {searchInput.trim() === "" ? (
-                      filteredLocalities.length > 0 ? (
-                        filteredLocalities.map((locality) => {
-                          const isDisabled = locality === "Most Searched";
+                    {searchInput?.trim() === "" ? (
+                      localities?.length > 0 ? (
+                        localities?.map((item) => {
+                          const isDisabled = item?.locality === "Most Searched";
                           return (
                             <li
-                              key={locality}
+                              key={item.locality}
                               onClick={() => {
                                 if (!isDisabled) {
-                                  setSearchInput(locality);
+                                  setSearchInput(item?.locality);
                                   dispatch(
-                                    setSearchData({ location: locality })
+                                    setSearchData({ location: item?.locality })
                                   );
                                   setIsSearchDropdownOpen(false);
                                 }
@@ -401,9 +367,9 @@ const Header = () => {
                               }`}
                             >
                               <div className="flex justify-between">
-                                <div>{locality}</div>
+                                <div>{item?.locality}</div>
                                 <p className="text-sm text-gray-300">
-                                  {locality === "Most Searched"
+                                  {item?.locality === "Most Searched"
                                     ? ""
                                     : "Locality"}
                                 </p>
@@ -416,17 +382,17 @@ const Header = () => {
                           No matching localities
                         </li>
                       )
-                    ) : localities.length > 0 ? (
-                      localities.map((item) => (
+                    ) : localities?.length > 0 ? (
+                      localities?.map((item) => (
                         <li
-                          key={item.locality}
+                          key={item?.locality}
                           onClick={() => {
-                            setSearchInput(item.locality);
+                            setSearchInput(item?.locality);
                             setIsSearchDropdownOpen(false);
                           }}
                           className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
                         >
-                          {item.locality}
+                          {item?.locality}
                           <p className="text-sm text-gray-300">Locality</p>
                         </li>
                       ))
@@ -441,7 +407,6 @@ const Header = () => {
             </div>
           </div>
         </div>
-
         <div className="md:hidden mt-3 flex overflow-x-auto gap-2 px-4 relative pb-3">
           {["Buy", "BHK", "Budget", "Property In", "Type"].map((label) => (
             <div key={label} className="relative flex-shrink-0">
@@ -589,5 +554,4 @@ const Header = () => {
     </>
   );
 };
-
 export default Header;

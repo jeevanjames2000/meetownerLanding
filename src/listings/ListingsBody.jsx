@@ -216,33 +216,34 @@ const PropertyCard = memo(
         const phone = sellerData?.mobile || sellerData?.phone;
         const name = sellerData?.name || "";
         if (phone) {
-          const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
+          const propertyFor =
+            property?.property_for === "Rent" ? "rent" : "buy";
           const category =
-            property.sub_type === "Apartment" ||
-            property.sub_type === "Individual house"
-              ? `${property.bedrooms}BHK`
-              : property.sub_type === "Plot"
+            property?.sub_type === "Apartment" ||
+            property?.sub_type === "Individual house"
+              ? `${property?.bedrooms}BHK`
+              : property?.sub_type === "Plot"
               ? "Plot"
               : "Property";
-          const propertyId = property.unique_property_id;
-          const propertyNameSlug = property.property_name
+          const propertyId = property?.unique_property_id;
+          const propertyNameSlug = property?.property_name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "_")
             .replace(/(^-|-$)/g, "");
-          const locationSlug = property.location_id
+          const locationSlug = property?.location_id
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "_")
             .replace(/(^-|-$)/g, "");
-          const citySlug = property.city
-            ? property.city
+          const citySlug = property?.city
+            ? property?.city
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "_")
                 .replace(/(^-|-$)/g, "")
             : "";
-          const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
+          const seoUrl = `${propertyFor}_${category}_${property?.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
           const fullUrl = `${window.location.origin}/property?${seoUrl}`;
           const encodedMessage = encodeURIComponent(
-            `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
+            `Hi ${name},\nI'm interested in this property: ${property?.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData?.mobile} to initiate the process.`
           );
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
@@ -283,7 +284,7 @@ const PropertyCard = memo(
                 <img
                   src={
                     property.image
-                      ? `https://api.meetowner.in/uploads/${property.image}`
+                      ? `https://api.meetowner.in/uploads/${property?.image}`
                       : `https://placehold.co/600x400?text=${
                           property?.property_name || "No Image Found"
                         }`
@@ -304,17 +305,17 @@ const PropertyCard = memo(
               <div className="mb-3 text-left">
                 <div className="flex flex-col md:flex-row justify-between md:items-center">
                   <p className="text-[#1D3A76] font-bold text-[15px]">
-                    {property.sub_type === "Apartment"
-                      ? `${property.bedrooms} BHK ${
-                          property.property_type
-                            ? property.property_type
-                            : property.sub_type || ""
-                        } for ${property.property_for}`
-                      : `${property.sub_type} for ${property.property_for}`}{" "}
-                    in {property.locality_name}, {property.google_address}
+                    {property?.sub_type === "Apartment"
+                      ? `${property?.bedrooms} BHK ${
+                          property?.property_type
+                            ? property?.property_type
+                            : property?.sub_type || ""
+                        } for ${property?.property_for}`
+                      : `${property?.sub_type} for ${property?.property_for}`}{" "}
+                    in {property?.locality_name}, {property?.google_address}
                   </p>
                   <div className="flex items-center gap-2 text-[#1D3A76] text-sm font-medium my-2 md:my-0">
-                    {likedProperties.includes(property.unique_property_id) ? (
+                    {likedProperties?.includes(property?.unique_property_id) ? (
                       <IoIosHeart
                         onClick={(e) => {
                           e.stopPropagation();
@@ -337,12 +338,12 @@ const PropertyCard = memo(
                 </div>
                 <div className="flex flex-col lg:flex-row justify-between">
                   <p className="text-[#1D3A76] font-bold text-base md:text-[18px]">
-                    {property.property_name}
+                    {property?.property_name}
                   </p>
                   <p className="text-[#1D3A76] font-semibold text-[18px]">
-                    {property.project_name || ""}{" "}
+                    {property?.project_name || ""}{" "}
                     <span className="text-[#1D3A76] font-bold text-[15px]">
-                      Rs: {formatToIndianCurrency(property.property_cost)}{" "}
+                      Rs: {formatToIndianCurrency(property?.property_cost)}{" "}
                       {property.price_negotiable && " (Negotiable)"}
                     </span>
                     <span className="text-[#A4A4A4] font-medium text-[15px] ml-2">
@@ -357,18 +358,18 @@ const PropertyCard = memo(
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex flex-wrap gap-2 items-center text-[#204691] font-medium text-sm">
                     {[
-                      property.sub_type === "Plot"
-                        ? property.plot_area
-                          ? `${formatValue(property.plot_area)} ${
+                      property?.sub_type === "Plot"
+                        ? property?.plot_area
+                          ? `${formatValue(property?.plot_area)} ${
                               property?.area_units
                             } Plot area`
-                          : property.carpet_area
-                          ? `${formatValue(property.carpet_area)} ${
+                          : property?.carpet_area
+                          ? `${formatValue(property?.carpet_area)} ${
                               property?.area_units
                             } Carpet area`
                           : null
-                        : property.builtup_area
-                        ? `${formatValue(property.builtup_area)} ${
+                        : property?.builtup_area
+                        ? `${formatValue(property?.builtup_area)} ${
                             property?.area_units
                           } Builtup area`
                         : null,
@@ -376,7 +377,7 @@ const PropertyCard = memo(
                         "Investor Property",
                       property?.under_construction && "Under Construction",
                       property?.under_construction &&
-                        `Possession: ${property.under_construction.slice(
+                        `Possession: ${property?.under_construction.slice(
                           2,
                           10
                         )}`,
@@ -398,11 +399,11 @@ const PropertyCard = memo(
                 <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
                   <p>Highlights:</p>
                   {[
-                    property?.facing && `${property.facing} Facing`,
+                    property?.facing && `${property?.facing} Facing`,
                     property?.bedrooms && `${property?.bedrooms} BHK`,
                     property?.property_in &&
                       property?.sub_type &&
-                      `${property.property_in} ${property.sub_type}`,
+                      `${property?.property_in} ${property?.sub_type}`,
                   ]
                     .filter(Boolean)
                     .map((item, index, arr) => (
@@ -491,9 +492,9 @@ const PropertyCard = memo(
                     </p>
                   </div>
                   <p className="text-gray-500 font-semibold text-sm hidden sm:block">
-                    {property.user.name.length > 10
-                      ? property.user.name.slice(0, 10) + "..."
-                      : property.user.name}
+                    {property?.user?.name?.length > 10
+                      ? property?.user?.name?.slice(0, 10) + "..."
+                      : property?.user?.name}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -620,7 +621,7 @@ function ListingsBody({ setShowLoginModal }) {
       const { userDetails } = JSON.parse(data);
       try {
         const response = await axios.get(
-          `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
+          `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails?.user_id}`
         );
         const liked = response.data.favourites || [];
         const likedIds = liked.map((fav) => fav.unique_property_id);
@@ -690,7 +691,7 @@ function ListingsBody({ setShowLoginModal }) {
     const { userDetails } = JSON.parse(data);
     try {
       const response = await axios.get(
-        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails.user_id}`
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
       );
       const contacts = response.data || [];
       const contactIds = contacts.results.map(
@@ -744,9 +745,9 @@ function ListingsBody({ setShowLoginModal }) {
         const viewData = {
           user_id: userDetails.user_id,
           property_id: property?.unique_property_id || "N/A",
-          name: userDetails.name || "N/A",
-          mobile: userDetails.mobile || "N/A",
-          email: userDetails.email || "N/A",
+          name: userDetails?.name || "N/A",
+          mobile: userDetails?.mobile || "N/A",
+          email: userDetails?.email || "N/A",
           property_name: property?.property_name || "N/A",
         };
         try {
@@ -837,11 +838,11 @@ function ListingsBody({ setShowLoginModal }) {
   const getOwnerDetails = useCallback(async (property) => {
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property.unique_property_id}`
+        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${property?.unique_property_id}`
       );
       const data = await response.json();
-      const propertydata = data.property_details;
-      const sellerdata = propertydata.seller_details;
+      const propertydata = data?.property_details;
+      const sellerdata = propertydata?.seller_details;
       if (response.ok) {
         return sellerdata;
       } else {
@@ -856,11 +857,11 @@ function ListingsBody({ setShowLoginModal }) {
     try {
       const { userDetails } = JSON.parse(localStorage.getItem("user"));
       const payload = {
-        unique_property_id: selectedProperty.unique_property_id,
-        user_id: userDetails.user_id,
-        name: userDetails.name,
-        mobile: userDetails.phone,
-        email: userDetails.email,
+        unique_property_id: selectedProperty?.unique_property_id,
+        user_id: userDetails?.user_id,
+        name: userDetails?.name,
+        mobile: userDetails?.phone,
+        email: userDetails?.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(selectedProperty);
@@ -869,7 +870,7 @@ function ListingsBody({ setShowLoginModal }) {
       setSubmittedStates((prev) => ({
         ...prev,
         [selectedProperty.unique_property_id]: {
-          ...prev[selectedProperty.unique_property_id],
+          ...prev[selectedProperty?.unique_property_id],
           contact: true,
         },
       }));
@@ -891,10 +892,11 @@ function ListingsBody({ setShowLoginModal }) {
       const { userDetails } = JSON.parse(data);
       const alreadySubmitted =
         localStorage.getItem("visit_submitted") === "true";
-      const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
-      const isEmailMissing = !userDetails?.email || userDetails.email === "N/A";
+      const isNameMissing = !userDetails?.name || userDetails?.name === "N/A";
+      const isEmailMissing =
+        !userDetails?.email || userDetails?.email === "N/A";
       const isMobileMissing =
-        !userDetails?.mobile || userDetails.mobile === "N/A";
+        !userDetails?.mobile || userDetails?.mobile === "N/A";
       if (
         !isNameMissing &&
         !isEmailMissing &&
@@ -922,11 +924,11 @@ function ListingsBody({ setShowLoginModal }) {
         }
         const { userDetails } = JSON.parse(data);
         const payload = {
-          unique_property_id: property.unique_property_id,
-          user_id: userDetails.user_id,
-          fullname: userDetails.name,
-          mobile: userDetails.mobile,
-          email: userDetails.email,
+          unique_property_id: property?.unique_property_id,
+          user_id: userDetails?.user_id,
+          fullname: userDetails?.name,
+          mobile: userDetails?.mobile,
+          email: userDetails?.email,
         };
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/contactSeller`,
@@ -935,8 +937,8 @@ function ListingsBody({ setShowLoginModal }) {
         await handleAPI(property);
         setSubmittedStates((prev) => ({
           ...prev,
-          [property.unique_property_id]: {
-            ...prev[property.unique_property_id],
+          [property?.unique_property_id]: {
+            ...prev[property?.unique_property_id],
             chat: true,
           },
         }));
