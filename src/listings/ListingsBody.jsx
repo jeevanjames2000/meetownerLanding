@@ -689,6 +689,7 @@ function ListingsBody({ setShowLoginModal }) {
       return;
     }
     const { userDetails } = JSON.parse(data);
+
     try {
       const response = await axios.get(
         `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
@@ -819,7 +820,7 @@ function ListingsBody({ setShowLoginModal }) {
         User_user_id: userDetails.user_id,
         userName: userDetails.name,
         userEmail: userDetails?.email || "N/A",
-        userMobile: userDetails.mobile,
+        userMobile: userDetails?.mobile,
         ...property,
         status: isAlreadyLiked ? 1 : 0,
       };
@@ -860,7 +861,7 @@ function ListingsBody({ setShowLoginModal }) {
         unique_property_id: selectedProperty?.unique_property_id,
         user_id: userDetails?.user_id,
         name: userDetails?.name,
-        mobile: userDetails?.phone,
+        mobile: userDetails?.mobile,
         email: userDetails?.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
