@@ -80,6 +80,45 @@ const Header = () => {
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
   );
+  const handleUserSearched = async () => {
+    let userDetails = null;
+    try {
+      const data = localStorage.getItem("user");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        userDetails = parsedData?.userDetails || null;
+      }
+    } catch (error) {
+      console.error("Error parsing localStorage data:", error);
+      userDetails = null;
+    }
+    if (userDetails?.user_id) {
+      const viewData = {
+        user_id: userDetails.user_id,
+        searched_location: searchData.city || "N/A",
+        searched_for: selectedTab || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        searched_city: location || "N/A",
+        property_in: selectedPropertyIn || "N/A",
+        sub_type: selectedSubType || "N/A",
+      };
+      console.log("Sending user activity:", viewData);
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/userActivity`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    }
+  };
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
@@ -179,9 +218,13 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const debounceUserActivity = debounce(() => {
+    handleUserSearched();
+  }, 3000);
   const debouncedDispatch = useCallback(
     debounce((value) => {
       dispatch(setSearchData({ location: value }));
+      debounceUserActivity();
     }, 3000),
     []
   );

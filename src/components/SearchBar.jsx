@@ -93,6 +93,44 @@ export default function SearchBar() {
       video_url: ad3,
     },
   ]);
+  const handleUserSearched = async () => {
+    let userDetails = null;
+    try {
+      const data = localStorage.getItem("user");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        userDetails = parsedData?.userDetails || null;
+      }
+    } catch (error) {
+      console.error("Error parsing localStorage data:", error);
+      userDetails = null;
+    }
+    if (userDetails?.user_id) {
+      const viewData = {
+        user_id: userDetails.user_id,
+        searched_location: searchInput || "N/A",
+        searched_for: selected || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        searched_city: location || "N/A",
+        property_in: searchData.property_in || "N/A",
+        sub_type: searchData.sub_type || "",
+      };
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/userActivity`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    }
+  };
   useEffect(() => {
     const selectedTab = tabs[activeTab];
     dispatch(
@@ -216,6 +254,7 @@ export default function SearchBar() {
           : "Apartment",
       location: searchInput,
     };
+    handleUserSearched();
     navigate(`/listings${seoUrl}`, { state: params });
   };
   const getCurrentLocation = () => {
@@ -261,6 +300,7 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location]);
+
   return (
     <div
       className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"

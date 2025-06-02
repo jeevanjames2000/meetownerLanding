@@ -108,7 +108,40 @@ const Favourites = () => {
   const { handleAPI } = useWhatsappHook();
   const navigate = useNavigate();
   const handleNavigation = useCallback(
-    (property) => {
+    async (property) => {
+      let userDetails = null;
+      try {
+        const data = localStorage.getItem("user");
+        if (data) {
+          const parsedData = JSON.parse(data);
+          userDetails = parsedData?.userDetails || null;
+        }
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+        userDetails = null;
+      }
+      if (userDetails?.user_id) {
+        const viewData = {
+          user_id: userDetails.user_id,
+          property_id: property?.unique_property_id || "N/A",
+          name: userDetails?.name || "N/A",
+          mobile: userDetails?.mobile || "N/A",
+          email: userDetails?.email || "N/A",
+          property_name: property?.property_name || "N/A",
+        };
+        try {
+          await axios.post(
+            `${config.awsApiUrl}/listings/v1/propertyViewed`,
+            viewData
+          );
+        } catch (error) {
+          console.error("Failed to record property view:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+          });
+        }
+      }
       navigate("/property", { state: property });
     },
     [navigate]
