@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import meetlogo from "../assets/Images/Favicon@10x.png";
+import noPropertiesFound from "../assets/Images/14099.jpg";
 import { FaPhoneAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -134,7 +135,7 @@ const AdsCard = memo(() => {
                     : project?.description}
                 </p>
                 <div className="flex justify-end items-center">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-[#243cc2] hover:bg-[#fefefe] text-white rounded-xl shadow">
+                  <button className="flex items-center gap-2 px-6 py-2 bg-[#243cc2] hover:bg-blue-700 text-white rounded-xl shadow">
                     <FaHouse />
                     View Property
                   </button>
@@ -703,12 +704,52 @@ function ListingsBody({ setShowLoginModal }) {
       console.error("Failed to fetch liked properties:", error);
     }
   };
+  const handleUserSearched = async () => {
+    let userDetails = null;
+    try {
+      const data = localStorage.getItem("user");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        userDetails = parsedData?.userDetails || null;
+      }
+    } catch (error) {
+      console.error("Error parsing localStorage data:", error);
+      userDetails = null;
+    }
+    if (userDetails?.user_id) {
+      const viewData = {
+        user_id: userDetails.user_id,
+        searched_location: searchData?.location || "N/A",
+        searched_for: searchData?.tab || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        searched_city: searchData?.city || "N/A",
+        property_in: searchData?.property_in || "N/A",
+        sub_type: searchData?.sub_type || "N/A",
+      };
+      console.log("Sending user activity:", viewData);
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/userActivity`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    }
+  };
   useEffect(() => {
     setData([]);
     setPage(1);
     setHasMore(true);
     fetchProperties(1, true);
     fetchContactedProperties();
+    handleUserSearched();
   }, [
     searchData?.location,
     searchData?.bhk,
@@ -1107,10 +1148,18 @@ function ListingsBody({ setShowLoginModal }) {
           )}
         </WindowScroller>
       ) : !loading ? (
-        <div className="text-center mt-10">
-          <h1 className="text-2xl text-gray-500 font-bold">
-            No Properties Found!
-          </h1>
+        <div className="text-center mt-10 flex flex-col gap-5">
+          <>
+            <img
+              src={noPropertiesFound}
+              alt="Property"
+              crossOrigin="anonymous"
+              className="w-[100%] h-70 object-contain rounded-md"
+            />
+            <h1 className="text-2xl text-gray-500 font-bold">
+              No Properties Found!
+            </h1>
+          </>
           <AdsCard />
         </div>
       ) : null}

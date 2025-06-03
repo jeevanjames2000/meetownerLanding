@@ -78,6 +78,7 @@ const PropertyBody = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [aroundProperty, setAroundProperty] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+
   useEffect(() => {
     const fetchPropertyFromQueryParams = async () => {
       if (!location.state) {
@@ -242,9 +243,7 @@ const PropertyBody = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
-    } catch (err) {
-      console.log("err: ", err);
-    }
+    } catch (err) {}
   };
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();

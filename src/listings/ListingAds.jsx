@@ -6,10 +6,12 @@ import { toast } from "react-toastify";
 import Login from "../auth/Login";
 import { setPropertyData } from "../../store/slices/propertyDetails";
 import { useDispatch, useSelector } from "react-redux";
+import noPropertiesFound from "../assets/Images/urban-planning_10891692.png";
 
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
@@ -123,8 +125,24 @@ const ListingAds = () => {
     }
   };
   if (property.length === 0) {
-    return;
+    return (
+      <div className="flex flex-col items-center justify-center border border-gray-300 rounded-xl p-6 bg-white shadow-sm text-center">
+        <img
+          src={noPropertiesFound}
+          alt="Property"
+          crossOrigin="anonymous"
+          className="w-[100%] h-20 object-contain rounded-md"
+        />
+        <div className="text-md font-semibold text-gray-600 mb-4">
+          😕 We couldn't find any properties for the selected filters.
+        </div>
+        <div className="text-sm text-gray-500">
+          🔄 Try changing the location or filters to see available properties.
+        </div>
+      </div>
+    );
   }
+
   return (
     <>
       <div className="hidden sticky right-0 top-20 lg:block md:block h-auto z-0 bg-white  p-3 rounded-xl shadow-lg overflow-hidden">

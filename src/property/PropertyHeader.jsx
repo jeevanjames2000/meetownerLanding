@@ -20,11 +20,10 @@ import axios from "axios";
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-  const [selectedCity, setSelectedCity] = useState(
-    searchData?.city || "Hyderabad"
-  );
+
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const [location, setLocation] = useState("Hyderabad");
+
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
@@ -43,6 +42,44 @@ const PropertyHeader = () => {
       console.error("Error fetching cities:", error);
     }
   };
+  const handleUserSearched = async () => {
+    let userDetails = null;
+    try {
+      const data = localStorage.getItem("user");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        userDetails = parsedData?.userDetails || null;
+      }
+    } catch (error) {
+      console.error("Error parsing localStorage data:", error);
+      userDetails = null;
+    }
+    if (userDetails?.user_id) {
+      const viewData = {
+        user_id: userDetails.user_id,
+        searched_location: searchData?.location || "N/A",
+        searched_for: searchData?.tab || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        searched_city: location || "N/A",
+        property_in: searchData?.property_in || "N/A",
+        sub_type: searchData?.sub_type || "N/A",
+      };
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/userActivity`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    }
+  };
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -59,6 +96,7 @@ const PropertyHeader = () => {
     };
     fetchCities();
     fetchLocalities();
+    handleUserSearched();
   }, [searchInput, location]);
   const [city, setCity] = useState(searchData.city || "");
   const filteredLocations = citiesList.filter((loc) =>
@@ -182,6 +220,7 @@ const PropertyHeader = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   const handleValueChange = (value) => {
     setSearchInput(value);
     dispatch(
