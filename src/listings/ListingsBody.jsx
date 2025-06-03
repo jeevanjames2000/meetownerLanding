@@ -613,6 +613,45 @@ function ListingsBody({ setShowLoginModal }) {
     "Price: High to Low",
     "Newest First",
   ];
+  const handleUserSearched = async () => {
+    let userDetails = null;
+    try {
+      const data = localStorage.getItem("user");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        userDetails = parsedData?.userDetails || null;
+      }
+    } catch (error) {
+      console.error("Error parsing localStorage data:", error);
+      userDetails = null;
+    }
+    if (userDetails?.user_id && searchData?.city) {
+      const viewData = {
+        user_id: userDetails.user_id,
+        searched_location: searchData?.location || "N/A",
+        searched_for: searchData?.tab || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        searched_city: searchData?.city || "N/A",
+        property_in: searchData?.property_in || "N/A",
+        sub_type: searchData?.sub_type || "N/A",
+      };
+
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/userActivity`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    }
+  };
   useEffect(() => {
     const fetchLikedProperties = async () => {
       const data = localStorage.getItem("user");
@@ -639,6 +678,7 @@ function ListingsBody({ setShowLoginModal }) {
       try {
         setLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        handleUserSearched();
         const response = await fetch(
           `${
             config.awsApiUrl
@@ -704,52 +744,13 @@ function ListingsBody({ setShowLoginModal }) {
       console.error("Failed to fetch liked properties:", error);
     }
   };
-  const handleUserSearched = async () => {
-    let userDetails = null;
-    try {
-      const data = localStorage.getItem("user");
-      if (data) {
-        const parsedData = JSON.parse(data);
-        userDetails = parsedData?.userDetails || null;
-      }
-    } catch (error) {
-      console.error("Error parsing localStorage data:", error);
-      userDetails = null;
-    }
-    if (userDetails?.user_id) {
-      const viewData = {
-        user_id: userDetails.user_id,
-        searched_location: searchData?.location || "N/A",
-        searched_for: searchData?.tab || "N/A",
-        name: userDetails?.name || "N/A",
-        mobile: userDetails?.mobile || "N/A",
-        email: userDetails?.email || "N/A",
-        searched_city: searchData?.city || "N/A",
-        property_in: searchData?.property_in || "N/A",
-        sub_type: searchData?.sub_type || "N/A",
-      };
-      console.log("Sending user activity:", viewData);
-      try {
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/userActivity`,
-          viewData
-        );
-      } catch (error) {
-        console.error("Failed to record property view:", {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-        });
-      }
-    }
-  };
+
   useEffect(() => {
     setData([]);
     setPage(1);
     setHasMore(true);
     fetchProperties(1, true);
     fetchContactedProperties();
-    handleUserSearched();
   }, [
     searchData?.location,
     searchData?.bhk,

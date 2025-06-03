@@ -23,6 +23,7 @@ const Header = () => {
   const searchData = useSelector((state) => state.search);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const [location, setLocation] = useState(searchData.city || "");
+  console.log("location: ", location);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
@@ -80,7 +81,6 @@ const Header = () => {
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || "Ready to move"
   );
-
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
@@ -150,10 +150,6 @@ const Header = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
-  const handleClear = () => {
-    setSearchInput("");
-    dispatch(setSearchData({ location: "" }));
-  };
   const getSelectedLabel = (label) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
@@ -180,16 +176,77 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
+  const handleUserSearched = useCallback(
+    async (searchValue) => {
+      let userDetails = null;
+      try {
+        const data = localStorage.getItem("user");
+        if (data) {
+          userDetails = JSON.parse(data)?.userDetails || null;
+        }
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+        userDetails = null;
+      }
+      if (userDetails?.user_id && location) {
+        const viewData = {
+          user_id: userDetails.user_id,
+          searched_location: searchValue || "N/A",
+          searched_for: selectedTab || "N/A",
+          name: userDetails?.name || "N/A",
+          mobile: userDetails?.mobile || "N/A",
+          email: userDetails?.email || "N/A",
+          searched_city: location || "N/A",
+          property_in: selectedPropertyIn || "N/A",
+          sub_type: selectedSubType || "N/A",
+        };
+        try {
+          await axios.post(
+            `${config.awsApiUrl}/enquiry/v1/userActivity`,
+            viewData
+          );
+        } catch (error) {
+          console.error("Failed to record property view:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+          });
+        }
+      }
+    },
+    [selectedTab, location, selectedPropertyIn, selectedSubType]
+  );
+  const debouncedUserActivity = useCallback(
+    debounce((value) => {
+      handleUserSearched(value);
+    }, 1000),
+    [handleUserSearched]
+  );
   const debouncedDispatch = useCallback(
     debounce((value) => {
       dispatch(setSearchData({ location: value }));
-    }, 3000),
-    []
+    }, 1000),
+    [dispatch]
   );
+  const handleClear = () => {
+    setSearchInput("");
+    dispatch(setSearchData({ location: "" }));
+    setLocalities([]);
+    debouncedUserActivity("");
+  };
+  useEffect(() => {
+    debouncedUserActivity(searchInput);
+  }, [
+    selectedTab,
+    selectedPropertyIn,
+    selectedSubType,
+    debouncedUserActivity,
+    searchInput,
+  ]);
   const handleValueChange = (value) => {
     setSearchInput(value);
     debouncedDispatch(value);
+    debouncedUserActivity(value);
   };
   const navigate = useNavigate();
   const handleRouteHome = () => {
@@ -249,6 +306,7 @@ const Header = () => {
                                 setIsLocationOpen(false);
                                 setSearchInput("");
                                 setIsSearchDropdownOpen(false);
+                                debouncedUserActivity(option);
                               }
                             }}
                             className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
