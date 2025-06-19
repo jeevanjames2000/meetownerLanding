@@ -19,7 +19,6 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { debounce } from "lodash";
 import axios from "axios";
 import { Building, Building2, Home, Landmark, MapPin } from "lucide-react";
-
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -28,7 +27,6 @@ const commercialSubTypes = [
   { id: "Plot", label: "Plot", icon: MapPin },
   { id: "Others", label: "Others", icon: MapPin },
 ];
-
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
@@ -52,7 +50,6 @@ const Header = () => {
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || ""
   );
-
   const fetchCities = async () => {
     try {
       const response = await axios.get(
@@ -67,11 +64,9 @@ const Header = () => {
       console.error("Error fetching cities:", error);
     }
   };
-
   useEffect(() => {
     fetchCities();
   }, []);
-
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -88,9 +83,7 @@ const Header = () => {
     };
     fetchLocalities();
   }, [searchInput, location]);
-
   useEffect(() => {
-    // Reset sub_type when property_in changes
     if (
       selectedPropertyIn === "Commercial" &&
       !commercialSubTypes.some((subtype) => subtype.id === selectedSubType)
@@ -112,9 +105,7 @@ const Header = () => {
       dispatch(setSubType(""));
     }
   }, [selectedPropertyIn, selectedSubType, dispatch]);
-
   useEffect(() => {
-    // Reset occupancy when sub_type changes to Plot or Land
     if (
       ["Plot", "Land"].includes(selectedSubType) &&
       !["Immediate", "Future"].includes(selectedOccupancy)
@@ -129,11 +120,9 @@ const Header = () => {
       dispatch(setOccupancy(""));
     }
   }, [selectedSubType, selectedOccupancy, dispatch]);
-
   const toggleDropdown = (key) => {
     setActiveDropdown((prev) => (prev === key ? null : key));
   };
-
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
@@ -153,14 +142,12 @@ const Header = () => {
     }
     return ["Property Type"];
   };
-
   const getStatusOptions = () => {
     if (["Plot", "Land"].includes(selectedSubType)) {
       return ["Possession Status", "Immediate", "Future"];
     }
     return ["Status", "Ready to Move", "Under Construction"];
   };
-
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
     BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
@@ -174,7 +161,6 @@ const Header = () => {
     Type: getTypeOptions(),
     Status: getStatusOptions(),
   };
-
   const labelToActionMap = {
     Buy: setTab,
     BHK: setBHK,
@@ -183,7 +169,6 @@ const Header = () => {
     Type: setSubType,
     Status: setOccupancy,
   };
-
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
     BHK: setSelectedBHK,
@@ -192,7 +177,6 @@ const Header = () => {
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
   };
-
   const labelToStoreKeyMap = {
     Buy: "tab",
     BHK: "bhk",
@@ -201,12 +185,10 @@ const Header = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
-
   const getSelectedLabel = (label, id) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
     if (label === "Type" && id) {
-      // Handle commercial subtypes
       const subtype = commercialSubTypes.find((st) => st.id === id);
       return subtype ? subtype.label : id || "Property Type";
     }
@@ -219,10 +201,8 @@ const Header = () => {
     });
     return typeof match === "object" ? match.label : match || options[0];
   };
-
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-
   useEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
@@ -235,7 +215,6 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
   const handleUserSearched = useCallback(
     async (searchValue) => {
       let userDetails = null;
@@ -283,39 +262,33 @@ const Header = () => {
       selectedOccupancy,
     ]
   );
-
   const debouncedUserActivity = useCallback(
     debounce((value) => {
       handleUserSearched(value);
     }, 1000),
     [handleUserSearched]
   );
-
   const debouncedDispatch = useCallback(
     debounce((value) => {
       dispatch(setSearchData({ location: value }));
     }, 1000),
     [dispatch]
   );
-
   const handleClear = () => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
     debouncedUserActivity("");
   };
-
   const handleValueChange = (value) => {
     setSearchInput(value);
     debouncedDispatch(value);
     debouncedUserActivity(value);
   };
-
   const navigate = useNavigate();
   const handleRouteHome = () => {
     navigate("/");
   };
-
   return (
     <>
       <header
@@ -718,5 +691,4 @@ const Header = () => {
     </>
   );
 };
-
 export default Header;

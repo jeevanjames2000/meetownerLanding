@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -15,19 +15,41 @@ import {
 } from "../../store/slices/searchSlice";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 import config from "../../config";
 import axios from "axios";
+import { Building, Building2, Home, Landmark, MapPin } from "lucide-react";
+const commercialSubTypes = [
+  { id: "Office", label: "Office", icon: Building },
+  { id: "Retail Shop", label: "Retail Shop", icon: Home },
+  { id: "Show Room", label: "Showroom", icon: Building2 },
+  { id: "Warehouse", label: "Warehouse", icon: Landmark },
+  { id: "Plot", label: "Plot", icon: MapPin },
+  { id: "Others", label: "Others", icon: MapPin },
+];
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-  const [location, setLocation] = useState("Hyderabad");
-
+  const [location, setLocation] = useState(searchData.city || "Hyderabad");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
   const [citiesList, setCitiesList] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
+  const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
+  const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
+  const [selectedPropertyIn, setSelectedPropertyIn] = useState(
+    searchData.property_in || "Residential"
+  );
+  const [selectedSubType, setSelectedSubType] = useState(
+    searchData.sub_type || ""
+  );
+  const [selectedOccupancy, setSelectedOccupancy] = useState(
+    searchData.occupancy || ""
+  );
   const fetchCities = async () => {
     try {
       const response = await axios.get(
@@ -42,44 +64,9 @@ const PropertyHeader = () => {
       console.error("Error fetching cities:", error);
     }
   };
-  const handleUserSearched = async () => {
-    let userDetails = null;
-    try {
-      const data = localStorage.getItem("user");
-      if (data) {
-        const parsedData = JSON.parse(data);
-        userDetails = parsedData?.userDetails || null;
-      }
-    } catch (error) {
-      console.error("Error parsing localStorage data:", error);
-      userDetails = null;
-    }
-    if (userDetails?.user_id) {
-      const viewData = {
-        user_id: userDetails.user_id,
-        searched_location: searchData?.location || "N/A",
-        searched_for: searchData?.tab || "N/A",
-        name: userDetails?.name || "N/A",
-        mobile: userDetails?.mobile || "N/A",
-        email: userDetails?.email || "N/A",
-        searched_city: location || "N/A",
-        property_in: searchData?.property_in || "N/A",
-        sub_type: searchData?.sub_type || "N/A",
-      };
-      try {
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/userActivity`,
-          viewData
-        );
-      } catch (error) {
-        console.error("Failed to record property view:", {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-        });
-      }
-    }
-  };
+  useEffect(() => {
+    fetchCities();
+  }, []);
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -94,43 +81,53 @@ const PropertyHeader = () => {
         setLocalities([]);
       }
     };
-    fetchCities();
     fetchLocalities();
-    handleUserSearched();
   }, [searchInput, location]);
-  const [city, setCity] = useState(searchData.city || "");
-  const filteredLocations = citiesList.filter((loc) =>
-    loc.toLowerCase().includes(city.toLowerCase())
-  );
-  const [activeDropdown, setActiveDropdown] = useState(null);
+  useEffect(() => {
+    if (
+      selectedPropertyIn === "Commercial" &&
+      !commercialSubTypes.some((subtype) => subtype.id === selectedSubType)
+    ) {
+      setSelectedSubType("");
+      dispatch(setSubType(""));
+    } else if (
+      selectedPropertyIn === "Residential" &&
+      ![
+        "Apartment",
+        "Independent House",
+        "Independent Villa",
+        "Plot",
+        "Land",
+        "Others",
+      ].includes(selectedSubType)
+    ) {
+      setSelectedSubType("");
+      dispatch(setSubType(""));
+    }
+  }, [selectedPropertyIn, selectedSubType, dispatch]);
+  useEffect(() => {
+    if (
+      ["Plot", "Land"].includes(selectedSubType) &&
+      !["Immediate", "Future"].includes(selectedOccupancy)
+    ) {
+      setSelectedOccupancy("");
+      dispatch(setOccupancy(""));
+    } else if (
+      !["Plot", "Land"].includes(selectedSubType) &&
+      !["Ready to Move", "Under Construction"].includes(selectedOccupancy)
+    ) {
+      setSelectedOccupancy("");
+      dispatch(setOccupancy(""));
+    }
+  }, [selectedSubType, selectedOccupancy, dispatch]);
   const toggleDropdown = (key) => {
-    setActiveDropdown((prev) => {
-      const newValue = prev === key ? null : key;
-      return newValue;
-    });
+    setActiveDropdown((prev) => (prev === key ? null : key));
   };
-  const [selectedTab, setSelectedTab] = useState(searchData.tab || "Buy");
-  const [selectedBHK, setSelectedBHK] = useState(searchData.bhk || null);
-  const [selectedBudget, setSelectedBudget] = useState(searchData.budget || "");
-  const [selectedPropertyIn, setSelectedPropertyIn] = useState(
-    searchData.property_in || "Residential"
-  );
-  const [selectedSubType, setSelectedSubType] = useState(
-    searchData.sub_type || ""
-  );
-  const [selectedOccupancy, setSelectedOccupancy] = useState(
-    searchData.occupancy || "Ready to move"
-  );
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
         "Property Type",
-        "Office",
-        "Retail shop",
-        "Show room",
-        "Warehouse",
-        "Plot",
-        "Others",
+        ...commercialSubTypes.map((subtype) => subtype.id),
       ];
     } else if (selectedPropertyIn === "Residential") {
       return [
@@ -145,6 +142,12 @@ const PropertyHeader = () => {
     }
     return ["Property Type"];
   };
+  const getStatusOptions = () => {
+    if (["Plot", "Land"].includes(selectedSubType)) {
+      return ["Possession Status", "Immediate", "Future"];
+    }
+    return ["Status", "Ready to Move", "Under Construction"];
+  };
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
     BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
@@ -155,16 +158,8 @@ const PropertyHeader = () => {
       { label: "75 Lakhs+", value: "75+" },
     ],
     "Property In": ["Property In", "Residential", "Commercial"],
-    Type: [
-      "Property Type",
-      "Apartment",
-      "Independent House",
-      "Independent Villa",
-      "Plot",
-      "Land",
-      "Others",
-    ],
-    Status: ["Status", "Ready to Move", "Under Construction"],
+    Type: getTypeOptions(),
+    Status: getStatusOptions(),
   };
   const labelToActionMap = {
     Buy: setTab,
@@ -190,13 +185,13 @@ const PropertyHeader = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
-  const handleClear = () => {
-    setSearchInput("");
-    dispatch(setSearchData({ location: "" }));
-  };
-  const getSelectedLabel = (label) => {
+  const getSelectedLabel = (label, id) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
+    if (label === "Type" && id) {
+      const subtype = commercialSubTypes.find((st) => st.id === id);
+      return subtype ? subtype.label : id || "Property Type";
+    }
     const options =
       label === "Type" ? getTypeOptions() : dropdownOptions[label];
     if (!options) return label;
@@ -220,14 +215,75 @@ const PropertyHeader = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
+  const handleUserSearched = useCallback(
+    async (searchValue) => {
+      let userDetails = null;
+      try {
+        const data = localStorage.getItem("user");
+        if (data) {
+          userDetails = JSON.parse(data)?.userDetails || null;
+        }
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+        userDetails = null;
+      }
+      if (userDetails?.user_id && location) {
+        const viewData = {
+          user_id: userDetails.user_id,
+          searched_location: searchValue || "N/A",
+          searched_for: selectedTab || "N/A",
+          name: userDetails?.name || "N/A",
+          mobile: userDetails?.mobile || "N/A",
+          email: userDetails?.email || "N/A",
+          searched_city: location || "N/A",
+          property_in: selectedPropertyIn || "N/A",
+          sub_type: selectedSubType || "N/A",
+          occupancy: selectedOccupancy || "N/A",
+        };
+        try {
+          await axios.post(
+            `${config.awsApiUrl}/enquiry/v1/userActivity`,
+            viewData
+          );
+        } catch (error) {
+          console.error("Failed to record property view:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+          });
+        }
+      }
+    },
+    [
+      selectedTab,
+      location,
+      selectedPropertyIn,
+      selectedSubType,
+      selectedOccupancy,
+    ]
+  );
+  const debouncedUserActivity = useCallback(
+    debounce((value) => {
+      handleUserSearched(value);
+    }, 1000),
+    [handleUserSearched]
+  );
+  const debouncedDispatch = useCallback(
+    debounce((value) => {
+      dispatch(setSearchData({ location: value }));
+    }, 1000),
+    [dispatch]
+  );
+  const handleClear = () => {
+    setSearchInput("");
+    dispatch(setSearchData({ location: "" }));
+    setLocalities([]);
+    debouncedUserActivity("");
+  };
   const handleValueChange = (value) => {
     setSearchInput(value);
-    dispatch(
-      setSearchData({
-        location: value,
-      })
-    );
+    debouncedDispatch(value);
+    debouncedUserActivity(value);
   };
   const navigate = useNavigate();
   const handleRouteHome = () => {
@@ -279,16 +335,19 @@ const PropertyHeader = () => {
                           <li
                             key={option}
                             onClick={() => {
-                              setLocation(option);
-                              dispatch(
-                                setSearchData({
-                                  location: option,
-                                  city: option,
-                                })
-                              );
-                              setIsLocationOpen(false);
-                              setSearchInput("");
-                              setIsSearchDropdownOpen(false);
+                              if (!isDisabled) {
+                                setLocation(option);
+                                dispatch(
+                                  setSearchData({
+                                    location: option,
+                                    city: option,
+                                  })
+                                );
+                                setIsLocationOpen(false);
+                                setSearchInput("");
+                                setIsSearchDropdownOpen(false);
+                                debouncedUserActivity(option);
+                              }
                             }}
                             className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
                               isDisabled
@@ -310,7 +369,10 @@ const PropertyHeader = () => {
                         className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
                         onClick={() => toggleDropdown(label)}
                       >
-                        {getSelectedLabel(label)} <FaChevronDown />
+                        {label === "Type"
+                          ? getSelectedLabel(label, selectedSubType)
+                          : getSelectedLabel(label)}
+                        <FaChevronDown />
                       </button>
                       {activeDropdown === label && (
                         <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-50 text-left">
@@ -322,7 +384,6 @@ const PropertyHeader = () => {
                               (label === "Type" ||
                                 label === "Property In" ||
                                 label === "Status" ||
-                                label === "Property Type" ||
                                 label === "BHK") &&
                               index === 0
                             ) {
@@ -332,7 +393,6 @@ const PropertyHeader = () => {
                               <div
                                 key={`${label}-${value}`}
                                 onClick={() => {
-                                  const key = labelToStoreKeyMap[label];
                                   dispatch(labelToActionMap[label](value));
                                   labelToLocalSetterMap[label](value);
                                   setActiveDropdown(null);
@@ -450,6 +510,188 @@ const PropertyHeader = () => {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+        <div className="md:hidden mt-3 flex overflow-x-auto gap-2 px-4 relative pb-3">
+          {[
+            "Buy",
+            "BHK",
+            "Budget",
+            "Property In",
+            ...(selectedPropertyIn === "Commercial"
+              ? commercialSubTypes.map((subtype) => subtype.id)
+              : ["Type"]),
+          ].map((label) => (
+            <div key={label} className="relative flex-shrink-0">
+              <button
+                className="flex items-center gap-1 text-gray-700 text-sm px-3 py-1 bg-gray-100 rounded-full cursor-pointer whitespace-nowrap"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleDropdown(label);
+                }}
+              >
+                {getSelectedLabel(
+                  label === "Type" ||
+                    commercialSubTypes.some((st) => st.id === label)
+                    ? "Type"
+                    : label,
+                  commercialSubTypes.some((st) => st.id === label)
+                    ? label
+                    : undefined
+                )}
+                <FaChevronDown className="text-xs" />
+              </button>
+              {activeDropdown === label && (
+                <div
+                  className="fixed inset-0 bg-transparent bg-opacity-30 z-40"
+                  onClick={() => setActiveDropdown(null)}
+                ></div>
+              )}
+              {activeDropdown === label && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium">
+                      {commercialSubTypes.some((st) => st.id === label)
+                        ? commercialSubTypes.find((st) => st.id === label)
+                            ?.label
+                        : label}
+                    </h3>
+                    <button
+                      onClick={() => setActiveDropdown(null)}
+                      className="text-gray-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(label === "Type" ||
+                    commercialSubTypes.some((st) => st.id === label)
+                      ? getTypeOptions()
+                      : dropdownOptions[label] || []
+                    ).map((option, index) => {
+                      const isObject = typeof option === "object";
+                      const value = isObject ? option.value : option;
+                      const display = isObject ? option.label : option;
+                      if (
+                        (label === "BHK" ||
+                          label === "Property In" ||
+                          label === "Type" ||
+                          commercialSubTypes.some((st) => st.id === label) ||
+                          label === "Budget") &&
+                        index === 0
+                      )
+                        return null;
+                      return (
+                        <button
+                          key={`${label}-${value}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(
+                              labelToActionMap[
+                                commercialSubTypes.some((st) => st.id === label)
+                                  ? "Type"
+                                  : label
+                              ](value)
+                            );
+                            labelToLocalSetterMap[
+                              commercialSubTypes.some((st) => st.id === label)
+                                ? "Type"
+                                : label
+                            ](value);
+                            setActiveDropdown(null);
+                          }}
+                          className={`px-4 py-2 rounded-lg text-left text-sm ${
+                            searchData[
+                              commercialSubTypes.some((st) => st.id === label)
+                                ? "sub_type"
+                                : labelToStoreKeyMap[label]
+                            ] === value ||
+                            (value === "" &&
+                              !searchData[
+                                commercialSubTypes.some((st) => st.id === label)
+                                  ? "sub_type"
+                                  : labelToStoreKeyMap[label]
+                              ])
+                              ? "bg-[#1D3A76] text-white"
+                              : "bg-gray-100 hover:bg-gray-200"
+                          }`}
+                        >
+                          {display}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+          <div className="relative flex-shrink-0">
+            <button
+              className="flex items-center gap-1 text-sm px-3 py-[2px] bg-gray-100 rounded-full cursor-pointer whitespace-nowrap border-2 border-blue-900 text-blue-900"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMoreFiltersOpen(!isMoreFiltersOpen);
+              }}
+            >
+              MORE FILTERS <FaChevronDown className="text-xs" />
+            </button>
+            {isMoreFiltersOpen && (
+              <div
+                className="fixed inset-0 bg-transparent bg-opacity-10 z-40"
+                onClick={() => setIsMoreFiltersOpen(false)}
+              ></div>
+            )}
+            {isMoreFiltersOpen && (
+              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-xl text-blue-900">
+                    More Filters
+                  </h3>
+                  <button
+                    onClick={() => setIsMoreFiltersOpen(false)}
+                    className="text-gray-500"
+                  >
+                    ×
+                  </button>
+                </div>
+                {["Status"].map((label) => (
+                  <div key={label} className="mb-4">
+                    <h4 className="font-medium mb-2 text-left">
+                      {getSelectedLabel(label, undefined)}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(dropdownOptions[label] || []).map((option, index) => {
+                        const isObject = typeof option === "object";
+                        const value = isObject ? option.value : option;
+                        const display = isObject ? option.label : option;
+                        if (index === 0) return null;
+                        return (
+                          <button
+                            key={`${label}-${value}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dispatch(labelToActionMap[label](value));
+                              labelToLocalSetterMap[label](value);
+                            }}
+                            className={`px-4 py-2 text-left rounded-lg text-sm ${
+                              searchData[labelToStoreKeyMap[label]] === value ||
+                              (value === "" &&
+                                !searchData[labelToStoreKeyMap[label]])
+                                ? "bg-[#1D3A76] text-white"
+                                : "bg-gray-100 hover:bg-gray-200"
+                            }`}
+                          >
+                            {display}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>

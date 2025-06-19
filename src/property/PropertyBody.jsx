@@ -878,7 +878,14 @@ const PropertyBody = () => {
     },
     property_cost: {
       label: "Property Cost",
-      value: (prop) => `₹ ${formatToIndianCurrency(prop.property_cost)}`,
+      value: (prop) => (
+        <div className="flex flex-col">
+          <span>₹ {formatToIndianCurrency(prop.property_cost)}</span>
+          <span className="text-xs text-gray-500">
+            {prop.property_cost_type || "(Cost may vary)"}
+          </span>
+        </div>
+      ),
       icon: <IndianRupee className="w-5 h-5" />,
     },
     bedrooms: {
@@ -1113,10 +1120,14 @@ const PropertyBody = () => {
     },
     builtup_unit: {
       label: "Unit Cost",
-      value: (prop) =>
-        `₹ ${formatToIndianCurrency(prop.builtup_unit)} ${
-          prop.unit_cost_type || ""
-        }`,
+      value: (prop) => (
+        <span>
+          ₹ {formatToIndianCurrency(prop.builtup_unit)}{" "}
+          <span className="text-xs text-gray-500">
+            {prop.unit_cost_type || "(Cost may vary)"}
+          </span>
+        </span>
+      ),
       icon: <IndianRupee className="w-5 h-5" />,
     },
   };
@@ -1487,19 +1498,21 @@ const PropertyBody = () => {
         </div>
       )}
       <div className="mt-8">
-        <h2 className="text-xl font-bold text-blue-800 mb-4">
+        <h2 className="text-xl text-left font-semibold text-indigo-800 mb-5">
           Property Overview
         </h2>
-        <div className="bg-[#F9F9F9] rounded-xl bg-white border border-gray-300 shadow-sm px-10 py-6 hover:shadow-lg transition">
+        <div className="bg-[#F9F9F9] rounded-xl  border border-gray-300 shadow-sm px-10 py-6 hover:shadow-lg transition">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {overviewItems.map((item, idx) => (
               <div key={idx} className="flex items-start gap-4">
                 <div className="text-[#4B1D1D] text-lg">{item.icon}</div>
-                <div>
-                  <div className="text-gray-700 font-medium text-sm">
+                <div className="flex flex-col">
+                  <div className="text-gray-700 font-bold text-md text-left">
                     {item.label}
                   </div>
-                  <div className="text-gray-900 text-sm">{item.value}</div>
+                  <div className="text-gray-900 font-semibold text-sm text-left">
+                    {item.value}
+                  </div>
                 </div>
               </div>
             ))}
