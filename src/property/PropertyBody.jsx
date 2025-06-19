@@ -111,8 +111,8 @@ const PropertyBody = () => {
               throw new Error("Failed to fetch property details");
             }
             const data = await response.json();
-            if (data && data.property_details) {
-              setProperty(data.property_details);
+            if (data && data.property) {
+              setProperty(data.property);
             } else {
               throw new Error("Invalid property data received");
             }
@@ -215,10 +215,10 @@ const PropertyBody = () => {
   const getPropertyDetails = async (propertyData) => {
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${propertyData.unique_property_id}`
+        `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${propertyData.unique_property_id}`
       );
       const data = await response.json();
-      const propertydata = data.property_details;
+      const propertydata = data.property;
       const sellerdata = propertydata.seller_details;
       if (response.ok) {
         return sellerdata;
@@ -261,9 +261,7 @@ const PropertyBody = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
-    } catch (err) {
-      console.log("err: ", err);
-    }
+    } catch (err) {}
   };
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
@@ -948,14 +946,14 @@ const PropertyBody = () => {
     },
     occupancy: {
       label: (prop) =>
-        prop.occupancy === "Under Construction"
+        prop.possession_status === "Under Construction"
           ? "Possession Starts"
           : "Occupancy Status",
       value: (prop) =>
         ["Apartment", "Independent House", "Independent Villa"].includes(
           prop.sub_type
         )
-          ? prop.occupancy === "Under Construction"
+          ? prop.possession_status === "Under Construction"
             ? `Under Construction${
                 prop.under_construction
                   ? ` (${formatDate(prop.under_construction)})`
@@ -1227,6 +1225,11 @@ const PropertyBody = () => {
                   : property?.property_cost
               )?.toLocaleString()}
             </p>
+            {property?.property_cost_type && (
+              <span className="text-sm text-gray-600 font-medium">
+                ({property.property_cost_type})
+              </span>
+            )}
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
@@ -1249,7 +1252,7 @@ const PropertyBody = () => {
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-between">
-          <div className="flex flex-wrap items-center gap-3 text-sm text-blue-800 font-medium mt-3">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-blue-800 font-medium">
             <span className=" h-4 border-gray-300">
               {property.sub_type === "Apartment"
                 ? `${property.bedrooms} BHK ${
@@ -1263,6 +1266,12 @@ const PropertyBody = () => {
                   }`
                 : `${property.sub_type}`}{" "}
             </span>
+            {property?.land_sub_type && (
+              <>
+                <span className="border-l h-4 border-gray-300"></span>
+                <span> {property.land_sub_type} </span>
+              </>
+            )}
             {property?.builtup_area && (
               <>
                 <span className="border-l h-4 border-gray-300"></span>

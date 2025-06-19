@@ -42,7 +42,7 @@ const PropertyAds = () => {
           if (idMatch && idMatch[1]) {
             const propertyId = idMatch[1];
             const response = await fetch(
-              `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${propertyId}`
+              `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${propertyId}`
             );
 
             if (!response.ok) {
@@ -50,8 +50,8 @@ const PropertyAds = () => {
             }
 
             const data = await response.json();
-            if (data && data.property_details) {
-              setProperty(data.property_details);
+            if (data && data.property) {
+              setProperty(data.property);
             } else {
               throw new Error("Invalid property data received");
             }
