@@ -698,7 +698,7 @@ function ListingsBody({ setShowLoginModal }) {
             searchData?.bhk || ""
           }&property_cost=${
             searchData?.budget || ""
-          }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
+          }&priceFilter=${encodeURIComponent(selected)}&possession_status=${
             searchData?.occupancy || ""
           }&property_status=1&city_id=${searchData.city}`
         );

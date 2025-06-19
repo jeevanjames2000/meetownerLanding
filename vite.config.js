@@ -21,7 +21,7 @@ export default defineConfig({
     },
     base: "/",
     hmr: {
-      host: "preprod.meetowner.in",
+      host: "meetowner.in",
     },
   },
 });

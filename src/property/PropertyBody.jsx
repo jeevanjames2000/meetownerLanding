@@ -105,7 +105,7 @@ const PropertyBody = () => {
           if (idMatch && idMatch[1]) {
             const propertyId = idMatch[1];
             const response = await fetch(
-              `https://api.meetowner.in/listings/getsingleproperty?unique_property_id=${propertyId}`
+              `${config.awsApiUrl}/listings/v1/getSingleProperty?unique_property_id=${propertyId}`
             );
             if (!response.ok) {
               throw new Error("Failed to fetch property details");
@@ -225,7 +225,9 @@ const PropertyBody = () => {
       } else {
         throw new Error("Failed to fetch owner details");
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("err: ", err);
+    }
   };
   const handleClose = () => {
     setShowLoginModal(false);
@@ -259,7 +261,9 @@ const PropertyBody = () => {
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
-    } catch (err) {}
+    } catch (err) {
+      console.log("err: ", err);
+    }
   };
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
