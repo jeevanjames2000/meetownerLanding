@@ -882,7 +882,7 @@ const PropertyBody = () => {
         <div className="flex flex-col">
           <span>₹ {formatToIndianCurrency(prop.property_cost)}</span>
           <span className="text-xs text-gray-500">
-            {prop.property_cost_type || "(Cost may vary)"}
+            `({prop.property_cost_type || "(Cost may vary)"})`
           </span>
         </div>
       ),
@@ -1124,7 +1124,7 @@ const PropertyBody = () => {
         <span>
           ₹ {formatToIndianCurrency(prop.builtup_unit)}{" "}
           <span className="text-xs text-gray-500">
-            {prop.unit_cost_type || "(Cost may vary)"}
+            `({prop.unit_cost_type || "(Cost may vary)"})`
           </span>
         </span>
       ),
@@ -1277,7 +1277,7 @@ const PropertyBody = () => {
                   }`
                 : `${property.sub_type}`}{" "}
             </span>
-            {property?.land_sub_type && (
+            {property?.land_sub_type && property?.sub_type === "Land" && (
               <>
                 <span className="border-l h-4 border-gray-300"></span>
                 <span> {property.land_sub_type} </span>
