@@ -26,6 +26,7 @@ import { ChevronUp } from "lucide-react";
 import Favourites from "./components/favourites";
 import ProfileWrapper from "./profile/ProfileWrapper";
 import { HelmetProvider } from "react-helmet-async";
+import AppRedirect from "./components/AppRedirect";
 
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -93,6 +94,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<PrivacyAndPolicies />} />
             <Route path="/profile" element={<ProfileWrapper />} />
+            <Route path="/app" element={<AppRedirect />} />
           </Routes>
         </Router>
       </HelmetProvider>

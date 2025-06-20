@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 
 import { QRCodeSVG } from "qrcode.react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -25,8 +25,9 @@ const Footer = () => {
   );
   const playStoreUrl =
     "https://play.google.com/store/apps/details?id=com.meetowner.app&pcampaignid=web_share";
-  const appStoreUrl = 
-  "https://apps.apple.com/us/app/meetowner/id6743744178";
+  const appStoreUrl = "https://apps.apple.com/us/app/meetowner/id6743744178";
+  const url = "https://meetowner.in/app";
+
   return (
     <footer
       className="relative py-10 overflow-x-hidden"
@@ -40,8 +41,10 @@ const Footer = () => {
               <div className="flex justify-center">
                 <h3 className="text-lg font-bold mb-2">MEET OWNER</h3>
               </div>
-              <div className="flex flex-col space-y-3">
-                <QRCodeSVG value={playStoreUrl} size={160} />
+              <div className="flex flex-col space-y-2">
+                <div className="rounded shadow-md inline-block">
+                  <QRCodeSVG value={url} size={160} includeMargin />
+                </div>
                 <a
                   href={playStoreUrl}
                   target="_blank"
@@ -54,19 +57,19 @@ const Footer = () => {
                     <span className="text-xs">Google Play</span>
                   </div>
                 </a>
-                  
+
                 <a
-                href={appStoreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black"
-              >
-                <FaApple className="h-6 w-6" />
-                <div className="flex flex-col">
-                  <span className="text-xs">Available on the</span>
-                  <span className="text-xs">App Store</span>
-                </div>
-              </a>
+                  href={appStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center w-full space-x-2 bg-transparent border border-white text-white px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-black"
+                >
+                  <FaApple className="h-6 w-6" />
+                  <div className="flex flex-col">
+                    <span className="text-xs">Available on the</span>
+                    <span className="text-xs">App Store</span>
+                  </div>
+                </a>
               </div>
             </div>
 
