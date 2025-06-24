@@ -117,6 +117,14 @@ const HousingPicks = () => {
     },
     [navigate, dispatch, searchData]
   );
+  const formatToIndianCurrency = (value) => {
+    if (!value || isNaN(value)) return "N/A";
+    const numValue = parseFloat(value);
+    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+    return numValue.toString();
+  };
 
   const handleContactSeller = async (property) => {
     try {
@@ -137,6 +145,23 @@ const HousingPicks = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
+      const SubType =
+        property.sub_type === "Apartment"
+          ? `${property?.sub_type} ${property?.bedrooms}BHK`
+          : property?.sub_type;
+      const smspayload = {
+        name: userDetails?.name,
+        mobile: userDetails?.mobile,
+        sub_type: SubType,
+        location: property?.location_id.split(/[\s,]+/)[0],
+        property_cost: formatToIndianCurrency(property?.property_cost),
+        ownerMobile: property?.mobile || property?.phone || "N/A",
+      };
+
+      await axios.post(
+        `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+        smspayload
+      );
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
     } catch (err) {
       toast.error("Something went wrong! Please try again");

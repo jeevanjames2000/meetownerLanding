@@ -21,7 +21,7 @@ const useWhatsappHook = (selectedPropertyId) => {
       );
       const data = await response.json();
       const propertydata = data.property;
-      const sellerdata = propertydata.seller_details;
+      const sellerdata = propertydata.user;
       if (response.ok) {
         setOwner(sellerdata);
         return sellerdata;

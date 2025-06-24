@@ -262,8 +262,7 @@ const PropertyCard = memo(
         });
       }
     };
-    const handleContactClick = (e) => {
-      e.stopPropagation();
+    const handleContactClick = () => {
       handleScheduleVisit(property);
     };
     return (
@@ -592,6 +591,14 @@ const SkeletonPropertyCard = () => {
     </div>
   );
 };
+const formatToIndianCurrency = (value) => {
+  if (!value || isNaN(value)) return "N/A";
+  const numValue = parseFloat(value);
+  if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+  if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+  if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+  return numValue.toString();
+};
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
@@ -885,7 +892,7 @@ function ListingsBody({ setShowLoginModal }) {
       );
       const data = await response.json();
       const propertydata = data?.property;
-      const sellerdata = propertydata?.seller_details;
+      const sellerdata = propertydata?.user;
       if (response.ok) {
         return sellerdata;
       } else {
@@ -896,30 +903,57 @@ function ListingsBody({ setShowLoginModal }) {
       throw err;
     }
   }, []);
-  const handleModalSubmit = useCallback(async () => {
-    try {
-      const { userDetails } = JSON.parse(localStorage.getItem("user"));
-      const payload = {
-        unique_property_id: selectedProperty?.unique_property_id,
-        user_id: userDetails?.user_id,
-        name: userDetails?.name,
-        mobile: userDetails?.mobile,
-        email: userDetails?.email,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(selectedProperty);
-      fetchContactedProperties();
-      localStorage.setItem("visit_submitted", "true");
-      setSubmittedStates((prev) => ({
-        ...prev,
-        [selectedProperty.unique_property_id]: {
-          ...prev[selectedProperty?.unique_property_id],
-          contact: true,
-        },
-      }));
-      setModalOpen(false);
-    } catch (err) {}
-  }, [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]);
+  const handleModalSubmit = useCallback(
+    async (selectedProperty) => {
+      try {
+        const { userDetails } = JSON.parse(localStorage.getItem("user"));
+        const payload = {
+          unique_property_id: selectedProperty?.unique_property_id,
+          user_id: userDetails?.user_id,
+          name: userDetails?.name,
+          mobile: userDetails?.mobile,
+          email: userDetails?.email,
+        };
+        const sellerData = await getOwnerDetails(selectedProperty);
+        const SubType =
+          selectedProperty.sub_type === "Apartment"
+            ? `${selectedProperty?.sub_type} ${selectedProperty?.bedrooms}BHK`
+            : selectedProperty?.sub_type;
+        const smspayload = {
+          name: userDetails?.name,
+          mobile: userDetails?.mobile,
+          sub_type: SubType,
+          location: selectedProperty?.location_id.split(/[\s,]+/)[0],
+          property_cost: formatToIndianCurrency(
+            selectedProperty?.property_cost
+          ),
+          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
+        };
+
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+          smspayload
+        );
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(selectedProperty);
+
+        fetchContactedProperties();
+        localStorage.setItem("visit_submitted", "true");
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [selectedProperty.unique_property_id]: {
+            ...prev[selectedProperty?.unique_property_id],
+            contact: true,
+          },
+        }));
+        setModalOpen(false);
+      } catch (err) {}
+    },
+    [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]
+  );
   const handleScheduleVisit = useCallback(
     (property) => {
       setSelectedProperty(property);
@@ -946,7 +980,7 @@ function ListingsBody({ setShowLoginModal }) {
         !isMobileMissing &&
         alreadySubmitted
       ) {
-        handleModalSubmit(selectedProperty);
+        handleModalSubmit(property);
       } else {
         setModalOpen(true);
       }
@@ -973,6 +1007,17 @@ function ListingsBody({ setShowLoginModal }) {
           mobile: userDetails?.mobile,
           email: userDetails?.email,
         };
+        const smspayload = {
+          name: userDetails?.name,
+          mobile: userDetails?.mobile,
+          sub_type: selectedProperty?.sub_type,
+          location: selectedProperty?.location_id,
+          property_cost: selectedProperty?.property_cost,
+        };
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+          smspayload
+        );
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/contactSeller`,
           payload

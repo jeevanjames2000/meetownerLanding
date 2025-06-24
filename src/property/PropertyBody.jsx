@@ -259,6 +259,24 @@ const PropertyBody = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
+
+      const SubType =
+        property.sub_type === "Apartment"
+          ? `${property?.sub_type} ${property?.bedrooms}BHK`
+          : property?.sub_type;
+      const smspayload = {
+        name: userDetails?.name,
+        mobile: userDetails?.mobile,
+        sub_type: SubType,
+        location: property?.location_id.split(/[\s,]+/)[0],
+        property_cost: formatToIndianCurrency(property?.property_cost),
+        ownerMobile: property?.mobile || property?.phone || "N/A",
+      };
+
+      await axios.post(
+        `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+        smspayload
+      );
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
     } catch (err) {}
