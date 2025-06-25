@@ -1,8 +1,29 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import compression from "vite-plugin-compression";
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  build: {
+    minify: "esbuild",
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
+  plugins: [
+    react(),
+    tailwindcss(),
+    compression({
+      algorithm: "brotliCompress",
+      ext: ".br",
+    }),
+  ],
   server: {
     host: "0.0.0.0",
     port: 3003,
@@ -19,7 +40,6 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
-    base: "/",
     hmr: {
       host: "meetowner.in",
     },
