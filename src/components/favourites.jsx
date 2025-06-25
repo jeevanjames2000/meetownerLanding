@@ -17,6 +17,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import { Pagination } from "swiper/modules";
+import postIcon from "../assets/Images/post.gif";
+
 const PropertyCard = memo(
   ({
     property,
@@ -506,13 +508,24 @@ const Favourites = () => {
     return (
       <>
         <Header />
-        <div className="text-center py-10 h-100 text-gray-500">
-          No favourites found.
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
+          <img
+            src={postIcon}
+            alt="No favourites"
+            className="w-55 h-55 mb-4 opacity-80"
+          />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            No Favourites Yet
+          </h2>
+          <p className="text-gray-500 text-md">
+            Looks like you haven't liked any properties yet.
+          </p>
         </div>
         <Footer />
       </>
     );
   }
+
   return (
     <>
       <Header />
