@@ -1139,7 +1139,7 @@ function ListingsBody({ setShowLoginModal }) {
             In {searchData?.city || ""}
           </p>
         </div>
-        <div className="relative  flex flex-row  text-left z-50 flex-shrink-0 ">
+        <div className="relative  flex flex-row mb-10 text-left z-50 flex-shrink-0 ">
           <Breadcrumb />
           <div className="flex items-center gap-2">
             <p className="text-[#000000] text-sm whitespace-nowrap font-medium">

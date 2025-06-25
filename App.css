@@ -65,3 +65,27 @@
   scrollbar-width: none;
   /* Firefox */
 }
+
+/* Center swiper pagination dots */
+.custom-swiper .swiper-pagination {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  left: 0;
+}
+
+.custom-swiper .swiper-pagination-bullets {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.custom-swiper .swiper-pagination-bullet {
+  background-color: #ccc;
+  opacity: 1;
+}
+
+.custom-swiper .swiper-pagination-bullet-active {
+  background-color: #1d3a76;
+}
