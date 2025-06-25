@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import compression from "vite-plugin-compression";
+import obfuscatorPlugin from "vite-plugin-javascript-obfuscator";
 export default defineConfig({
   build: {
     minify: "esbuild",
@@ -11,6 +12,9 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules")) {
             return "vendor";
+          }
+          if (id.includes("/src/components/")) {
+            return "components";
           }
         },
       },
@@ -22,6 +26,11 @@ export default defineConfig({
     compression({
       algorithm: "brotliCompress",
       ext: ".br",
+    }),
+    obfuscatorPlugin({
+      options: {
+        debugProtection: true,
+      },
     }),
   ],
   server: {
