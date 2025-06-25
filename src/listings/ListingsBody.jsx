@@ -626,7 +626,7 @@ function ListingsBody({ setShowLoginModal }) {
       const data = localStorage.getItem("user");
       if (data) {
         const parsedData = JSON.parse(data);
-        userDetails = parsedData?.userDetails || null;
+        userDetails = parsedData || null;
       }
     } catch (error) {
       console.error("Error parsing localStorage data:", error);
@@ -665,7 +665,7 @@ function ListingsBody({ setShowLoginModal }) {
       if (!data) {
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       try {
         const response = await axios.get(
           `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails?.user_id}`
@@ -736,7 +736,7 @@ function ListingsBody({ setShowLoginModal }) {
     if (!data) {
       return;
     }
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
 
     try {
       const response = await axios.get(
@@ -785,7 +785,7 @@ function ListingsBody({ setShowLoginModal }) {
         const data = localStorage.getItem("user");
         if (data) {
           const parsedData = JSON.parse(data);
-          userDetails = parsedData?.userDetails || null;
+          userDetails = parsedData || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
@@ -856,7 +856,7 @@ function ListingsBody({ setShowLoginModal }) {
         setShowLoginModal(true);
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const isAlreadyLiked = likedProperties.includes(
         property.unique_property_id
       );
@@ -906,7 +906,7 @@ function ListingsBody({ setShowLoginModal }) {
   const handleModalSubmit = useCallback(
     async (selectedProperty) => {
       try {
-        const { userDetails } = JSON.parse(localStorage.getItem("user"));
+        const userDetails = JSON.parse(localStorage.getItem("user"));
         const payload = {
           unique_property_id: selectedProperty?.unique_property_id,
           user_id: userDetails?.user_id,
@@ -927,18 +927,18 @@ function ListingsBody({ setShowLoginModal }) {
           property_cost: formatToIndianCurrency(
             selectedProperty?.property_cost
           ),
-          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
+          ownerMobile: "6302816551",
         };
 
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
           smspayload
         );
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-          payload
-        );
-        await handleAPI(selectedProperty);
+        // await axios.post(
+        //   `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+        //   payload
+        // );
+        // await handleAPI(selectedProperty);
 
         fetchContactedProperties();
         localStorage.setItem("visit_submitted", "true");
@@ -966,7 +966,7 @@ function ListingsBody({ setShowLoginModal }) {
         setShowLoginModal(true);
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const alreadySubmitted =
         localStorage.getItem("visit_submitted") === "true";
       const isNameMissing = !userDetails?.name || userDetails?.name === "N/A";
@@ -999,7 +999,10 @@ function ListingsBody({ setShowLoginModal }) {
           setShowLoginModal(true);
           return;
         }
-        const { userDetails } = JSON.parse(data);
+        const userDetails = JSON.parse(data);
+        const sellerData = await getOwnerDetails(selectedProperty);
+
+        console.log("userDetails: ", userDetails);
         const payload = {
           unique_property_id: property?.unique_property_id,
           user_id: userDetails?.user_id,
@@ -1013,16 +1016,17 @@ function ListingsBody({ setShowLoginModal }) {
           sub_type: selectedProperty?.sub_type,
           location: selectedProperty?.location_id,
           property_cost: selectedProperty?.property_cost,
+          ownerMobile: "6302816551",
         };
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
           smspayload
         );
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-          payload
-        );
-        await handleAPI(property);
+        // await axios.post(
+        //   `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+        //   payload
+        // );
+        // await handleAPI(property);
         setSubmittedStates((prev) => ({
           ...prev,
           [property?.unique_property_id]: {

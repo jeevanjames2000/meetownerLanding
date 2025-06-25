@@ -11,6 +11,8 @@ import config from "../../config";
 import { toast } from "react-toastify";
 import { LogOutIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
+
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -51,7 +53,7 @@ const Sidebar = ({
     const fetchLikedProperties = async () => {
       const data = localStorage.getItem("user");
       if (!data) return;
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       try {
         const response = await axios.get(
           `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
@@ -81,6 +83,7 @@ const Sidebar = ({
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     };
+
     return (
       <Swiper
         spaceBetween={25}
@@ -129,27 +132,8 @@ const Sidebar = ({
       </Swiper>
     );
   };
-  const faq = [
-    {
-      title: "How secure is my data with MeetOwner?",
-      description:
-        "meetowner.in prioritizes data security with encryption protocols and strict privacy policies. Your personal and property information is safeguarded against unauthorized access.",
-    },
-    {
-      title: "How are builder and channel partner accounts verified?",
-      description:
-        "Builders and channel partners must provide valid business registration details, RERA (if applicable), and identity verification before account approval.",
-    },
-    {
-      title: "How can I reach MeetOwner for login or account issues?",
-      description: "Email: support@meetowner.in",
-    },
-    {
-      title: "Can I edit my profile on MeetOwner?",
-      description:
-        'Yes, you can edit your profile by accessing the "Edit Profile" option in your account settings. This allows you to update your name, contact details, and other relevant information.',
-    },
-  ];
+  const url = "https://meetowner.in/app";
+
   const recentData = getRecentActivity(likedProperties, intrested);
   const sidebarItems = [
     {
@@ -160,12 +144,7 @@ const Sidebar = ({
       title: "Download App",
       content: (
         <div className="text-sm text-gray-600 flex justify-center">
-          <img
-            src={QR}
-            crossOrigin="anonymous"
-            alt="QR code to download app"
-            className="h-40 w-40"
-          />
+          <QRCodeSVG value={url} size={220} includeMargin />
         </div>
       ),
     },
@@ -177,7 +156,7 @@ const Sidebar = ({
         toast.error("Please Login to Contact!");
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         unique_property_id: property.property_id,
         user_id: userDetails.user_id,

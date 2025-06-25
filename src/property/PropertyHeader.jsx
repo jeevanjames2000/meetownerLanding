@@ -221,7 +221,7 @@ const PropertyHeader = () => {
       try {
         const data = localStorage.getItem("user");
         if (data) {
-          userDetails = JSON.parse(data)?.userDetails || null;
+          userDetails = JSON.parse(data) || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);

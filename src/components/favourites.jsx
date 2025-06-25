@@ -35,7 +35,7 @@ const Favourites = () => {
   const fetchLikedProperties = async () => {
     const data = localStorage.getItem("user");
     if (!data) return;
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
     try {
       const response = await axios.get(
         `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
@@ -75,7 +75,7 @@ const Favourites = () => {
     if (!data) {
       return;
     }
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
     try {
       const response = await axios.get(
         `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails.user_id}`
@@ -114,7 +114,7 @@ const Favourites = () => {
         const data = localStorage.getItem("user");
         if (data) {
           const parsedData = JSON.parse(data);
-          userDetails = parsedData?.userDetails || null;
+          userDetails = parsedData || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
@@ -154,7 +154,7 @@ const Favourites = () => {
         toast.error("Please Login to Contact!");
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         unique_property_id: property.unique_property_id,
         User_user_id: userDetails.user_id,
@@ -179,7 +179,7 @@ const Favourites = () => {
       setShowLoginModal(true);
       return;
     }
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
     setSelectedProperty(property);
     const alreadySubmitted = localStorage.getItem("visit_submitted") === "true";
     const isNameMissing = !userDetails?.name || userDetails.name === "N/A";
@@ -199,7 +199,7 @@ const Favourites = () => {
   };
   const handleModalSubmit = async (property) => {
     try {
-      const { userDetails } = JSON.parse(localStorage.getItem("user"));
+      const userDetails = JSON.parse(localStorage.getItem("user"));
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -230,7 +230,7 @@ const Favourites = () => {
         setShowLoginModal(true);
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,

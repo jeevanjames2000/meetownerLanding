@@ -9,7 +9,7 @@ const useWhatsappHook = (selectedPropertyId) => {
   useEffect(() => {
     const data = localStorage.getItem("user");
     if (data) {
-      setUserDetails(JSON.parse(data).userDetails);
+      setUserDetails(JSON.parse(data));
     } else {
       setError("User not logged in!");
     }

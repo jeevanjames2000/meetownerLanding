@@ -21,11 +21,13 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (user?.token) {
+    const token = JSON.parse(localStorage.getItem("token"));
+
+    if (token) {
       dispatch(
         setAuthData({
-          userDetails: user.userDetails,
-          accessToken: user.token,
+          userDetails: user,
+          accessToken: token,
           loggedIn: true,
         })
       );

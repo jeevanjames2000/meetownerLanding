@@ -41,6 +41,7 @@ const Login = ({ onClose }) => {
         { mobile },
         { headers: { "Content-Type": "application/json" } }
       );
+      console.log("response: ", response.data);
       return response.data;
     } catch (error) {
       setError("Failed to check user existence. Please try again.");
@@ -129,6 +130,7 @@ const Login = ({ onClose }) => {
       }
       setIsLoading(true);
       const userData = await checkUserExists();
+      console.log("userData: ", userData);
       if (userData && userData.status === "success") {
         setLoginData(userData);
         if (type === 1) {
@@ -157,12 +159,23 @@ const Login = ({ onClose }) => {
     try {
       if (loginData && loginData.status === "success") {
         const { user_details, accessToken } = loginData;
+        console.log("user_details: ", user_details);
         localStorage.setItem(
           "user",
           JSON.stringify({
+            ...user_details,
+          })
+        );
+        localStorage.setItem(
+          "mobile",
+          JSON.stringify({
             mobile,
-            userDetails: user_details,
-            token: accessToken,
+          })
+        );
+        localStorage.setItem(
+          "token",
+          JSON.stringify({
+            accessToken,
           })
         );
         dispatch(

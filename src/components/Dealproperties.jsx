@@ -58,7 +58,7 @@ const DealProperties = () => {
         setShowLoginModal(true);
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -92,7 +92,7 @@ const DealProperties = () => {
         const data = localStorage.getItem("user");
         if (data) {
           const parsedData = JSON.parse(data);
-          userDetails = parsedData?.userDetails || null;
+          userDetails = parsedData || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);

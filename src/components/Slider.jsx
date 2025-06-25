@@ -58,7 +58,7 @@ const PropertyListing = () => {
     const fetchLikedProperties = async () => {
       const data = localStorage.getItem("user");
       if (!data) return;
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       try {
         const response = await axios.get(
           `${config.awsApiUrl}/fav/v1/getAllFavourites?user_id=${userDetails.user_id}`
@@ -101,7 +101,7 @@ const PropertyListing = () => {
         setShowLoginModal(true);
         return;
       }
-      const { userDetails } = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -128,7 +128,8 @@ const PropertyListing = () => {
       });
       return;
     }
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
+    console.log("userDetails: ", userDetails);
     const isAlreadyLiked = likedProperties.includes(
       property.unique_property_id
     );
@@ -164,7 +165,7 @@ const PropertyListing = () => {
         const data = localStorage.getItem("user");
         if (data) {
           const parsedData = JSON.parse(data);
-          userDetails = parsedData?.userDetails || null;
+          userDetails = parsedData || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);

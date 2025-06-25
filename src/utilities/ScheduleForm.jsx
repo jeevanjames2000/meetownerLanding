@@ -21,7 +21,7 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
       });
       return;
     }
-    const { userDetails } = JSON.parse(data);
+    const userDetails = JSON.parse(data);
     setUserDetails(userDetails);
     setFormData((prev) => ({
       ...prev,
@@ -38,7 +38,7 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
     e.preventDefault();
     try {
       const storedUser = JSON.parse(localStorage.getItem("user"));
-      let updatedUserDetails = { ...storedUser.userDetails };
+      let updatedUserDetails = { ...storedUser };
       const missingName =
         !updatedUserDetails?.name || updatedUserDetails.name === "N/A";
       const missingEmail =

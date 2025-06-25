@@ -9,7 +9,7 @@ const DownloadApp = ({ onClose }) => {
   const appStoreUrl = "https://apps.apple.com/us/app/meetowner/id6743744178";
   const url = "https://meetowner.in/app";
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-h-150 overflow-scroll relative">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-h-150 overflow-hidden relative">
       <button
         onClick={onClose}
         className="absolute top-3 right-3 text-black hover:text-gray-600"
@@ -18,9 +18,12 @@ const DownloadApp = ({ onClose }) => {
       </button>
 
       <h2 className="text-lg font-semibold mb-4 text-center">Download App</h2>
-
-      <div className="mb-4 flex justify-between gap-4">
-        {}
+      <div className="mb-4 text-center">
+        <div className="inline-block bg-white rounded shadow-md">
+          <QRCodeSVG value={url} size={220} includeMargin />
+        </div>
+      </div>
+      <div className="flex justify-between gap-4">
         <button
           onClick={() => window.open(playStoreUrl, "_blank")}
           className="flex items-center flex-1 space-x-2 px-4 py-2 rounded-lg bg-yellow-500 text-black"
@@ -32,7 +35,6 @@ const DownloadApp = ({ onClose }) => {
           </div>
         </button>
 
-        {}
         <button
           onClick={() => window.open(appStoreUrl, "_blank")}
           className="flex items-center flex-1 space-x-2 px-4 py-2 rounded-lg bg-yellow-500 text-black"
@@ -43,12 +45,6 @@ const DownloadApp = ({ onClose }) => {
             <span className="text-xs font-semibold">App Store</span>
           </div>
         </button>
-      </div>
-
-      <div className="mt-3 text-center">
-        <div className="inline-block bg-white rounded shadow-md">
-          <QRCodeSVG value={url} size={220} includeMargin />
-        </div>
       </div>
     </div>
   );

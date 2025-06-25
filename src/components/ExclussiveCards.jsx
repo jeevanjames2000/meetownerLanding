@@ -40,7 +40,7 @@ const ExclussiveCards = () => {
         const data = localStorage.getItem("user");
         if (data) {
           const parsedData = JSON.parse(data);
-          userDetails = parsedData?.userDetails || null;
+          userDetails = parsedData || null;
         }
       } catch (error) {
         console.error("Error parsing localStorage data:", error);
