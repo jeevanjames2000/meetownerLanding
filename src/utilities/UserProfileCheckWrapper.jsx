@@ -86,11 +86,16 @@ const UserProfileCheckWrapper = ({ children }) => {
       return;
     }
     const data = localStorage.getItem("user");
-    if (data) {
-      try {
-        const userDetails = JSON.parse(data);
-        const isIncomplete =
-          !userDetails?.name?.trim() || !userDetails?.email?.trim();
+    if (!data) {
+      setShowModal(false);
+      return;
+    }
+    try {
+      const userDetails = JSON.parse(data);
+      const isLoggedIn = !!userDetails?.user_id;
+      const isIncomplete =
+        !userDetails?.name?.trim() || !userDetails?.email?.trim();
+      if (isLoggedIn && isIncomplete) {
         setUser({
           user_id: userDetails.user_id || "",
           name: userDetails.name || "",
@@ -100,12 +105,12 @@ const UserProfileCheckWrapper = ({ children }) => {
           city: userDetails.city || "",
           address: userDetails.address || "",
         });
-        setShowModal(isIncomplete);
-      } catch (error) {
-        console.error("Invalid user data in localStorage:", error);
+        setShowModal(true);
+      } else {
         setShowModal(false);
       }
-    } else {
+    } catch (error) {
+      console.error("Invalid user data in localStorage:", error);
       setShowModal(false);
     }
   }, [pathname]);
@@ -120,7 +125,7 @@ const UserProfileCheckWrapper = ({ children }) => {
       name: user.name,
       mobile: user.mobile,
       email: user.email,
-      password: user.password,
+      password: user.password || undefined,
       city: user.city,
       address: user.address,
     };
