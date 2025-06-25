@@ -94,7 +94,9 @@ const UserProfileCheckWrapper = ({ children }) => {
       const userDetails = JSON.parse(data);
       const isLoggedIn = !!userDetails?.user_id;
       const isIncomplete =
-        !userDetails?.name?.trim() || !userDetails?.email?.trim();
+        !userDetails?.name?.trim() ||
+        !userDetails?.email?.trim() ||
+        !userDetails?.city?.trim();
       if (isLoggedIn && isIncomplete) {
         setUser({
           user_id: userDetails.user_id || "",
