@@ -125,6 +125,24 @@ const HousingPicks = () => {
     if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
     return numValue.toString();
   };
+  const getOwnerDetails = useCallback(async (property) => {
+    try {
+      const response = await fetch(
+        `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${property?.unique_property_id}`
+      );
+      const data = await response.json();
+      const propertydata = data?.property;
+      const sellerdata = propertydata?.user;
+      if (response.ok) {
+        return sellerdata;
+      } else {
+        throw new Error("Failed to fetch owner details");
+      }
+    } catch (err) {
+      console.error("Error fetching owner details:", err);
+      throw err;
+    }
+  }, []);
 
   const handleContactSeller = async (property) => {
     try {
@@ -138,6 +156,8 @@ const HousingPicks = () => {
         return;
       }
       const userDetails = JSON.parse(data);
+      const sellerData = await getOwnerDetails(property);
+
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -155,7 +175,7 @@ const HousingPicks = () => {
         sub_type: SubType,
         location: property?.location_id.split(/[\s,]+/)[0],
         property_cost: formatToIndianCurrency(property?.property_cost),
-        ownerMobile: property?.mobile || property?.phone || "N/A",
+        ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
       };
 
       await axios.post(

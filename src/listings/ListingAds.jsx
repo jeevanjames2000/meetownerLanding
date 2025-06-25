@@ -11,7 +11,6 @@ import noPropertiesFound from "../assets/Images/urban-planning_10891692.png";
 const ListingAds = () => {
   const [property, setProperty] = useState([]);
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData);
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {

@@ -129,7 +129,6 @@ const PropertyListing = () => {
       return;
     }
     const userDetails = JSON.parse(data);
-    console.log("userDetails: ", userDetails);
     const isAlreadyLiked = likedProperties.includes(
       property.unique_property_id
     );
@@ -283,7 +282,6 @@ const PropertyListing = () => {
     if (navigator.share) {
       navigator
         .share(shareData)
-        .then(() => console.log("Property shared successfully"))
         .catch((error) => console.error("Error sharing property:", error));
     } else {
       navigator.clipboard

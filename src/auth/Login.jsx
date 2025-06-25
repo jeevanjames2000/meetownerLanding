@@ -8,20 +8,8 @@ import config from "../../config";
 import { toast } from "react-toastify";
 const Login = ({ onClose }) => {
   const modalRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
@@ -30,10 +18,29 @@ const Login = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState(null);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const OTP_LENGTH = 4;
   const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
+  const handleKeyPress = (e, action) => {
+    if (e.key === "Enter" && !isLoading) {
+      e.preventDefault();
+      if (action === "sendOtp" && validateMobile(mobile)) {
+        handleLogin(0);
+      } else if (action === "verifyOtp" && enteredOtp.length === OTP_LENGTH) {
+        verifyOTP();
+      }
+    }
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
   const checkUserExists = useCallback(async () => {
     try {
       const response = await axios.post(
@@ -41,65 +48,12 @@ const Login = ({ onClose }) => {
         { mobile },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("response: ", response.data);
       return response.data;
     } catch (error) {
       setError("Failed to check user existence. Please try again.");
       return null;
     }
   }, [mobile]);
-
-  const registerUser = useCallback(
-    async (type) => {
-      try {
-        const response = await axios.post(
-          "https://api.meetowner.in/auth/registernew",
-          {
-            name: "N/A",
-            mobile,
-            city: 4,
-            userType: "user",
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        if (response.data.status === "success") {
-          const userData = await checkUserExists();
-
-          setLoginData(userData);
-          if (type === 0) {
-            sendOTP();
-          } else {
-            sendWhatsAppMessage();
-          }
-          return true;
-        }
-        return false;
-      } catch (error) {
-        setError("Registration failed. Please try again.");
-        return false;
-      }
-    },
-    [mobile, dispatch, onClose]
-  );
-  const sendWhatsAppMessage = async () => {
-    setEnteredOtp("");
-    try {
-      const res = await axios.post(
-        `${config.awsApiUrl}/auth/v1/sendGallaboxOTP`,
-        {
-          mobile,
-        }
-      );
-      setOtp(parseInt(res.data.otp));
-      setMessage(`WhatsApp OTP sent successfully to +91 ${mobile}`);
-      setOtpSent(true);
-      setError("");
-    } catch (err) {
-      setError("Failed to send OTP via WhatsApp. Please try again!");
-      setMessage("");
-    }
-  };
-
   const sendOTP = useCallback(async () => {
     setIsLoading(true);
     setError("");
@@ -119,7 +73,54 @@ const Login = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [mobile]);
+  }, [mobile, setOtp, setMessage, setOtpSent, setError]);
+  const sendWhatsAppMessage = useCallback(async () => {
+    setEnteredOtp("");
+    try {
+      const res = await axios.post(
+        `${config.awsApiUrl}/auth/v1/sendGallaboxOTP`,
+        { mobile }
+      );
+      setOtp(parseInt(res.data.otp));
+      setMessage(`WhatsApp OTP sent successfully to +91 ${mobile}`);
+      setOtpSent(true);
+      setError("");
+    } catch (err) {
+      setError("Failed to send OTP via WhatsApp. Please try again!");
+      setMessage("");
+    }
+  }, [mobile, setOtp, setEnteredOtp, setMessage, setOtpSent, setError]);
+  const registerUser = useCallback(
+    async (type) => {
+      try {
+        const response = await axios.post(
+          "https://api.meetowner.in/auth/registernew",
+          {
+            name: "N/A",
+            mobile,
+            city: "N/A",
+            userType: "user",
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (response.data.status === "success") {
+          const userData = await checkUserExists();
+          setLoginData(userData);
+          if (type === 0) {
+            sendOTP();
+          } else {
+            sendWhatsAppMessage();
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        setError("Registration failed. Please try again.");
+        return false;
+      }
+    },
+    [mobile, checkUserExists, sendOTP, sendWhatsAppMessage]
+  );
   const handleLogin = useCallback(
     async (type) => {
       if (!validateMobile(mobile)) {
@@ -130,7 +131,6 @@ const Login = ({ onClose }) => {
       }
       setIsLoading(true);
       const userData = await checkUserExists();
-      console.log("userData: ", userData);
       if (userData && userData.status === "success") {
         setLoginData(userData);
         if (type === 1) {
@@ -143,9 +143,17 @@ const Login = ({ onClose }) => {
       }
       setIsLoading(false);
     },
-    [mobile, checkUserExists, sendOTP, registerUser, navigate]
+    [
+      mobile,
+      checkUserExists,
+      sendOTP,
+      registerUser,
+      sendWhatsAppMessage,
+      setIsLoading,
+      setError,
+      setLoginData,
+    ]
   );
-
   const verifyOTP = useCallback(() => {
     const trimmedEnteredOtp = enteredOtp.trim();
     if (
@@ -159,25 +167,9 @@ const Login = ({ onClose }) => {
     try {
       if (loginData && loginData.status === "success") {
         const { user_details, accessToken } = loginData;
-        console.log("user_details: ", user_details);
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...user_details,
-          })
-        );
-        localStorage.setItem(
-          "mobile",
-          JSON.stringify({
-            mobile,
-          })
-        );
-        localStorage.setItem(
-          "token",
-          JSON.stringify({
-            accessToken,
-          })
-        );
+        localStorage.setItem("user", JSON.stringify({ ...user_details }));
+        localStorage.setItem("mobile", JSON.stringify({ mobile }));
+        localStorage.setItem("token", JSON.stringify({ accessToken }));
         dispatch(
           setAuthData({
             userDetails: user_details,
@@ -188,7 +180,6 @@ const Login = ({ onClose }) => {
         dispatch(setLoggedIn(true));
         toast.success("Login successful!");
         setMessage("Login successful!");
-        // navigate(redirectPath || "/");
         setError("");
         onClose();
       } else {
@@ -201,7 +192,17 @@ const Login = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [enteredOtp, otp, mobile, dispatch, onClose, loginData]);
+  }, [
+    enteredOtp,
+    otp,
+    mobile,
+    dispatch,
+    onClose,
+    loginData,
+    setIsLoading,
+    setError,
+    setMessage,
+  ]);
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-opacity-75 z-50">
       <div
@@ -215,7 +216,7 @@ const Login = ({ onClose }) => {
         >
           ×
         </button>
-        <h2 className="text-black  text-center text-2xl font-bold mb-5">
+        <h2 className="text-black text-center text-2xl font-bold mb-5">
           Login
         </h2>
         {message && (
@@ -232,6 +233,7 @@ const Login = ({ onClose }) => {
             setMobile(value);
             setError("");
           }}
+          onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
           className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black text-black placeholder-gray-400 focus:outline-none"
           disabled={isLoading || otpSent}
         />
@@ -246,6 +248,7 @@ const Login = ({ onClose }) => {
               setEnteredOtp(value);
               setError("");
             }}
+            onKeyDown={(e) => handleKeyPress(e, "verifyOtp")}
             className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black placeholder-gray-400 focus:outline-none"
             disabled={isLoading}
           />
@@ -262,7 +265,6 @@ const Login = ({ onClose }) => {
         >
           Change mobile number
         </p>
-
         <button
           onClick={otpSent ? verifyOTP : () => handleLogin(0)}
           className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
@@ -270,9 +272,9 @@ const Login = ({ onClose }) => {
         >
           {isLoading ? "Processing..." : otpSent ? "VERIFY OTP" : "SEND OTP"}
         </button>
-        <div className="flex items-center my-2">
+        <div className="flex items-center my-4">
           <div className="flex-grow border-t border-gray-300"></div>
-          <span className=" text-black text-sm">OR</span>
+          <span className="text-black text-sm mx-2">OR</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
         <button

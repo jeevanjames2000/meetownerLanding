@@ -927,18 +927,18 @@ function ListingsBody({ setShowLoginModal }) {
           property_cost: formatToIndianCurrency(
             selectedProperty?.property_cost
           ),
-          ownerMobile: "6302816551",
+          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
         };
 
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
           smspayload
         );
-        // await axios.post(
-        //   `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-        //   payload
-        // );
-        // await handleAPI(selectedProperty);
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(selectedProperty);
 
         fetchContactedProperties();
         localStorage.setItem("visit_submitted", "true");
@@ -1002,7 +1002,6 @@ function ListingsBody({ setShowLoginModal }) {
         const userDetails = JSON.parse(data);
         const sellerData = await getOwnerDetails(selectedProperty);
 
-        console.log("userDetails: ", userDetails);
         const payload = {
           unique_property_id: property?.unique_property_id,
           user_id: userDetails?.user_id,
@@ -1016,17 +1015,17 @@ function ListingsBody({ setShowLoginModal }) {
           sub_type: selectedProperty?.sub_type,
           location: selectedProperty?.location_id,
           property_cost: selectedProperty?.property_cost,
-          ownerMobile: "6302816551",
+          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
         };
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
           smspayload
         );
-        // await axios.post(
-        //   `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-        //   payload
-        // );
-        // await handleAPI(property);
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(property);
         setSubmittedStates((prev) => ({
           ...prev,
           [property?.unique_property_id]: {
