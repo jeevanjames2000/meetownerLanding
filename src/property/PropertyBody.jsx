@@ -219,7 +219,7 @@ const PropertyBody = () => {
       );
       const data = await response.json();
       const propertydata = data.property;
-      const sellerdata = propertydata.seller_details;
+      const sellerdata = propertydata.user;
       if (response.ok) {
         return sellerdata;
       } else {
@@ -251,7 +251,7 @@ const PropertyBody = () => {
         setShowLoginModal(true);
         return;
       }
-      const  userDetails  = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
