@@ -121,6 +121,7 @@ export default function ScheduleFormModal({ isOpen, onClose, onSubmit }) {
             placeholder="Phone"
             className="w-full border border-gray-300 rounded px-3 py-2"
             value={formData.phone}
+            disabled
             onChange={handleChange}
             required
           />

@@ -95,6 +95,29 @@ const PropertyBody = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [aroundProperty, setAroundProperty] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [contacted, setContacted] = useState([]);
+  const [submittedStates, setSubmittedStates] = useState({});
+
+  const fetchContactedProperties = async (property) => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      return;
+    }
+    const userDetails = JSON.parse(data);
+
+    try {
+      const response = await axios.get(
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellersByID?unique_property_id=${property?.unique_property_id}&user_id=${userDetails.user_id}`
+      );
+      const contacts = response.data || [];
+      const contactIds = contacts.results.map(
+        (contact) => contact.unique_property_id
+      );
+      setContacted(contactIds);
+    } catch (error) {
+      console.error("Failed to fetch liked properties:", error);
+    }
+  };
   useEffect(() => {
     const fetchPropertyFromQueryParams = async () => {
       if (!location.state) {
@@ -155,6 +178,7 @@ const PropertyBody = () => {
         }
       }
     };
+    fetchContactedProperties(property);
     fetchPropertyData();
   }, [property?.unique_property_id]);
   useEffect(() => {
@@ -229,6 +253,7 @@ const PropertyBody = () => {
       console.error("err: ", err);
     }
   };
+
   const handleClose = () => {
     setShowLoginModal(false);
   };
@@ -272,14 +297,23 @@ const PropertyBody = () => {
         property_cost: formatToIndianCurrency(property?.property_cost),
         ownerMobile: property?.mobile || property?.phone || "N/A",
       };
-
       await axios.post(
         `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
         smspayload
       );
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(property);
-    } catch (err) {}
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [property.unique_property_id]: {
+          ...prev[property?.unique_property_id],
+          contact: true,
+        },
+      }));
+      setContacted((prev) => [...prev, property.unique_property_id]);
+    } catch (err) {
+      console.log("err: ", err);
+    }
   };
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
@@ -1383,9 +1417,21 @@ const PropertyBody = () => {
             </button>
             <button
               onClick={handleContactSeller}
-              className="w-[45%] h-10 bg-[#EC6F51]  items-center hover:bg-[#d85e43] text-white text-sm px-6 py-2 cursor-pointer rounded-lg"
+              disabled={
+                submittedStates[property?.unique_property_id]?.contact ||
+                contacted.includes(property.unique_property_id)
+              }
+              className={`w-full h-10 bg-[#EC6F51] items-left hover:bg-[#d85e43] text-white text-sm px-5 py-2 cursor-pointer rounded-lg ${
+                submittedStates[property?.unique_property_id]?.contact ||
+                contacted.includes(property.unique_property_id)
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
             >
-              Contact
+              {submittedStates[property?.unique_property_id]?.contact ||
+              contacted.includes(property.unique_property_id)
+                ? "Submitted"
+                : "Contact"}
             </button>
           </div>
         </div>

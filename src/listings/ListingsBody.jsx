@@ -262,7 +262,14 @@ const PropertyCard = memo(
         });
       }
     };
-    const handleContactClick = () => {
+    const handleContactClick = (property) => {
+      if (!property?.unique_property_id) {
+        toast.error("Invalid property data!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
+      }
       handleScheduleVisit(property);
     };
     return (
@@ -273,8 +280,7 @@ const PropertyCard = memo(
              lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  
              hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)]  
              lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  
-             transition-shadow duration-300 bg-white cursor-pointer w-full"
-        onClick={() => handleNavigation(property)}
+             transition-shadow duration-300 bg-white w-full"
         style={{ minHeight: "auto", height: "auto" }}
       >
         <div className="bg-[#ffff] rounded-[20px] p-3 w-full h-auto flex flex-col">
@@ -336,7 +342,10 @@ const PropertyCard = memo(
                     <p className="text-[12px] lg:text-base">Verified</p>
                   </div>
                 </div>
-                <div className="flex flex-col lg:flex-row justify-between">
+                <div
+                  className="flex flex-col lg:flex-row justify-between cursor-pointer"
+                  onClick={() => handleNavigation(property)}
+                >
                   <p className="text-[#1D3A76] font-bold text-base md:text-[18px]">
                     {property?.property_name}
                   </p>
@@ -354,7 +363,10 @@ const PropertyCard = memo(
                   </p>
                 </div>
               </div>
-              <div className="mb-4 relative flex-1">
+              <div
+                className="mb-4 relative flex-1 cursor-pointer"
+                onClick={() => handleNavigation(property)}
+              >
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex flex-wrap gap-2 items-center text-[#204691] font-medium text-sm">
                     {[
@@ -510,7 +522,7 @@ const PropertyCard = memo(
                     Chat
                   </button>
                   <button
-                    onClick={handleContactClick}
+                    onClick={() => handleContactClick(property)}
                     className="bg-blue-900 cursor-pointer hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
                     disabled={
                       submittedState?.contact ||
@@ -644,7 +656,6 @@ function ListingsBody({ setShowLoginModal }) {
         property_in: searchData?.property_in || "N/A",
         sub_type: searchData?.sub_type || "N/A",
       };
-
       try {
         await axios.post(
           `${config.awsApiUrl}/enquiry/v1/userActivity`,
@@ -737,7 +748,6 @@ function ListingsBody({ setShowLoginModal }) {
       return;
     }
     const userDetails = JSON.parse(data);
-
     try {
       const response = await axios.get(
         `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
@@ -751,7 +761,6 @@ function ListingsBody({ setShowLoginModal }) {
       console.error("Failed to fetch liked properties:", error);
     }
   };
-
   useEffect(() => {
     setData([]);
     setPage(1);
@@ -847,6 +856,13 @@ function ListingsBody({ setShowLoginModal }) {
   );
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [submittedStates, setSubmittedStates] = useState({});
+  const [shouldSubmit, setShouldSubmit] = useState(false);
+  useEffect(() => {
+    if (selectedProperty && shouldSubmit) {
+      handleModalSubmit();
+      setShouldSubmit(false);
+    }
+  }, [selectedProperty, shouldSubmit]);
   const { handleAPI } = useWhatsappHook(selectedProperty);
   const handleLike = useCallback(
     async (property) => {
@@ -886,76 +902,118 @@ function ListingsBody({ setShowLoginModal }) {
     [likedProperties]
   );
   const getOwnerDetails = useCallback(async (property) => {
+    if (!property?.unique_property_id) {
+      console.error("Invalid property in getOwnerDetails:", property);
+      throw new Error("Invalid property data");
+    }
     try {
       const response = await fetch(
-        `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${property?.unique_property_id}`
+        `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${property.unique_property_id}`
       );
       const data = await response.json();
-      const propertydata = data?.property;
-      const sellerdata = propertydata?.user;
-      if (response.ok) {
-        return sellerdata;
+      const propertyData = data?.property;
+      const sellerData = propertyData?.user;
+      if (response.ok && sellerData) {
+        return sellerData;
       } else {
+        console.error("Failed to fetch owner details:", data);
         throw new Error("Failed to fetch owner details");
       }
     } catch (err) {
-      console.error("Error fetching owner details:", err);
+      console.error("Error fetching owner details:", err, { property });
       throw err;
     }
   }, []);
-  const handleModalSubmit = useCallback(
-    async (selectedProperty) => {
-      try {
-        const userDetails = JSON.parse(localStorage.getItem("user"));
-        const payload = {
-          unique_property_id: selectedProperty?.unique_property_id,
-          user_id: userDetails?.user_id,
-          name: userDetails?.name,
-          mobile: userDetails?.mobile,
-          email: userDetails?.email,
-        };
-        const sellerData = await getOwnerDetails(selectedProperty);
-        const SubType =
-          selectedProperty.sub_type === "Apartment"
-            ? `${selectedProperty?.sub_type} ${selectedProperty?.bedrooms}BHK`
-            : selectedProperty?.sub_type;
-        const smspayload = {
-          name: userDetails?.name,
-          mobile: userDetails?.mobile,
-          sub_type: SubType,
-          location: selectedProperty?.location_id.split(/[\s,]+/)[0],
-          property_cost: formatToIndianCurrency(
-            selectedProperty?.property_cost
-          ),
-          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
-        };
-
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
-          smspayload
-        );
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-          payload
-        );
-        await handleAPI(selectedProperty);
-
-        fetchContactedProperties();
-        localStorage.setItem("visit_submitted", "true");
-        setSubmittedStates((prev) => ({
-          ...prev,
-          [selectedProperty.unique_property_id]: {
-            ...prev[selectedProperty?.unique_property_id],
-            contact: true,
-          },
-        }));
-        setModalOpen(false);
-      } catch (err) {}
-    },
-    [handleAPI, selectedProperty, setSubmittedStates, setModalOpen]
-  );
+  const handleModalSubmit = useCallback(async () => {
+    if (!selectedProperty?.unique_property_id) {
+      toast.error("No property selected!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      console.error(
+        "No selectedProperty in handleModalSubmit:",
+        selectedProperty
+      );
+      return;
+    }
+    try {
+      const userDetails = JSON.parse(localStorage.getItem("user"));
+      if (!userDetails) {
+        toast.info("Please Login to Schedule Visits!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setShowLoginModal(true);
+        return;
+      }
+      const payload = {
+        unique_property_id: selectedProperty.unique_property_id,
+        user_id: userDetails?.user_id || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+      };
+      const sellerData = await getOwnerDetails(selectedProperty);
+      const SubType =
+        selectedProperty.sub_type === "Apartment"
+          ? `${selectedProperty.sub_type} ${selectedProperty.bedrooms || ""}BHK`
+          : selectedProperty.sub_type || "N/A";
+      const smspayload = {
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        sub_type: SubType,
+        location: selectedProperty.location_id?.split(/[\s,]+/)[0] || "N/A",
+        property_cost: formatToIndianCurrency(
+          selectedProperty.property_cost || 0
+        ),
+        ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
+      };
+      await axios.post(
+        `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+        smspayload
+      );
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
+      await handleAPI(selectedProperty);
+      fetchContactedProperties();
+      localStorage.setItem("visit_submitted", "true");
+      setSubmittedStates((prev) => ({
+        ...prev,
+        [selectedProperty.unique_property_id]: {
+          ...prev[selectedProperty.unique_property_id],
+          contact: true,
+        },
+      }));
+      setContacted((prev) =>
+        prev.includes(selectedProperty.unique_property_id)
+          ? prev
+          : [...prev, selectedProperty.unique_property_id]
+      );
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Error in handleModalSubmit:", err, { selectedProperty });
+      toast.error("Something went wrong while scheduling visit", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  }, [
+    handleAPI,
+    selectedProperty,
+    setSubmittedStates,
+    setModalOpen,
+    setShowLoginModal,
+    fetchContactedProperties,
+  ]);
   const handleScheduleVisit = useCallback(
     (property) => {
+      if (!property?.unique_property_id) {
+        toast.error("Invalid property data!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        console.error("Invalid property in handleScheduleVisit:", property);
+        return;
+      }
       setSelectedProperty(property);
       const data = localStorage.getItem("user");
       if (!data) {
@@ -980,71 +1038,12 @@ function ListingsBody({ setShowLoginModal }) {
         !isMobileMissing &&
         alreadySubmitted
       ) {
-        handleModalSubmit(property);
+        setShouldSubmit(true);
       } else {
         setModalOpen(true);
       }
     },
-    [setShowLoginModal, setSelectedProperty, handleModalSubmit, setModalOpen]
-  );
-  const handleContactSeller = useCallback(
-    async (property) => {
-      try {
-        const data = localStorage.getItem("user");
-        if (!data) {
-          toast.info("Please Login to Contact!", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          setShowLoginModal(true);
-          return;
-        }
-        const userDetails = JSON.parse(data);
-        const sellerData = await getOwnerDetails(selectedProperty);
-
-        const payload = {
-          unique_property_id: property?.unique_property_id,
-          user_id: userDetails?.user_id,
-          fullname: userDetails?.name,
-          mobile: userDetails?.mobile,
-          email: userDetails?.email,
-        };
-        const smspayload = {
-          name: userDetails?.name,
-          mobile: userDetails?.mobile,
-          sub_type: selectedProperty?.sub_type,
-          location: selectedProperty?.location_id,
-          property_cost: selectedProperty?.property_cost,
-          ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
-        };
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
-          smspayload
-        );
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-          payload
-        );
-        await handleAPI(property);
-        setSubmittedStates((prev) => ({
-          ...prev,
-          [property?.unique_property_id]: {
-            ...prev[property?.unique_property_id],
-            chat: true,
-          },
-        }));
-        toast.success("Successfully contacted seller!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      } catch (err) {
-        toast.error("Something went wrong while submitting enquiry", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      }
-    },
-    [handleAPI, setShowLoginModal, setSubmittedStates]
+    [setShowLoginModal, setSelectedProperty, setModalOpen]
   );
   const cards = useMemo(() => {
     const baseCards = data.slice(0);
@@ -1094,7 +1093,6 @@ function ListingsBody({ setShowLoginModal }) {
                   contacted={contacted}
                   handleLike={handleLike}
                   handleScheduleVisit={handleScheduleVisit}
-                  handleContactSeller={handleContactSeller}
                   submittedState={
                     submittedStates[item.unique_property_id] || {}
                   }
