@@ -28,10 +28,8 @@ import ProfileWrapper from "./profile/ProfileWrapper";
 import { HelmetProvider } from "react-helmet-async";
 import AppRedirect from "./components/AppRedirect";
 import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
-
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -39,7 +37,6 @@ function Home() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -77,13 +74,28 @@ function Home() {
     </>
   );
 }
-
 function App() {
+  const [loginTrigger, setLoginTrigger] = useState(0);
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "user") {
+        setLoginTrigger((prev) => prev + 1);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setLoginTrigger((prev) => prev + 1);
+    }
+  }, []);
   return (
     <Provider store={store}>
       <HelmetProvider>
         <Router>
-          <UserProfileCheckWrapper>
+          <UserProfileCheckWrapper loginTrigger={loginTrigger}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<LoginWrapper />} />
@@ -104,5 +116,4 @@ function App() {
     </Provider>
   );
 }
-
 export default App;

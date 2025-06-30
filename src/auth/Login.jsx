@@ -3,13 +3,11 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
-import { useNavigate } from "react-router-dom";
 import config from "../../config";
 import { toast } from "react-toastify";
 const Login = ({ onClose }) => {
   const modalRef = useRef(null);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
