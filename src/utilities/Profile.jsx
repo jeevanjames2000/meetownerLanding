@@ -141,11 +141,7 @@ export default function ProfilePage() {
           <div className="relative">
             <img
               src={
-                user.photo
-                  ? user.photo.startsWith("http")
-                    ? `${user.photo}?t=${Date.now()}`
-                    : `${config.awsApiUrl}/${user.photo}?t=${Date.now()}`
-                  : profileImage
+                user.photo ? `${config.awsApiUrl}/${user.photo}` : profileImage
               }
               alt="Profile"
               crossOrigin="anonymous"

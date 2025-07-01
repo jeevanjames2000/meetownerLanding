@@ -272,6 +272,12 @@ const PropertyCard = memo(
       }
       handleScheduleVisit(property);
     };
+    const getPriceDisplay = (propertyFor, price) => {
+      if (propertyFor === "Rent") {
+        return price ? `₹ ${formatToIndianCurrency(price)}/month` : "N/A";
+      }
+      return price ? `₹ ${formatToIndianCurrency(price)}` : "N/A";
+    };
     return (
       <div
         key={`property-${index}`}
@@ -349,17 +355,38 @@ const PropertyCard = memo(
                   <p className="text-[#1D3A76] font-bold text-base md:text-[18px]">
                     {property?.property_name}
                   </p>
-                  <p className="text-[#1D3A76] font-semibold text-[18px]">
-                    {property?.project_name || ""}{" "}
-                    <span className="text-[#1D3A76] font-bold text-[15px]">
-                      Rs: {formatToIndianCurrency(property?.property_cost)}{" "}
-                      {property.price_negotiable && " (Negotiable)"}
+                  <p className="flex flex-col items-end text-[#1D3A76] font-semibold text-[18px] max-h-5">
+                    <span className="flex items-center font-bold text-[15px]">
+                      {property?.property_for === "Rent" ? (
+                        <span className="flex flex-col items-end">
+                          {getPriceDisplay(
+                            property?.property_for,
+                            property?.monthly_rent
+                          )}
+                          {property?.property_cost_type && (
+                            <span>{property.property_cost_type}</span>
+                          )}
+                          <span className="text-xs font-normal text-[#A4A4A4]">
+                            Expected Monthly Rent
+                          </span>
+                        </span>
+                      ) : (
+                        <>
+                          {getPriceDisplay(
+                            property?.property_for,
+                            property?.property_cost
+                          )}
+                          {property?.property_cost_type && (
+                            <span>{property.property_cost_type}</span>
+                          )}
+                        </>
+                      )}
                     </span>
-                    <span className="text-[#A4A4A4] font-medium text-[15px] ml-2">
-                      {property?.loan_facility === "Yes"
-                        ? "EMI option Available"
-                        : ""}
-                    </span>
+                    {property?.loan_facility === "Yes" && (
+                      <span className="text-xs text-[#A4A4A4]">
+                        EMI option Available
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -396,6 +423,10 @@ const PropertyCard = memo(
                       property?.possession_status === "Immediate" &&
                         "Immediate",
                       property?.possession_status === "Future" && "Future",
+                      property?.furnished_status &&
+                        (property?.furnished_status === "Unfurnished"
+                          ? "Unfurnished"
+                          : `${property?.furnished_status} Furnished`),
                     ]
                       .filter(Boolean)
                       .map((item, index, arr) => (
@@ -409,7 +440,7 @@ const PropertyCard = memo(
                   </div>
                 </div>
                 <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
-                  <p>Highlights:</p>
+                  <p className="text-[#1D3A76]">Highlights :</p>
                   {[
                     property?.facing && `${property?.facing} Facing`,
                     property?.bedrooms && `${property?.bedrooms} BHK`,
@@ -435,7 +466,7 @@ const PropertyCard = memo(
                   property?.public_parking ||
                   property?.private_parking) && (
                   <div className="text-sm text-[#A4A4A4] font-medium mt-2 flex flex-wrap items-center gap-1">
-                    <p>Amenities:</p>
+                    <p className="text-[#1D3A76]">Amenities :</p>
                     {property?.facilities
                       ? property?.facilities
                           .split(",")
@@ -697,29 +728,31 @@ function ListingsBody({ setShowLoginModal }) {
         setLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         handleUserSearched();
-        const response = await fetch(
-          `${
-            config.awsApiUrl
-          }/listings/v1/getAllPropertiesByType?page=${currentPage}&property_for=${
-            searchData?.tab === "Latest"
-              ? "Sell"
-              : searchData.tab === "Buy"
-              ? "Sell"
-              : searchData?.tab === "Rent"
-              ? "Rent"
-              : searchData?.tab === "Plot"
-              ? "Sell"
-              : "Sell"
-          }&property_in=${searchData?.property_in || ""}&sub_type=${
-            searchData?.sub_type === "Others" ? "" : searchData?.sub_type
-          }&search=${searchData.location || ""}&bedrooms=${
-            searchData?.bhk || ""
-          }&property_cost=${
-            searchData?.budget || ""
-          }&priceFilter=${encodeURIComponent(selected)}&possession_status=${
-            searchData?.occupancy || ""
-          }&property_status=1&city_id=${searchData.city}`
-        );
+        const baseUrl = `${
+          config.awsApiUrl
+        }/listings/v1/getAllPropertiesByType?page=${currentPage}&property_for=${
+          searchData?.tab === "Latest"
+            ? "Sell"
+            : searchData.tab === "Buy"
+            ? "Sell"
+            : searchData?.tab === "Rent"
+            ? "Rent"
+            : searchData?.tab === "Plot"
+            ? "Sell"
+            : "Sell"
+        }&property_in=${searchData?.property_in || ""}&sub_type=${
+          searchData?.sub_type === "Others" ? "" : searchData?.sub_type
+        }&search=${searchData.location || ""}&bedrooms=${
+          searchData?.bhk || ""
+        }&property_cost=${
+          searchData?.budget || ""
+        }&priceFilter=${encodeURIComponent(selected)}&possession_status=${
+          searchData?.occupancy || ""
+        }&property_status=1&city_id=${searchData.city}&furnished_status=${
+          searchData.furnished_status
+        }`;
+
+        const response = await fetch(`${baseUrl}`);
         const res = await response.json();
         const newData = res.properties || [];
         setData((prevData) => {
@@ -775,6 +808,7 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.occupancy,
     searchData?.sub_type,
     searchData?.budget,
+    searchData?.furnished_status,
     selected,
   ]);
   useEffect(() => {

@@ -16,6 +16,7 @@ const searchSlice = createSlice({
     userCity: null,
     loading: false,
     error: null,
+    furnished_status: "",
   },
   reducers: {
     setCity: (state, action) => {
@@ -60,6 +61,9 @@ const searchSlice = createSlice({
         ...action.payload,
       };
     },
+    setFurnishedStatus: (state, action) => {
+      state.furnished_status = action.payload;
+    },
     setPlotSubType: (state, action) => {
       state.plot_subType = action.payload;
     },
@@ -84,5 +88,6 @@ export const {
   setSearchData,
   setPlotSubType,
   setCommercialSubType,
+  setFurnishedStatus,
 } = searchSlice.actions;
 export default searchSlice.reducer;

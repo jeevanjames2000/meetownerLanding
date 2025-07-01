@@ -8,6 +8,7 @@ import config from "../../config";
 import {
   setBHK,
   setBudget,
+  setFurnishedStatus,
   setOccupancy,
   setPropertyIn,
   setSearchData,
@@ -18,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { debounce } from "lodash";
 import axios from "axios";
-import { Building, Building2, Home, Landmark, MapPin } from "lucide-react";
+import { Building, Building2, Home, Landmark, MapPin, X } from "lucide-react";
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -27,6 +28,14 @@ const commercialSubTypes = [
   { id: "Plot", label: "Plot", icon: MapPin },
   { id: "Others", label: "Others", icon: MapPin },
 ];
+const getFurnishingOptions = () => {
+  return [
+    { label: "Furnishing", value: "" },
+    { label: "Unfurnished", value: "Unfurnished" },
+    { label: "Semi Furnished", value: "Semi" },
+    { label: "Fully Furnished", value: "Fully" },
+  ];
+};
 const Header = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
@@ -50,6 +59,18 @@ const Header = () => {
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || ""
   );
+  const [selectedFurnishedStatus, setSelectedFurnishedStatus] = useState(
+    searchData.furnished_status || ""
+  );
+  useEffect(() => {
+    if (
+      ["Plot", "Land"].includes(selectedSubType) &&
+      selectedFurnishedStatus !== ""
+    ) {
+      setSelectedFurnishedStatus("");
+      dispatch(setFurnishedStatus(""));
+    }
+  }, [selectedSubType, selectedFurnishedStatus, dispatch]);
   const fetchCities = async () => {
     try {
       const response = await axios.get(
@@ -160,6 +181,7 @@ const Header = () => {
     "Property In": ["Property In", "Residential", "Commercial"],
     Type: getTypeOptions(),
     Status: getStatusOptions(),
+    Furnishing: getFurnishingOptions(),
   };
   const labelToActionMap = {
     Buy: setTab,
@@ -168,6 +190,7 @@ const Header = () => {
     "Property In": setPropertyIn,
     Type: setSubType,
     Status: setOccupancy,
+    Furnishing: setFurnishedStatus,
   };
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
@@ -176,6 +199,7 @@ const Header = () => {
     "Property In": setSelectedPropertyIn,
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
+    Furnishing: setSelectedFurnishedStatus,
   };
   const labelToStoreKeyMap = {
     Buy: "tab",
@@ -184,6 +208,16 @@ const Header = () => {
     "Property In": "property_in",
     Type: "sub_type",
     Status: "occupancy",
+    Furnishing: "furnished_status",
+  };
+  const defaultValues = {
+    Buy: "Buy",
+    BHK: null,
+    Budget: "",
+    "Property In": "Residential",
+    Type: "",
+    Status: "",
+    Furnishing: "",
   };
   const getSelectedLabel = (label, id) => {
     const key = labelToStoreKeyMap[label];
@@ -191,6 +225,12 @@ const Header = () => {
     if (label === "Type" && id) {
       const subtype = commercialSubTypes.find((st) => st.id === id);
       return subtype ? subtype.label : id || "Property Type";
+    }
+    if (label === "Furnishing") {
+      const match = getFurnishingOptions().find(
+        (opt) => opt.value === selectedValue
+      );
+      return match ? match.label : "Furnishing";
     }
     const options =
       label === "Type" ? getTypeOptions() : dropdownOptions[label];
@@ -200,6 +240,12 @@ const Header = () => {
       return opt === selectedValue;
     });
     return typeof match === "object" ? match.label : match || options[0];
+  };
+  const handleClearFilter = (label) => {
+    const defaultValue = defaultValues[label];
+    dispatch(labelToActionMap[label](defaultValue));
+    labelToLocalSetterMap[label](defaultValue);
+    setActiveDropdown(null);
   };
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -239,6 +285,7 @@ const Header = () => {
           property_in: selectedPropertyIn || "N/A",
           sub_type: selectedSubType || "N/A",
           occupancy: selectedOccupancy || "N/A",
+          furnished_status: selectedFurnishedStatus || "N/A",
         };
         try {
           await axios.post(
@@ -260,13 +307,14 @@ const Header = () => {
       selectedPropertyIn,
       selectedSubType,
       selectedOccupancy,
+      selectedFurnishedStatus,
     ]
   );
   const debouncedUserActivity = useCallback(
     debounce((value) => {
       handleUserSearched(value);
     }, 1000),
-    [handleUserSearched]
+    [handleUserSearched, selectedFurnishedStatus]
   );
   const debouncedDispatch = useCallback(
     debounce((value) => {
@@ -289,6 +337,7 @@ const Header = () => {
   const handleRouteHome = () => {
     navigate("/");
   };
+  const shouldShowFurnishing = !["Plot", "Land"].includes(selectedSubType);
   return (
     <>
       <header
@@ -356,54 +405,80 @@ const Header = () => {
                           </li>
                         );
                       })}
+                      <li
+                        onClick={() => {
+                          setLocation("");
+                          dispatch(setSearchData({ location: "", city: "" }));
+                          setIsLocationOpen(false);
+                          setSearchInput("");
+                          setIsSearchDropdownOpen(false);
+                          debouncedUserActivity("");
+                        }}
+                        className="px-3 py-1 text-left rounded-md text-red-500 hover:bg-red-100 cursor-pointer"
+                      >
+                        Clear
+                      </li>
                     </ul>
                   )}
                 </div>
                 <div className="hidden lg:flex items-center gap-4">
-                  {Object.entries(dropdownOptions).map(([label, options]) => (
-                    <div key={label} className="relative">
-                      <button
-                        className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
-                        onClick={() => toggleDropdown(label)}
-                      >
-                        {label === "Type"
-                          ? getSelectedLabel(label, selectedSubType)
-                          : getSelectedLabel(label)}
-                        <FaChevronDown />
-                      </button>
-                      {activeDropdown === label && (
-                        <div className="absolute mt-2 w-36 bg-white rounded-lg shadow-lg z-50 text-left">
-                          {options.map((option, index) => {
-                            const isObject = typeof option === "object";
-                            const value = isObject ? option.value : option;
-                            const display = isObject ? option.label : option;
-                            if (
-                              (label === "Type" ||
-                                label === "Property In" ||
-                                label === "Status" ||
-                                label === "BHK") &&
-                              index === 0
-                            ) {
-                              return null;
-                            }
-                            return (
-                              <div
-                                key={`${label}-${value}`}
-                                onClick={() => {
-                                  dispatch(labelToActionMap[label](value));
-                                  labelToLocalSetterMap[label](value);
-                                  setActiveDropdown(null);
-                                }}
-                                className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
-                              >
-                                {display}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {Object.entries(dropdownOptions)
+                    .filter(
+                      ([label]) =>
+                        label !== "Furnishing" || shouldShowFurnishing
+                    )
+                    .map(([label, options]) => (
+                      <div key={label} className="relative">
+                        <button
+                          className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
+                          onClick={() => toggleDropdown(label)}
+                        >
+                          {label === "Type"
+                            ? getSelectedLabel(label, selectedSubType)
+                            : getSelectedLabel(label)}
+                          <FaChevronDown />
+                        </button>
+                        {activeDropdown === label && (
+                          <div className="absolute mt-2 w-40 bg-white rounded-lg shadow-lg z-50 text-left">
+                            <div
+                              onClick={() => handleClearFilter(label)}
+                              className="w-full px-4 py-2 text-red-600 hover:bg-red-100 text-xs cursor-pointer flex items-center justify-start transition-all duration-150 border-b"
+                            >
+                              <X size={14} className="mr-2" />
+                              Clear Filters
+                            </div>
+                            {options.map((option, index) => {
+                              const isObject = typeof option === "object";
+                              const value = isObject ? option.value : option;
+                              const display = isObject ? option.label : option;
+                              if (
+                                (label === "Type" ||
+                                  label === "Property In" ||
+                                  label === "Status" ||
+                                  label === "BHK" ||
+                                  label === "Furnishing") &&
+                                index === 0
+                              ) {
+                                return null;
+                              }
+                              return (
+                                <div
+                                  key={`${label}-${value}`}
+                                  onClick={() => {
+                                    dispatch(labelToActionMap[label](value));
+                                    labelToLocalSetterMap[label](value);
+                                    setActiveDropdown(null);
+                                  }}
+                                  className="w-full px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer transition-all duration-150"
+                                >
+                                  {display}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
               <div className="relative flex-grow min-w-0">
@@ -514,6 +589,7 @@ const Header = () => {
             ...(selectedPropertyIn === "Commercial"
               ? commercialSubTypes.map((subtype) => subtype.id)
               : ["Type"]),
+            ...(shouldShowFurnishing ? ["Furnishing"] : []),
           ].map((label) => (
             <div key={label} className="relative flex-shrink-0">
               <button
@@ -558,6 +634,20 @@ const Header = () => {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClearFilter(
+                          commercialSubTypes.some((st) => st.id === label)
+                            ? "Type"
+                            : label
+                        );
+                      }}
+                      className="px-4 py-2 flex justify-center items-center rounded-lg text-left text-xs bg-red-100 text-red-500 hover:bg-red-200"
+                    >
+                      <X size={14} className="mr-2" />
+                      Clear Filters
+                    </button>
                     {(label === "Type" ||
                     commercialSubTypes.some((st) => st.id === label)
                       ? getTypeOptions()
@@ -571,7 +661,8 @@ const Header = () => {
                           label === "Property In" ||
                           label === "Type" ||
                           commercialSubTypes.some((st) => st.id === label) ||
-                          label === "Budget") &&
+                          label === "Budget" ||
+                          label === "Furnishing") &&
                         index === 0
                       )
                         return null;
@@ -649,12 +740,24 @@ const Header = () => {
                     ×
                   </button>
                 </div>
-                {["Status"].map((label) => (
+                {[
+                  "Status",
+                  ...(shouldShowFurnishing ? ["Furnishing"] : []),
+                ].map((label) => (
                   <div key={label} className="mb-4">
                     <h4 className="font-medium mb-2 text-left">
                       {getSelectedLabel(label, undefined)}
                     </h4>
                     <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearFilter(label);
+                        }}
+                        className="px-4 py-2 rounded-lg text-left text-sm bg-red-100 text-red-500 hover:bg-red-200"
+                      >
+                        Clear
+                      </button>
                       {(dropdownOptions[label] || []).map((option, index) => {
                         const isObject = typeof option === "object";
                         const value = isObject ? option.value : option;
