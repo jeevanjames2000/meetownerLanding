@@ -983,7 +983,7 @@ function ListingsBody({ setShowLoginModal }) {
       const payload = {
         unique_property_id: selectedProperty.unique_property_id,
         user_id: userDetails?.user_id || "N/A",
-        name: userDetails?.name || "N/A",
+        fullname: userDetails?.name || "N/A",
         mobile: userDetails?.mobile || "N/A",
         email: userDetails?.email || "N/A",
       };

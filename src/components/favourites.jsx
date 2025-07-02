@@ -455,7 +455,7 @@ const Favourites = () => {
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
-        name: userDetails.name,
+        fullname: userDetails.name,
         mobile: userDetails.phone,
         email: userDetails.email,
       };
