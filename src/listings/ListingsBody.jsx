@@ -382,9 +382,13 @@ const PropertyCard = memo(
                         </>
                       )}
                     </span>
-                    {property?.loan_facility === "Yes" && (
+                    {property?.loan_facility === "Yes" ? (
                       <span className="text-xs text-[#A4A4A4]">
                         EMI option Available
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[#A4A4A4]">
+                        One Time Payment
                       </span>
                     )}
                   </p>

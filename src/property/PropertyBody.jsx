@@ -1305,9 +1305,15 @@ const PropertyBody = () => {
             </p>
           </div>
           <div className="text-sm text-blue-00 text-left md:text-right">
-            <span className="text-md font-bold text-blue-900">
-              {property?.loan_facility && "EMI option available"}
-            </span>
+            {property?.loan_facility === "Yes" ? (
+              <span className="text-sm font-bold text-[#A4A4A4]">
+                EMI option Available
+              </span>
+            ) : (
+              <span className="text-sm font-bold text-[#A4A4A4]">
+                One Time Payment
+              </span>
+            )}
             <br />
             <span className="text-xs font-semibold text-gray-400">
               All Inclusive Price
