@@ -243,14 +243,14 @@ const PropertyCard = memo(
               <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <button
                   onClick={handleChatClick}
-                  className="flex items-center justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
+                  className="flex items-center cursor-pointer justify-center gap-1 border border-[#25D366] text-[#25D366] px-6 py-2 rounded-full text-sm font-medium"
                 >
                   <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4" />
                   Chat
                 </button>
                 <button
                   onClick={handleContactClick}
-                  className="bg-blue-900 hover:bg-blue-900 text-white px-6 py-2 rounded-full text-sm font-semibold"
+                  className="bg-blue-900 hover:bg-blue-900  text-white px-6 py-2 rounded-full text-sm font-semibold"
                   disabled={
                     submittedState?.contact ||
                     contacted.includes(property.unique_property_id)
@@ -408,9 +408,9 @@ const Favourites = () => {
       }
       const userDetails = JSON.parse(data);
       const payload = {
+        user_id: userDetails.user_id,
         unique_property_id: property.unique_property_id,
-        User_user_id: userDetails.user_id,
-        status: 1,
+        property_name: property.property_name,
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
@@ -452,11 +452,12 @@ const Favourites = () => {
   const handleModalSubmit = async (property) => {
     try {
       const userDetails = JSON.parse(localStorage.getItem("user"));
+
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
         fullname: userDetails.name,
-        mobile: userDetails.phone,
+        mobile: userDetails.mobile,
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
@@ -531,20 +532,46 @@ const Favourites = () => {
       <Header />
       <div className="flex flex-col lg:flex-row justify-center px-4  sm:px-6 lg:px-10 py-6 pb-10 gap-6">
         <div className="w-full lg:w-3/4 max-w-[900px] ">
-          <Swiper
-            modules={[Pagination]}
-            direction={isMobileView ? "horizontal" : "vertical"}
-            spaceBetween={24}
-            slidesPerView={isMobileView ? 1 : 3}
-            pagination={{
-              clickable: isMobileView,
-            }}
-            className="w-full h-[1000px] custom-swiper"
-            style={{ overflow: "scroll", scrollbarWidth: "none" }}
-          >
-            {likedProperties.map((property, index) => (
-              <SwiperSlide key={index} className="w-full h-full">
+          {isMobileView ? (
+            <Swiper
+              modules={[Pagination]}
+              direction="horizontal"
+              spaceBetween={24}
+              slidesPerView={1}
+              pagination={{
+                clickable: true,
+              }}
+              className="w-full"
+            >
+              {likedProperties.map((property, index) => (
+                <SwiperSlide key={index} className="w-full">
+                  <PropertyCard
+                    property={property}
+                    index={index}
+                    toggleReadMore={toggleReadMore}
+                    toggleFacilities={toggleFacilities}
+                    handleNavigation={handleNavigation}
+                    readMoreStates={readMoreStates}
+                    expandedCards={expandedCards}
+                    likedProperties={likedProperties}
+                    handleLike={handleLike}
+                    handleScheduleVisit={handleScheduleVisit}
+                    handleContactSeller={handleContactSeller}
+                    submittedState={
+                      submittedStates[property.unique_property_id] || {}
+                    }
+                    setShowLoginModal={setShowLoginModal}
+                    contacted={contacted}
+                    getOwnerDetails={getOwnerDetails}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {likedProperties.map((property, index) => (
                 <PropertyCard
+                  key={index}
                   property={property}
                   index={index}
                   toggleReadMore={toggleReadMore}
@@ -563,9 +590,9 @@ const Favourites = () => {
                   contacted={contacted}
                   getOwnerDetails={getOwnerDetails}
                 />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              ))}
+            </div>
+          )}
         </div>
         <DynamicAds />
       </div>

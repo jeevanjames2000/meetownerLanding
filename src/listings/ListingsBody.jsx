@@ -919,13 +919,11 @@ function ListingsBody({ setShowLoginModal }) {
           ? prev.filter((id) => id !== property.unique_property_id)
           : [...prev, property.unique_property_id]
       );
+
       const payload = {
-        User_user_id: userDetails.user_id,
-        userName: userDetails.name,
-        userEmail: userDetails?.email || "N/A",
-        userMobile: userDetails?.mobile,
-        ...property,
-        status: isAlreadyLiked ? 1 : 0,
+        user_id: userDetails.user_id,
+        unique_property_id: property.unique_property_id,
+        property_name: property.property_name,
       };
       try {
         await axios.post(`${config.awsApiUrl}/fav/v1/postIntrest`, payload);
