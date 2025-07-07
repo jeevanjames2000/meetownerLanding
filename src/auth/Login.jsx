@@ -94,9 +94,9 @@ const Login = ({ onClose }) => {
         const response = await axios.post(
           "https://api.meetowner.in/auth/registernew",
           {
-            name: "N/A",
-            mobile,
-            city: "N/A",
+            name: "",
+            mobile: mobile,
+            city: "",
             userType: "user",
           },
           { headers: { "Content-Type": "application/json" } }
