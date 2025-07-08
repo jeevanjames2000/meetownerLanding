@@ -649,6 +649,7 @@ const formatToIndianCurrency = (value) => {
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
+
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
@@ -752,9 +753,9 @@ function ListingsBody({ setShowLoginModal }) {
           searchData?.budget || ""
         }&priceFilter=${encodeURIComponent(selected)}&possession_status=${
           searchData?.occupancy || ""
-        }&property_status=1&city_id=${searchData.city}&furnished_status=${
-          searchData.furnished_status
-        }`;
+        }&property_status=${searchData.property_status}&city_id=${
+          searchData.city
+        }&furnished_status=${searchData.furnished_status}`;
 
         const response = await fetch(`${baseUrl}`);
         const res = await response.json();
@@ -813,6 +814,7 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.sub_type,
     searchData?.budget,
     searchData?.furnished_status,
+    searchData.property_status,
     selected,
   ]);
   useEffect(() => {
@@ -1155,10 +1157,10 @@ function ListingsBody({ setShowLoginModal }) {
   };
   return (
     <div className="min-h-screen p-1 relative z-0 overflow-visible">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-1 mt-2 px-2">
-        <div className="flex items-center flex-grow overflow-hidden min-w-0">
+      <div className="flex justify-between flex-wrap gap-2 mb-1 mt-2 px-2">
+        <div className="flex  flex-grow overflow-hidden min-w-0">
           <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
-          <p className="text-sm md:text-base whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
+          <p className="text-sm  whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"
               ? "Commercial"
               : searchData?.property_in === "Plot"
@@ -1173,7 +1175,8 @@ function ListingsBody({ setShowLoginModal }) {
             In {searchData?.city || ""}
           </p>
         </div>
-        <div className="relative  flex flex-row mb-10 text-left z-50 flex-shrink-0 ">
+
+        <div className="relative  flex flex-row mb-1 text-left z-50 flex-shrink-0 ">
           <Breadcrumb />
           <div className="flex items-center gap-2">
             <p className="text-[#000000] text-sm whitespace-nowrap font-medium">

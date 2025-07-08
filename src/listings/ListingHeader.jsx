@@ -11,6 +11,7 @@ import {
   setFurnishedStatus,
   setOccupancy,
   setPropertyIn,
+  setPropertyStatus,
   setSearchData,
   setSubType,
   setTab,
@@ -34,6 +35,13 @@ const getFurnishingOptions = () => {
     { label: "Unfurnished", value: "Unfurnished" },
     { label: "Semi Furnished", value: "Semi" },
     { label: "Fully Furnished", value: "Fully" },
+  ];
+};
+const getProjectOptions = () => {
+  return [
+    { label: "Projects", value: "" },
+    { label: "Launched Projects", value: "1" },
+    { label: "Upcoming Projects", value: "3" },
   ];
 };
 const Header = () => {
@@ -61,6 +69,9 @@ const Header = () => {
   );
   const [selectedFurnishedStatus, setSelectedFurnishedStatus] = useState(
     searchData.furnished_status || ""
+  );
+  const [selectedProjectStatus, setSelectedProjectStatus] = useState(
+    searchData.projectStatus || ""
   );
   useEffect(() => {
     if (
@@ -182,6 +193,7 @@ const Header = () => {
     Type: getTypeOptions(),
     Status: getStatusOptions(),
     Furnishing: getFurnishingOptions(),
+    Projects: getProjectOptions(),
   };
   const labelToActionMap = {
     Buy: setTab,
@@ -191,6 +203,7 @@ const Header = () => {
     Type: setSubType,
     Status: setOccupancy,
     Furnishing: setFurnishedStatus,
+    Projects: setPropertyStatus,
   };
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
@@ -200,6 +213,7 @@ const Header = () => {
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
     Furnishing: setSelectedFurnishedStatus,
+    Projects: setSelectedProjectStatus,
   };
   const labelToStoreKeyMap = {
     Buy: "tab",
@@ -209,6 +223,7 @@ const Header = () => {
     Type: "sub_type",
     Status: "occupancy",
     Furnishing: "furnished_status",
+    Projects: "property_status",
   };
   const defaultValues = {
     Buy: "Buy",
@@ -218,6 +233,7 @@ const Header = () => {
     Type: "",
     Status: "",
     Furnishing: "",
+    Projects: "1",
   };
   const getSelectedLabel = (label, id) => {
     const key = labelToStoreKeyMap[label];
@@ -342,7 +358,7 @@ const Header = () => {
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 w-full bg-white shadow-sm p-2 md:px-6 z-20"
+        className="fixed top-0 left-0 w-full bg-white shadow-sm p-2 md:px-2 z-20"
       >
         <div className="flex justify-between items-center">
           <div
@@ -362,7 +378,7 @@ const Header = () => {
               onClick={handleRouteHome}
             />
           </div>
-          <div className="flex justify-end w-full max-w-[70rem] lg:max-w-[85rem] xl:w-[75rem] xl:max-w-none  sm:hidden md:hidden lg:flex px-2 lg:px-2">
+          <div className="flex justify-end w-full max-w-[70rem] lg:max-w-[85rem] xl:w-[75rem] xl:max-w-none  sm:hidden md:hidden lg:flex px-1 lg:px-1">
             <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap lg:flex-nowrap gap-2 lg:gap-3 justify-between">
               <div className="hidden md:flex items-center gap-2 lg:gap-4 shrink-0">
                 <div className="relative inline-block">
@@ -370,11 +386,27 @@ const Header = () => {
                     className="flex items-center space-x-2 bg-[#1D3A76] px-3 lg:px-6 py-2 lg:py-4 rounded-full cursor-pointer text-white text-sm lg:text-base"
                     onClick={() => setIsLocationOpen(!isLocationOpen)}
                   >
-                    <span className="hidden md:inline truncate max-w-[100px] lg:max-w-none">{location}</span>
-                    <FaFilter className="text-xs lg:text-sm"/>
+                    <span className="hidden md:inline truncate max-w-[100px] lg:max-w-none">
+                      {location}
+                    </span>
+                    <FaFilter className="text-xs lg:text-sm" />
                   </div>
                   {isLocationOpen && (
                     <ul className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50">
+                      <li
+                        onClick={() => {
+                          setLocation("");
+                          dispatch(setSearchData({ location: "", city: "" }));
+                          setIsLocationOpen(false);
+                          setSearchInput("");
+                          setIsSearchDropdownOpen(false);
+                          debouncedUserActivity("");
+                        }}
+                        className="w-full px-4 py-2 text-red-600 hover:bg-red-100 text-xs cursor-pointer flex items-center justify-start transition-all duration-150 border-b"
+                      >
+                        <X size={14} className="mr-2" />
+                        Clear Filters
+                      </li>
                       {citiesList.map((option) => {
                         const isDisabled = option === "Top Cities";
                         return (
@@ -405,19 +437,6 @@ const Header = () => {
                           </li>
                         );
                       })}
-                      <li
-                        onClick={() => {
-                          setLocation("");
-                          dispatch(setSearchData({ location: "", city: "" }));
-                          setIsLocationOpen(false);
-                          setSearchInput("");
-                          setIsSearchDropdownOpen(false);
-                          debouncedUserActivity("");
-                        }}
-                        className="px-3 py-1 text-left rounded-md text-red-500 hover:bg-red-100 cursor-pointer text-xs"
-                      >
-                        Clear
-                      </li>
                     </ul>
                   )}
                 </div>
@@ -456,7 +475,8 @@ const Header = () => {
                                   label === "Property In" ||
                                   label === "Status" ||
                                   label === "BHK" ||
-                                  label === "Furnishing") &&
+                                  label === "Furnishing" ||
+                                  label === "Projects") &&
                                 index === 0
                               ) {
                                 return null;
@@ -482,33 +502,33 @@ const Header = () => {
                 </div>
               </div>
               <div className="relative flex-grow min-w-0">
-                 <input
-                    type="text"
-                    placeholder="Search locality, city..."
-                    value={searchInput}
-                    onChange={(e) => handleValueChange(e.target.value)}
-                    onFocus={() => setIsSearchDropdownOpen(true)}
-                    onBlur={() =>
-                      setTimeout(() => setIsSearchDropdownOpen(false), 300)
-                    }
-                    className="w-full pl-2 pr-20 py-2 h-10 text-center placeholder:text-center bg-[#fff] rounded-lg border border-gray-300 md:py-3 md:h-12 lg:h-13 md:bg-transparent md:rounded-none md:border-none md:text-left md:placeholder:text-left focus:outline-none focus:ring-0 text-sm lg:text-base truncate hover:overflow-visible hover:whitespace-normal"
-                  />
-                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2 md:top-3 lg:top-3.5">
-                {searchInput && (
-                  <button
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                    onClick={handleClear}
-                  >
-                    <IoCloseCircleOutline className="w-5 h-5" />
-                  </button>
-                )}
-                <img
-                  src={Searchhome}
-                  alt="Search Home"
-                  className="w-[24px] h-[24px]"
+                <input
+                  type="text"
+                  placeholder="Search locality, city..."
+                  value={searchInput}
+                  onChange={(e) => handleValueChange(e.target.value)}
+                  onFocus={() => setIsSearchDropdownOpen(true)}
+                  onBlur={() =>
+                    setTimeout(() => setIsSearchDropdownOpen(false), 300)
+                  }
+                  className="w-full pl-2 pr-20 py-2 h-10 text-center placeholder:text-center bg-[#fff] rounded-lg border border-gray-300 md:py-3 md:h-12 lg:h-13 md:bg-transparent md:rounded-none md:border-none md:text-left md:placeholder:text-left focus:outline-none focus:ring-0 text-sm lg:text-base truncate hover:overflow-visible hover:whitespace-normal"
                 />
-              </div>
-              {isSearchDropdownOpen && (
+                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2 md:top-3 lg:top-3.5">
+                  {searchInput && (
+                    <button
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                      onClick={handleClear}
+                    >
+                      <IoCloseCircleOutline className="w-5 h-5" />
+                    </button>
+                  )}
+                  <img
+                    src={Searchhome}
+                    alt="Search Home"
+                    className="w-[24px] h-[24px]"
+                  />
+                </div>
+                {isSearchDropdownOpen && (
                   <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto overflow-x-hidden dropdown-list z-50">
                     {searchInput?.trim() === "" ? (
                       localities?.length > 0 ? (
@@ -535,7 +555,9 @@ const Header = () => {
                               <div className="flex justify-between">
                                 <div>{item?.locality}</div>
                                 <p className="text-sm text-gray-300">
-                                  {item?.locality === "Most Searched" ? "" : "Locality"}
+                                  {item?.locality === "Most Searched"
+                                    ? ""
+                                    : "Locality"}
                                 </p>
                               </div>
                             </li>
@@ -577,6 +599,7 @@ const Header = () => {
             "BHK",
             "Budget",
             "Property In",
+            "Projects",
             ...(selectedPropertyIn === "Commercial"
               ? commercialSubTypes.map((subtype) => subtype.id)
               : ["Type"]),

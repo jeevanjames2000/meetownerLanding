@@ -1,20 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import logoImage from "../assets/Images/Untitled-22.png";
 import favicon from "../assets/Images/Favicon@10x.png";
 import { HiMenu } from "react-icons/hi";
-import { IoClose } from "react-icons/io5";
 import Login from "../auth/Login";
-import useAuthStatus from "../auth/useAuthStatus";
 import { useNavigate } from "react-router-dom";
 import DownloadApp from "../utilities/DownloadApp";
 import Sidebar from "../utilities/SideBar";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
-import axios from "axios";
-import config from "../../config";
+import { IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "react-toastify";
-import { LogInIcon } from "lucide-react";
+import { IoDiamondOutline } from "react-icons/io5";
+import { setSearchData } from "../../store/slices/searchSlice";
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
@@ -98,7 +95,16 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutsideDownload);
     };
   }, [showDownloadModal]);
-
+  const handleListings = () => {
+    dispatch(
+      setSearchData({
+        property_status: "3",
+        sub_type: "",
+        property_in: "",
+      })
+    );
+    navigate("/listings");
+  };
   return (
     <>
       <header className="w-full bg-white shadow-sm px-2 relative z-10">
@@ -133,6 +139,13 @@ const Header = () => {
               Download App
             </button>
             <button
+              onClick={handleListings}
+              className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-gray-800 font-medium hover:bg-[#F0AA00] transition-all items-center"
+            >
+              <IoDiamondOutline className="p-1 w-6 h-6 mr-1 text-blue-900 hover:text-red-500" />
+              Upcoming Projects
+            </button>
+            <button
               onClick={() =>
                 (window.location.href = "https://sellers.meetowner.in/")
               }
@@ -145,10 +158,10 @@ const Header = () => {
             </button>
             {Data && (
               <div
-                className="flex cursor-pointer border border-[#F0AA00] px-6 py-1 rounded-full"
+                className="flex cursor-pointer font-medium border border-[#F0AA00] hover:bg-[#F0AA00] px-6 py-1 rounded-full"
                 onClick={handleFavRoute}
               >
-                <IoIosHeartEmpty className="p-1 w-6 h-6 bg-white rounded-2xl text-red-600 hover:text-red-500 " />
+                <IoIosHeartEmpty className="p-1 w-6 h-6  rounded-2xl text-red-600 hover:text-red-500 " />
                 <p>Favourites</p>
               </div>
             )}

@@ -28,6 +28,7 @@ import ProfileWrapper from "./profile/ProfileWrapper";
 import { HelmetProvider } from "react-helmet-async";
 import AppRedirect from "./components/AppRedirect";
 import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
+
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {

@@ -6,7 +6,6 @@ import Footer from "../components/Footer";
 import { ToastContainer } from "react-toastify";
 import LoginModal from "../utilities/LoginModal";
 import { Helmet } from "react-helmet-async";
-import Breadcrumb from "../utilities/BreadCrumb";
 const Listings = () => {
   useEffect(() => {
     window.scrollTo(0, 0);

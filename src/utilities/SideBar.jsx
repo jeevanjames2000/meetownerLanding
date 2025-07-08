@@ -1,7 +1,7 @@
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoDiamondOutline } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
 import QR from "../assets/Images/qrcode_193007135_71c6cda8449bb038d4fc90072469a021.png";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -9,9 +9,10 @@ import "swiper/css/pagination";
 import axios from "axios";
 import config from "../../config";
 import { toast } from "react-toastify";
-import { LogOutIcon, User2Icon } from "lucide-react";
+import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
+import { setSearchData } from "../../store/slices/searchSlice";
 
 const Sidebar = ({
   menuOpen,
@@ -166,7 +167,7 @@ const Sidebar = ({
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
     } catch (err) {
-      toast.error("Something went wrong while submitting enquiry");
+      console.log("err: ", err);
     }
   };
   useEffect(() => {}, [isLoggedIn, user, Data]);
@@ -182,6 +183,18 @@ const Sidebar = ({
       return;
     }
     navigate("/profile");
+  };
+  const dispatch = useDispatch();
+
+  const handleListings = () => {
+    dispatch(
+      setSearchData({
+        property_status: "3",
+        sub_type: "",
+        property_in: "",
+      })
+    );
+    navigate("/listings");
   };
   return (
     <div
@@ -232,7 +245,14 @@ const Sidebar = ({
             )}
           </div>
         ))}
-        <button className="w-full mt-6 bg-[#F0AA00]  hover:text-white text-white px-4 py-2 rounded-full font-medium mb-4">
+        <button
+          onClick={handleListings}
+          className="hidden md:flex border mt-6 mb-4 bg-[#F0AA00]  border-[#F0AA00] px-6 py-1 rounded-full hover:text-white text-black font-medium hover:bg-[#F0AA00] transition-all items-center"
+        >
+          <ArrowDownRight className="p-1 w-6 h-6 mr-1 text-black hover:text-red-500" />
+          Upcoming Projects
+        </button>
+        <button className="w-full  bg-[#F0AA00]  hover:text-black text-black px-4 py-1 rounded-full font-medium mb-4">
           <div
             className="flex flex-row justify-center gap-3 cursor-pointer items-center"
             onClick={handleRoute}
@@ -252,7 +272,7 @@ const Sidebar = ({
           }}
           className={`w-full ${
             isLoggedIn ? "bg-red-500" : "bg-green-500"
-          }  text-white px-4 py-2 rounded-full font-medium mb-4`}
+          }  text-white px-4 py-1 rounded-full font-medium mb-4`}
         >
           <div className="flex flex-row justify-center gap-3 cursor-pointer items-center">
             {isLoggedIn ? "Logout" : "Login"}
