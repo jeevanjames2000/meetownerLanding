@@ -346,7 +346,7 @@ const Header = () => {
       >
         <div className="flex justify-between items-center">
           <div
-            className="flex text-left items-center cursor-pointer mr-auto"
+            className="flex text-left items-center cursor-pointer mr-1 flex-shrink-0"
             onClick={handleRouteHome}
           >
             <img
@@ -362,16 +362,16 @@ const Header = () => {
               onClick={handleRouteHome}
             />
           </div>
-          <div className="flex justify-end w-full max-w-[65rem] px-4">
-            <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap md:flex-nowrap gap-2 md:gap-4 justify-between">
-              <div className="hidden md:flex items-center gap-4 shrink-0">
+          <div className="flex justify-end w-full max-w-[70rem] lg:max-w-[85rem] xl:w-[75rem] xl:max-w-none  sm:hidden md:hidden lg:flex px-2 lg:px-2">
+            <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap lg:flex-nowrap gap-2 lg:gap-3 justify-between">
+              <div className="hidden md:flex items-center gap-2 lg:gap-4 shrink-0">
                 <div className="relative inline-block">
                   <div
-                    className="flex items-center space-x-2 bg-[#1D3A76] px-6 py-4 rounded-full cursor-pointer text-white h-13"
+                    className="flex items-center space-x-2 bg-[#1D3A76] px-3 lg:px-6 py-2 lg:py-4 rounded-full cursor-pointer text-white text-sm lg:text-base"
                     onClick={() => setIsLocationOpen(!isLocationOpen)}
                   >
-                    <span className="hidden md:inline">{location}</span>
-                    <FaFilter />
+                    <span className="hidden md:inline truncate max-w-[100px] lg:max-w-none">{location}</span>
+                    <FaFilter className="text-xs lg:text-sm"/>
                   </div>
                   {isLocationOpen && (
                     <ul className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50">
@@ -395,7 +395,7 @@ const Header = () => {
                                 debouncedUserActivity(option);
                               }
                             }}
-                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                            className={`px-3 py-1 text-left rounded-md transition-all duration-200 text-xs ${
                               isDisabled
                                 ? "text-gray-400 cursor-default"
                                 : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
@@ -414,14 +414,14 @@ const Header = () => {
                           setIsSearchDropdownOpen(false);
                           debouncedUserActivity("");
                         }}
-                        className="px-3 py-1 text-left rounded-md text-red-500 hover:bg-red-100 cursor-pointer"
+                        className="px-3 py-1 text-left rounded-md text-red-500 hover:bg-red-100 cursor-pointer text-xs"
                       >
                         Clear
                       </li>
                     </ul>
                   )}
                 </div>
-                <div className="hidden lg:flex items-center gap-4">
+                <div className="hidden xl:flex items-center gap-2">
                   {Object.entries(dropdownOptions)
                     .filter(
                       ([label]) =>
@@ -430,7 +430,7 @@ const Header = () => {
                     .map(([label, options]) => (
                       <div key={label} className="relative">
                         <button
-                          className="flex items-center gap-2 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer"
+                          className="flex items-center gap-1 text-gray-700 text-sm px-2 py-2 rounded-lg cursor-pointer whitespace-nowrap"
                           onClick={() => toggleDropdown(label)}
                         >
                           {label === "Type"
@@ -482,41 +482,34 @@ const Header = () => {
                 </div>
               </div>
               <div className="relative flex-grow min-w-0">
-                <input
-                  type="text"
-                  placeholder="Search locality, city..."
-                  value={searchInput}
-                  onChange={(e) => handleValueChange(e.target.value)}
-                  onFocus={() => setIsSearchDropdownOpen(true)}
-                  onBlur={() =>
-                    setTimeout(() => setIsSearchDropdownOpen(false), 300)
-                  }
-                  className="w-full pl-1 pr-10 
-             py-2 h-11
-             text-center placeholder:text-center 
-             bg-[#fff] rounded-lg border border-gray-300
-             md:py-4 md:h-13 
-             md:bg-transparent md:rounded-none md:border-none 
-             md:text-left md:placeholder:text-left 
-             focus:outline-none focus:ring-0"
-                />
-                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2">
-                  {searchInput && (
-                    <button
-                      className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                      onClick={handleClear}
-                    >
-                      <IoCloseCircleOutline className="w-5 h-5" />
-                    </button>
-                  )}
-                  <img
-                    src={Searchhome}
-                    alt="Search Home"
-                    className="w-[34px] h-[34px]"
+                 <input
+                    type="text"
+                    placeholder="Search locality, city..."
+                    value={searchInput}
+                    onChange={(e) => handleValueChange(e.target.value)}
+                    onFocus={() => setIsSearchDropdownOpen(true)}
+                    onBlur={() =>
+                      setTimeout(() => setIsSearchDropdownOpen(false), 300)
+                    }
+                    className="w-full pl-2 pr-20 py-2 h-10 text-center placeholder:text-center bg-[#fff] rounded-lg border border-gray-300 md:py-3 md:h-12 lg:h-13 md:bg-transparent md:rounded-none md:border-none md:text-left md:placeholder:text-left focus:outline-none focus:ring-0 text-sm lg:text-base truncate hover:overflow-visible hover:whitespace-normal"
                   />
-                </div>
-                {isSearchDropdownOpen && (
-                  <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto z-50">
+                <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2 md:top-3 lg:top-3.5">
+                {searchInput && (
+                  <button
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                    onClick={handleClear}
+                  >
+                    <IoCloseCircleOutline className="w-5 h-5" />
+                  </button>
+                )}
+                <img
+                  src={Searchhome}
+                  alt="Search Home"
+                  className="w-[24px] h-[24px]"
+                />
+              </div>
+              {isSearchDropdownOpen && (
+                  <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-60 overflow-y-auto overflow-x-hidden dropdown-list z-50">
                     {searchInput?.trim() === "" ? (
                       localities?.length > 0 ? (
                         localities?.map((item) => {
@@ -533,7 +526,7 @@ const Header = () => {
                                   setIsSearchDropdownOpen(false);
                                 }
                               }}
-                              className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
+                              className={`px-3 py-1 text-left rounded-md transition-all duration-200 text-sm ${
                                 isDisabled
                                   ? "text-gray-400 cursor-default"
                                   : "hover:bg-[#1D3A76] hover:text-white cursor-pointer"
@@ -542,9 +535,7 @@ const Header = () => {
                               <div className="flex justify-between">
                                 <div>{item?.locality}</div>
                                 <p className="text-sm text-gray-300">
-                                  {item?.locality === "Most Searched"
-                                    ? ""
-                                    : "Locality"}
+                                  {item?.locality === "Most Searched" ? "" : "Locality"}
                                 </p>
                               </div>
                             </li>
@@ -563,7 +554,7 @@ const Header = () => {
                             setSearchInput(item?.locality);
                             setIsSearchDropdownOpen(false);
                           }}
-                          className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
+                          className="px-2 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200 text-sm"
                         >
                           {item?.locality}
                           <p className="text-sm text-gray-300">Locality</p>
