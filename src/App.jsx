@@ -28,6 +28,7 @@ import ProfileWrapper from "./profile/ProfileWrapper";
 import { HelmetProvider } from "react-helmet-async";
 import AppRedirect from "./components/AppRedirect";
 import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
+import ContactUs from "./legal/contactUs";
 
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -110,6 +111,7 @@ function App() {
               <Route path="/privacy" element={<PrivacyAndPolicies />} />
               <Route path="/profile" element={<ProfileWrapper />} />
               <Route path="/app" element={<AppRedirect />} />
+              <Route path="/contactUs" element={<ContactUs />} />
             </Routes>
           </UserProfileCheckWrapper>
         </Router>
