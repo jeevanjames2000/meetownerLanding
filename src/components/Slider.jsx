@@ -283,7 +283,7 @@ const PropertyListing = () => {
         .catch((error) => console.error("Error sharing property:", error));
     } else {
       navigator.clipboard
-        .writeText(shareUrl)
+        .writeText(seoUrl)
         .then(() => {
           alert(
             "Property link copied to clipboard! You can paste it to share."
@@ -291,7 +291,7 @@ const PropertyListing = () => {
         })
         .catch((error) => {
           console.error("Error copying link:", error);
-          alert("Failed to copy link. Please copy this URL: " + shareUrl);
+          alert("Failed to copy link. Please copy this URL: " + seoUrl);
         });
     }
   };

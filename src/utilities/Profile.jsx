@@ -89,7 +89,7 @@ export default function ProfilePage() {
       if (!photoUrl) throw new Error("No photo URL returned");
       setProfileImage(photoUrl);
       toast.success("Profile photo updated successfully!");
-      await fetchProfile(user.user_id);
+      await fetchProfile(user.id);
     } catch (error) {
       console.error("Image Upload Error:", error);
       toast.error("Failed to upload photo.");

@@ -247,7 +247,7 @@ const Sidebar = ({
         ))}
         <button
           onClick={handleListings}
-          className="hidden md:flex border mt-6 mb-4 bg-[#F0AA00]  border-[#F0AA00] px-6 py-1 rounded-full hover:text-white text-black font-medium hover:bg-[#F0AA00] transition-all items-center"
+          className="hidden w-full md:flex border mt-6 mb-4 bg-[#F0AA00]  border-[#F0AA00] px-6 py-1 rounded-full hover:text-white text-black font-medium hover:bg-[#F0AA00] transition-all items-center"
         >
           <ArrowDownRight className="p-1 w-6 h-6 mr-1 text-black hover:text-red-500" />
           Upcoming Projects

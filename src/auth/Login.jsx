@@ -1,10 +1,31 @@
 import axios from "axios";
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
 import config from "../../config";
 import { toast } from "react-toastify";
+import CountryCodeSelector from "../utilities/CountryCodeSelector";
+import CryptoJS from "crypto-js";
+const JWT_SECRET = "khsfskhfks983493123!@#JSFKORuiweo232";
+function decrypt(encryptedText) {
+  try {
+    const [ivHex, encryptedHex] = encryptedText.split(":");
+    if (!ivHex || !encryptedHex)
+      throw new Error("Invalid encrypted text format");
+    const iv = CryptoJS.enc.Hex.parse(ivHex);
+    const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
+    const key = CryptoJS.SHA256(JWT_SECRET);
+    const decrypted = CryptoJS.AES.decrypt({ ciphertext: encrypted }, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    });
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  } catch (error) {
+    return null;
+  }
+}
 const Login = ({ onClose }) => {
   const modalRef = useRef(null);
   const dispatch = useDispatch();
@@ -16,12 +37,19 @@ const Login = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState(null);
+  const [selectedCode, setSelectedCode] = useState("+91");
+  const [country, setCountry] = useState("India");
   const OTP_LENGTH = 4;
-  const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
+  const validateMobile = (mobile, country) => {
+    if (country === "India") {
+      return /^[6-9]\d{9}$/.test(mobile);
+    }
+    return /^\d+$/.test(mobile) && mobile.length > 0;
+  };
   const handleKeyPress = (e, action) => {
     if (e.key === "Enter" && !isLoading) {
       e.preventDefault();
-      if (action === "sendOtp" && validateMobile(mobile)) {
+      if (action === "sendOtp" && validateMobile(mobile, country)) {
         handleLogin(0);
       } else if (action === "verifyOtp" && enteredOtp.length === OTP_LENGTH) {
         verifyOTP();
@@ -43,15 +71,14 @@ const Login = ({ onClose }) => {
     try {
       const response = await axios.post(
         "https://api.meetowner.in/auth/loginnew",
-        { mobile },
+        { mobile: mobile },
         { headers: { "Content-Type": "application/json" } }
       );
       return response.data;
     } catch (error) {
-      setError("Failed to check user existence. Please try again.");
       return null;
     }
-  }, [mobile]);
+  }, [mobile, selectedCode]);
   const sendOTP = useCallback(async () => {
     setIsLoading(true);
     setError("");
@@ -60,9 +87,15 @@ const Login = ({ onClose }) => {
         `${config.awsApiUrl}/auth/v1/sendOtp?mobile=${mobile}`
       );
       if (response.data.status === "success") {
-        setOtp(response.data.otp);
-        setMessage(`OTP sent successfully to +91${mobile}`);
-        setOtpSent(true);
+        const encryptedOtp = response.data.otp;
+        const decryptedOtp = decrypt(encryptedOtp);
+        if (decryptedOtp) {
+          setOtp(decryptedOtp);
+          setMessage(`OTP sent successfully to ${selectedCode}${mobile}`);
+          setOtpSent(true);
+        } else {
+          setError("Failed to decrypt OTP. Please try again.");
+        }
       } else {
         setError("Failed to send OTP. Please try again.");
       }
@@ -71,33 +104,46 @@ const Login = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [mobile, setOtp, setMessage, setOtpSent, setError]);
+  }, [mobile, selectedCode, setOtp, setMessage, setOtpSent, setError]);
   const sendWhatsAppMessage = useCallback(async () => {
     setEnteredOtp("");
     try {
       const res = await axios.post(
         `${config.awsApiUrl}/auth/v1/sendGallaboxOTP`,
-        { mobile }
+        {
+          mobile: mobile,
+          countryCode: selectedCode.replace("+", ""),
+        }
       );
-      setOtp(parseInt(res.data.otp));
-      setMessage(`WhatsApp OTP sent successfully to +91 ${mobile}`);
+      setOtp(res.data.otp.toString());
+      setMessage(`WhatsApp OTP sent successfully to ${selectedCode} ${mobile}`);
       setOtpSent(true);
       setError("");
     } catch (err) {
       setError("Failed to send OTP via WhatsApp. Please try again!");
       setMessage("");
     }
-  }, [mobile, setOtp, setEnteredOtp, setMessage, setOtpSent, setError]);
+  }, [
+    mobile,
+    selectedCode,
+    setOtp,
+    setEnteredOtp,
+    setMessage,
+    setOtpSent,
+    setError,
+  ]);
   const registerUser = useCallback(
     async (type) => {
       try {
         const response = await axios.post(
-          "https://api.meetowner.in/auth/registernew",
+          "https://api.meetowner.in/auth/v1/registernew",
           {
             name: "",
             mobile: mobile,
             city: "",
             userType: "user",
+            country: country || "India",
+            country_code: selectedCode || "+91",
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -117,13 +163,22 @@ const Login = ({ onClose }) => {
         return false;
       }
     },
-    [mobile, checkUserExists, sendOTP, sendWhatsAppMessage]
+    [
+      mobile,
+      selectedCode,
+      country,
+      checkUserExists,
+      sendOTP,
+      sendWhatsAppMessage,
+    ]
   );
   const handleLogin = useCallback(
     async (type) => {
-      if (!validateMobile(mobile)) {
+      if (!validateMobile(mobile, country)) {
         setError(
-          "Please enter a valid 10-digit mobile number starting with 6-9."
+          country === "India"
+            ? "Please enter a valid 10-digit mobile number starting with 6-9."
+            : "Please enter a valid mobile number."
         );
         return;
       }
@@ -143,6 +198,8 @@ const Login = ({ onClose }) => {
     },
     [
       mobile,
+      selectedCode,
+      country,
       checkUserExists,
       sendOTP,
       registerUser,
@@ -154,10 +211,7 @@ const Login = ({ onClose }) => {
   );
   const verifyOTP = useCallback(() => {
     const trimmedEnteredOtp = enteredOtp.trim();
-    if (
-      trimmedEnteredOtp.length !== OTP_LENGTH ||
-      trimmedEnteredOtp !== String(otp)
-    ) {
+    if (trimmedEnteredOtp.length !== OTP_LENGTH || trimmedEnteredOtp !== otp) {
       setError("Invalid OTP. Please try again.");
       return;
     }
@@ -166,7 +220,7 @@ const Login = ({ onClose }) => {
       if (loginData && loginData.status === "success") {
         const { user_details, accessToken } = loginData;
         localStorage.setItem("user", JSON.stringify({ ...user_details }));
-        localStorage.setItem("mobile", JSON.stringify({ mobile }));
+        localStorage.setItem("mobile", JSON.stringify({ mobile: mobile }));
         localStorage.setItem("token", JSON.stringify({ accessToken }));
         dispatch(
           setAuthData({
@@ -194,6 +248,8 @@ const Login = ({ onClose }) => {
     enteredOtp,
     otp,
     mobile,
+    selectedCode,
+    country,
     dispatch,
     onClose,
     loginData,
@@ -221,20 +277,29 @@ const Login = ({ onClose }) => {
           <p className="text-green-400 text-center mb-3">{message}</p>
         )}
         {error && <p className="text-red-400 text-center mb-3">{error}</p>}
-        <input
-          type="tel"
-          placeholder="Enter Mobile Number"
-          value={mobile}
-          maxLength={10}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, "");
-            setMobile(value);
-            setError("");
-          }}
-          onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
-          className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black text-black placeholder-gray-400 focus:outline-none"
-          disabled={isLoading || otpSent}
-        />
+        <div className="relative mb-1">
+          <input
+            type="tel"
+            placeholder="Enter Mobile Number"
+            value={mobile}
+            maxLength={15}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "");
+              setMobile(value);
+              setError("");
+            }}
+            onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
+            className="w-full px-4 py-2 rounded-md bg-white border border-black text-black placeholder-gray-400 focus:outline-none pl-20 pr-4"
+            disabled={isLoading || otpSent}
+          />
+          <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+            <CountryCodeSelector
+              selectedCode={selectedCode}
+              onSelect={setSelectedCode}
+              setCountry={setCountry}
+            />
+          </div>
+        </div>
         {otpSent && (
           <input
             type="text"
@@ -263,26 +328,41 @@ const Login = ({ onClose }) => {
         >
           Change mobile number
         </p>
-        <button
-          onClick={otpSent ? verifyOTP : () => handleLogin(0)}
-          className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {isLoading ? "Processing..." : otpSent ? "VERIFY OTP" : "SEND OTP"}
-        </button>
-        <div className="flex items-center my-4">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="text-black text-sm mx-2">OR</span>
-          <div className="flex-grow border-t border-gray-300"></div>
+        <div className="space-y-4">
+          {country === "India" && !otpSent && (
+            <button
+              onClick={() => handleLogin(0)}
+              className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "SEND OTP"}
+            </button>
+          )}
+          {otpSent && (
+            <button
+              onClick={verifyOTP}
+              className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "VERIFY OTP"}
+            </button>
+          )}
+          {country === "India" && !otpSent && (
+            <div className="flex items-center">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="text-black text-sm mx-2">OR</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+          )}
+          <button
+            onClick={() => handleLogin(1)}
+            className="w-full bg-green-500 text-white flex items-center justify-center py-2 rounded-md font-semibold hover:bg-green-600 transition duration-200 disabled:opacity-50"
+            disabled={isLoading || otpSent}
+          >
+            <FaWhatsapp className="mr-2" />
+            Login with WhatsApp
+          </button>
         </div>
-        <button
-          onClick={() => handleLogin(1)}
-          className="w-full bg-green-500 text-white flex items-center justify-center py-2 rounded-md font-semibold hover:bg-green-600 transition duration-200 disabled:opacity-50"
-          disabled={isLoading || otpSent}
-        >
-          <FaWhatsapp className="mr-2" />
-          Login with WhatsApp
-        </button>
       </div>
     </div>
   );
