@@ -54,14 +54,14 @@ const RecommendedSellers = () => {
                   <img
                     src={
                       seller.photo
-                        ? `https://api.meetowner.in/uploads/${seller.photo}`
+                        ? `https://api.meetowner.in/${seller.photo}`
                         : `https://placehold.co/600x400?text=${
                             seller?.name || "No Image Found"
                           }`
                     }
                     alt={seller?.name}
                     crossOrigin="anonymous"
-                    className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-cover"
+                    className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-contain"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = `https://placehold.co/600x400?text=${
