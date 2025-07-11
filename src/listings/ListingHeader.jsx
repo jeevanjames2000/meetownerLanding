@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -180,51 +180,63 @@ const Header = () => {
     }
     return ["Status", "Ready to Move", "Under Construction"];
   };
-  const dropdownOptions = {
-    Buy: ["Buy", "Rent"],
-    BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
-    Budget: [
-      { label: "Budget", value: "" },
-      { label: "Up to 50 Lakhs", value: "50" },
-      { label: "50-75 Lakhs", value: "50-75" },
-      { label: "75 Lakhs+", value: "75+" },
-    ],
-    "Property In": ["Property In", "Residential", "Commercial"],
-    Type: getTypeOptions(),
-    Status: getStatusOptions(),
-    Furnishing: getFurnishingOptions(),
-    Projects: getProjectOptions(),
-  };
-  const labelToActionMap = {
-    Buy: setTab,
-    BHK: setBHK,
-    Budget: setBudget,
-    "Property In": setPropertyIn,
-    Type: setSubType,
-    Status: setOccupancy,
-    Furnishing: setFurnishedStatus,
-    Projects: setPropertyStatus,
-  };
-  const labelToLocalSetterMap = {
-    Buy: setSelectedTab,
-    BHK: setSelectedBHK,
-    Budget: setSelectedBudget,
-    "Property In": setSelectedPropertyIn,
-    Type: setSelectedSubType,
-    Status: setSelectedOccupancy,
-    Furnishing: setSelectedFurnishedStatus,
-    Projects: setSelectedProjectStatus,
-  };
-  const labelToStoreKeyMap = {
-    Buy: "tab",
-    BHK: "bhk",
-    Budget: "budget",
-    "Property In": "property_in",
-    Type: "sub_type",
-    Status: "occupancy",
-    Furnishing: "furnished_status",
-    Projects: "property_status",
-  };
+  const dropdownOptions = useMemo(
+    () => ({
+      Buy: ["Buy", "Rent"],
+      BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
+      Budget: [
+        { label: "Budget", value: "" },
+        { label: "Up to 50 Lakhs", value: "50" },
+        { label: "50-75 Lakhs", value: "50-75" },
+        { label: "75 Lakhs+", value: "75+" },
+      ],
+      "Property In": ["Property In", "Residential", "Commercial"],
+      Type: getTypeOptions(),
+      Status: getStatusOptions(),
+      Furnishing: getFurnishingOptions(),
+      Projects: getProjectOptions(),
+    }),
+    [selectedPropertyIn, selectedSubType]
+  );
+  const labelToActionMap = useMemo(
+    () => ({
+      Buy: setTab,
+      BHK: setBHK,
+      Budget: setBudget,
+      "Property In": setPropertyIn,
+      Type: setSubType,
+      Status: setOccupancy,
+      Furnishing: setFurnishedStatus,
+      Projects: setPropertyStatus,
+    }),
+    []
+  );
+  const labelToLocalSetterMap = useMemo(
+    () => ({
+      Buy: setSelectedTab,
+      BHK: setSelectedBHK,
+      Budget: setSelectedBudget,
+      "Property In": setSelectedPropertyIn,
+      Type: setSelectedSubType,
+      Status: setSelectedOccupancy,
+      Furnishing: setSelectedFurnishedStatus,
+      Projects: setSelectedProjectStatus,
+    }),
+    []
+  );
+  const labelToStoreKeyMap = useMemo(
+    () => ({
+      Buy: "tab",
+      BHK: "bhk",
+      Budget: "budget",
+      "Property In": "property_in",
+      Type: "sub_type",
+      Status: "occupancy",
+      Furnishing: "furnished_status",
+      Projects: "property_status",
+    }),
+    []
+  );
   const defaultValues = {
     Buy: "Buy",
     BHK: null,
@@ -235,34 +247,40 @@ const Header = () => {
     Furnishing: "",
     Projects: "1",
   };
-  const getSelectedLabel = (label, id) => {
-    const key = labelToStoreKeyMap[label];
-    const selectedValue = searchData[key];
-    if (label === "Type" && id) {
-      const subtype = commercialSubTypes.find((st) => st.id === id);
-      return subtype ? subtype.label : id || "Property Type";
-    }
-    if (label === "Furnishing") {
-      const match = getFurnishingOptions().find(
-        (opt) => opt.value === selectedValue
-      );
-      return match ? match.label : "Furnishing";
-    }
-    const options =
-      label === "Type" ? getTypeOptions() : dropdownOptions[label];
-    if (!options) return label;
-    const match = options.find((opt) => {
-      if (typeof opt === "object") return opt.value === selectedValue;
-      return opt === selectedValue;
-    });
-    return typeof match === "object" ? match.label : match || options[0];
-  };
-  const handleClearFilter = (label) => {
-    const defaultValue = defaultValues[label];
-    dispatch(labelToActionMap[label](defaultValue));
-    labelToLocalSetterMap[label](defaultValue);
-    setActiveDropdown(null);
-  };
+  const getSelectedLabel = useCallback(
+    (label, id) => {
+      const key = labelToStoreKeyMap[label];
+      const selectedValue = searchData[key];
+      if (label === "Type" && id) {
+        const subtype = commercialSubTypes.find((st) => st.id === id);
+        return subtype ? subtype.label : id || "Property Type";
+      }
+      if (label === "Furnishing") {
+        const match = getFurnishingOptions().find(
+          (opt) => opt.value === selectedValue
+        );
+        return match ? match.label : "Furnishing";
+      }
+      const options =
+        label === "Type" ? getTypeOptions() : dropdownOptions[label];
+      if (!options) return label;
+      const match = options.find((opt) => {
+        if (typeof opt === "object") return opt.value === selectedValue;
+        return opt === selectedValue;
+      });
+      return typeof match === "object" ? match.label : match || options[0];
+    },
+    [searchData, dropdownOptions, labelToStoreKeyMap, selectedSubType]
+  );
+  const handleClearFilter = useCallback(
+    (label) => {
+      const defaultValue = defaultValues[label];
+      dispatch(labelToActionMap[label](defaultValue));
+      labelToLocalSetterMap[label](defaultValue);
+      setActiveDropdown(null);
+    },
+    [dispatch, labelToActionMap, labelToLocalSetterMap]
+  );
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
@@ -344,15 +362,18 @@ const Header = () => {
     setLocalities([]);
     debouncedUserActivity("");
   };
-  const handleValueChange = (value) => {
-    setSearchInput(value);
-    debouncedDispatch(value);
-    debouncedUserActivity(value);
-  };
+  const handleValueChange = useCallback(
+    (value) => {
+      setSearchInput(value);
+      debouncedDispatch(value);
+      debouncedUserActivity(value);
+    },
+    [debouncedDispatch, debouncedUserActivity]
+  );
   const navigate = useNavigate();
-  const handleRouteHome = () => {
+  const handleRouteHome = useCallback(() => {
     navigate("/");
-  };
+  }, [navigate]);
   const shouldShowFurnishing = !["Plot", "Land"].includes(selectedSubType);
   return (
     <>

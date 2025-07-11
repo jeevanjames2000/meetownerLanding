@@ -1,3 +1,11 @@
+const formatToIndianCurrency = (value) => {
+  if (!value || isNaN(value)) return "N/A";
+  const numValue = parseFloat(value);
+  if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
+  if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
+  if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
+  return numValue.toString();
+};
 import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { Ruler, Home, Key, Building, BathIcon, BedDouble } from "lucide-react";
 import { IoIosHeart } from "react-icons/io";
@@ -18,33 +26,21 @@ import "swiper/css/pagination";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import { Pagination } from "swiper/modules";
 import postIcon from "../assets/Images/post.gif";
-
 const PropertyCard = memo(
   ({
     property,
-    index,
     handleNavigation,
-    expandedCards,
     handleLike,
     handleScheduleVisit,
     submittedState,
     contacted,
     getOwnerDetails,
+    setShowLoginModal,
   }) => {
-    const formatToIndianCurrency = (value) => {
-      if (!value || isNaN(value)) return "N/A";
-      const numValue = parseFloat(value);
-      if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
-      if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
-      if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
-      return numValue.toString();
-    };
-
     const handleChatClick = async (e) => {
       e.stopPropagation();
       const data = localStorage.getItem("user");
       const userData = JSON.parse(data);
-
       if (!data) {
         toast.info("Please Login to Schedule Visits!", {
           position: "top-right",
@@ -86,7 +82,6 @@ const PropertyCard = memo(
           const encodedMessage = encodeURIComponent(
             `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
           );
-
           const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
           window.open(whatsappUrl, "_blank");
         } else {
@@ -102,12 +97,10 @@ const PropertyCard = memo(
         });
       }
     };
-
     const handleContactClick = (e) => {
       e.stopPropagation();
       handleScheduleVisit(property);
     };
-
     return (
       <div
         className="flex flex-col w-full max-w-[900px] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white cursor-pointer mb-6 mx-auto"
@@ -182,7 +175,7 @@ const PropertyCard = memo(
                       icon: <BedDouble className="w-4 h-4" />,
                       title: "BHK",
                       value: property?.bedrooms,
-                      shouldDisplay: !!property?.bedrooms, // checks for non-zero truthy value
+                      shouldDisplay: !!property?.bedrooms,
                     },
                     {
                       icon: <BathIcon className="w-4 h-4" />,
@@ -274,7 +267,17 @@ const Favourites = () => {
   const [loading, setLoading] = useState(true);
   const [readMoreStates, setReadMoreStates] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
-  const fetchLikedProperties = async () => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+  const modalRef = useRef(null);
+  const [contacted, setContacted] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [submittedStates, setSubmittedStates] = useState({});
+  const [owner, setOwner] = useState("");
+  const { handleAPI } = useWhatsappHook();
+  const navigate = useNavigate();
+  const fetchLikedProperties = useCallback(async () => {
     const data = localStorage.getItem("user");
     if (!data) return;
     const userDetails = JSON.parse(data);
@@ -289,42 +292,10 @@ const Favourites = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchLikedProperties();
-    fetchContactedProperties();
   }, []);
-  const toggleReadMore = (index) => {
-    setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
-  };
-  const toggleFacilities = (index) => {
-    setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
-  };
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
-  const modalRef = useRef(null);
-  const handleClose = () => {
-    setShowLoginModal(false);
-  };
-  const [contacted, setContacted] = useState([]);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [submittedStates, setSubmittedStates] = useState({});
-  const [owner, setOwner] = useState("");
-  const fetchContactedProperties = async () => {
+  const fetchContactedProperties = useCallback(async () => {
     const data = localStorage.getItem("user");
-    if (!data) {
-      return;
-    }
+    if (!data) return;
     const userDetails = JSON.parse(data);
     try {
       const response = await axios.get(
@@ -338,8 +309,29 @@ const Favourites = () => {
     } catch (error) {
       console.error("Failed to fetch liked properties:", error);
     }
-  };
-  const getOwnerDetails = async (property) => {
+  }, []);
+  useEffect(() => {
+    fetchLikedProperties();
+    fetchContactedProperties();
+  }, [fetchLikedProperties, fetchContactedProperties]);
+  const toggleReadMore = useCallback((index) => {
+    setReadMoreStates((prev) => ({ ...prev, [index]: !prev[index] }));
+  }, []);
+  const toggleFacilities = useCallback((index) => {
+    setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
+  }, []);
+  const handleClose = useCallback(() => {
+    setShowLoginModal(false);
+  }, []);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const getOwnerDetails = useCallback(async (property) => {
     try {
       const response = await fetch(
         `https://api.meetowner.in/listings/v1/getSingleProperty?unique_property_id=${property.unique_property_id}`
@@ -356,9 +348,7 @@ const Favourites = () => {
     } catch (err) {
       console.log("err: ", err);
     }
-  };
-  const { handleAPI } = useWhatsappHook();
-  const navigate = useNavigate();
+  }, []);
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -398,7 +388,6 @@ const Favourites = () => {
     },
     [navigate]
   );
-
   const handleLike = useCallback(
     async (property) => {
       const data = localStorage.getItem("user");
@@ -419,9 +408,9 @@ const Favourites = () => {
         console.error("Error updating interest:", err);
       }
     },
-    [likedProperties]
+    [fetchLikedProperties]
   );
-  const handleScheduleVisit = (property) => {
+  const handleScheduleVisit = useCallback((property) => {
     const data = localStorage.getItem("user");
     if (!data) {
       toast.info("Please Login to Schedule Visits!", {
@@ -448,63 +437,73 @@ const Favourites = () => {
     } else {
       setModalOpen(true);
     }
-  };
-  const handleModalSubmit = async (property) => {
-    try {
-      const userDetails = JSON.parse(localStorage.getItem("user"));
-
-      const payload = {
-        unique_property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        fullname: userDetails.name,
-        mobile: userDetails.mobile,
-        email: userDetails.email,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(property);
-      localStorage.setItem("visit_submitted", "true");
-      setSubmittedStates((prev) => ({
-        ...prev,
-        [property.unique_property_id]: {
-          ...prev[property.unique_property_id],
-          contact: true,
-        },
-      }));
-      setModalOpen(false);
-    } catch (err) {
-      toast.error("Something went wrong!");
-    }
-  };
-  const handleContactSeller = async (property) => {
-    try {
-      const data = localStorage.getItem("user");
-      if (!data) {
-        toast.info("Please Login to Contact!");
-        setShowLoginModal(true);
-        return;
+  }, []);
+  const handleModalSubmit = useCallback(
+    async (property) => {
+      try {
+        const userDetails = JSON.parse(localStorage.getItem("user"));
+        const payload = {
+          unique_property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          fullname: userDetails.name,
+          mobile: userDetails.mobile,
+          email: userDetails.email,
+        };
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(property);
+        localStorage.setItem("visit_submitted", "true");
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [property.unique_property_id]: {
+            ...prev[property.unique_property_id],
+            contact: true,
+          },
+        }));
+        setModalOpen(false);
+      } catch (err) {
+        toast.error("Something went wrong!");
       }
-      const userDetails = JSON.parse(data);
-      const payload = {
-        unique_property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        fullname: userDetails.name,
-        mobile: userDetails.mobile,
-        email: userDetails.email,
-      };
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      await handleAPI(property);
-      setSubmittedStates((prev) => ({
-        ...prev,
-        [property.unique_property_id]: {
-          ...prev[property.unique_property_id],
-          chat: true,
-        },
-      }));
-    } catch (err) {
-      toast.error("Something went wrong while submitting enquiry");
-    }
-  };
-
+    },
+    [handleAPI]
+  );
+  const handleContactSeller = useCallback(
+    async (property) => {
+      try {
+        const data = localStorage.getItem("user");
+        if (!data) {
+          toast.info("Please Login to Contact!");
+          setShowLoginModal(true);
+          return;
+        }
+        const userDetails = JSON.parse(data);
+        const payload = {
+          unique_property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          fullname: userDetails.name,
+          mobile: userDetails.mobile,
+          email: userDetails.email,
+        };
+        await axios.post(
+          `${config.awsApiUrl}/enquiry/v1/contactSeller`,
+          payload
+        );
+        await handleAPI(property);
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [property.unique_property_id]: {
+            ...prev[property.unique_property_id],
+            chat: true,
+          },
+        }));
+      } catch (err) {
+        toast.error("Something went wrong while submitting enquiry");
+      }
+    },
+    [handleAPI]
+  );
   if (!likedProperties.length) {
     return (
       <>
@@ -526,7 +525,6 @@ const Favourites = () => {
       </>
     );
   }
-
   return (
     <>
       <Header />

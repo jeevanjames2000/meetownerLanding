@@ -1,4 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
+const TABS = ["Buy", "Rent", "Plot", "Commercial"];
+const OPTIONS = ["Buy", "Rent"];
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -22,85 +25,71 @@ export default function SearchBar() {
   const Data = useSelector((state) => state.search.tab);
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const videoRefs = useRef([]);
   const sliderRef = useRef(null);
-  const tabs = ["Buy", "Rent", "Plot", "Commercial"];
-  const CustomPrevArrow = ({ onClick }) => (
-    <FaAngleLeft
-      onClick={onClick}
-      className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-1 text-white hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300"
-    />
-  );
-  const CustomNextArrow = ({ onClick }) => (
-    <FaAngleRight
-      onClick={onClick}
-      className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-1 text-white hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300"
-    />
-  );
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true,
-    arrows: true,
-    prevArrow: <CustomPrevArrow />,
-    nextArrow: <CustomNextArrow />,
-    beforeChange: () => {
-      videoRefs.current.forEach((video) => {
-        if (video) {
-          video.pause();
-        }
-      });
-    },
-    afterChange: (current) => {
-      if (videoRefs.current[current] && isPlaying) {
-        videoRefs.current[current].play();
-      }
-    },
-  };
   const [selected, setSelected] = useState("Buy");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [location, setLocation] = useState(searchData.city || "");
   const [citiesList, setCitiesList] = useState([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
-  const options = ["Buy", "Rent"];
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
   const dispatch = useDispatch();
   const [mediaList, setMediaList] = useState([
-    {
-      id: 1,
-      order: 1,
-      video_url: ad1,
-    },
-    {
-      id: 2,
-      order: 2,
-      video_url: ad2,
-    },
-    {
-      id: 3,
-      order: 3,
-      video_url: ad3,
-    },
+    { id: 1, order: 1, video_url: ad1 },
+    { id: 2, order: 2, video_url: ad2 },
+    { id: 3, order: 3, video_url: ad3 },
   ]);
-  const handleUserSearched = async () => {
+  const [localites, setLocalities] = useState([]);
+  const [isError, setIsError] = useState(false);
+  const containerRef = useRef(null);
+  const [city, setCity] = useState(searchData.city || "");
+  const filteredLocations = useMemo(
+    () =>
+      citiesList.filter((loc) =>
+        loc.toLowerCase().includes(city.toLowerCase())
+      ),
+    [citiesList, city]
+  );
+  const navigate = useNavigate();
+  const settings = useMemo(
+    () => ({
+      dots: false,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      autoplay: true,
+      autoplaySpeed: 3000,
+      pauseOnHover: true,
+      arrows: true,
+      prevArrow: (
+        <FaAngleLeft className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-1 text-white hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300" />
+      ),
+      nextArrow: (
+        <FaAngleRight className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 p-1 text-white hover:text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all duration-300" />
+      ),
+      beforeChange: () => {
+        videoRefs.current.forEach((video) => {
+          if (video) video.pause();
+        });
+      },
+      afterChange: (current) => {
+        if (videoRefs.current[current]) {
+          videoRefs.current[current].play();
+        }
+      },
+    }),
+    []
+  );
+  const handleUserSearched = useCallback(async () => {
     let userDetails = null;
     try {
       const data = localStorage.getItem("user");
-      if (data) {
-        const parsedData = JSON.parse(data);
-        userDetails = parsedData || null;
-      }
+      if (data) userDetails = JSON.parse(data) || null;
     } catch (error) {
       console.error("Error parsing localStorage data:", error);
       userDetails = null;
@@ -130,9 +119,9 @@ export default function SearchBar() {
         });
       }
     }
-  };
+  }, [searchInput, selected, location, searchData]);
   useEffect(() => {
-    const selectedTab = tabs[activeTab];
+    const selectedTab = TABS[activeTab];
     dispatch(
       setSearchData({
         city: location,
@@ -160,7 +149,7 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
-  const fetchMedia = async () => {
+  const fetchMedia = useCallback(async () => {
     try {
       const response = await fetch(
         `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=main_slider&city=${location}`
@@ -180,8 +169,8 @@ export default function SearchBar() {
       console.error("Error fetching ads:", error);
       setIsError(true);
     }
-  };
-  const fetchCities = async () => {
+  }, [location]);
+  const fetchCities = useCallback(async () => {
     setIsLoadingCities(true);
     try {
       const response = await axios.get(
@@ -198,7 +187,7 @@ export default function SearchBar() {
     } finally {
       setIsLoadingCities(false);
     }
-  };
+  }, []);
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -215,11 +204,24 @@ export default function SearchBar() {
     };
     fetchLocalities();
   }, [searchInput, location]);
-  const navigate = useNavigate();
-  const handleNavigation = () => {
-    const propertyFor = tabs[activeTab] === "Rent" ? "rent" : "sale";
+  useEffect(() => {
+    fetchMedia();
+    fetchCities();
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setIsLocationOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [location, fetchMedia, fetchCities]);
+  const handleNavigation = useCallback(() => {
+    const propertyFor = TABS[activeTab] === "Rent" ? "rent" : "sale";
     const propertyType = (() => {
-      switch (tabs[activeTab]) {
+      switch (TABS[activeTab]) {
         case "Plot":
           return "plots";
         case "Commercial":
@@ -247,17 +249,24 @@ export default function SearchBar() {
       city: location,
       property_for: selected === "Rent" ? "Rent" : "Sell",
       property_type:
-        tabs[activeTab] === "Plot"
+        TABS[activeTab] === "Plot"
           ? "Plot"
-          : tabs[activeTab] === "Commercial"
+          : TABS[activeTab] === "Commercial"
           ? "Commercial"
           : "Apartment",
       location: searchInput,
     };
     handleUserSearched();
     navigate(`/listings${seoUrl}`, { state: params });
-  };
-  const getCurrentLocation = () => {
+  }, [
+    activeTab,
+    location,
+    searchInput,
+    selected,
+    handleUserSearched,
+    navigate,
+  ]);
+  const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
@@ -265,42 +274,15 @@ export default function SearchBar() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        const response = await fetch(
+        await fetch(
           `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
         );
-        const data = await response.json();
-        const location = `${data.city}, ${data.principalSubdivision}, ${data.countryName}`;
       },
-      (error) => {
+      () => {
         alert("Please enable location services.");
       }
     );
-  };
-  const [localites, setLocalities] = useState([]);
-  const [isError, setIsError] = useState(false);
-  const isVideo = (url) => {
-    return url?.match(/\.(mp4|webm|ogg)$/i);
-  };
-  const containerRef = useRef(null);
-  const [city, setCity] = useState(searchData.city || "");
-  const filteredLocations = citiesList.filter((loc) =>
-    loc.toLowerCase().includes(city.toLowerCase())
-  );
-  useEffect(() => {
-    fetchMedia();
-    fetchCities();
-    const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setIsLocationOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [location]);
-
+  }, []);
   return (
     <div
       className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"
@@ -315,7 +297,7 @@ export default function SearchBar() {
                   ref={(el) => (videoRefs.current[index] = el)}
                   autoPlay
                   loop
-                  muted={isMuted}
+                  muted
                   className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
                 >
                   <source src={item.video_url} type="video/mp4" />
@@ -347,7 +329,7 @@ export default function SearchBar() {
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
         <div className="bg-white/30  rounded-t-2xl shadow-lg  p-3 sm:p-4 border border-white/20">
           <div className="inline-flex flex-wrap justify-center bg-white  rounded-full p-1 sm:p-2">
-            {tabs.map((item, index) => (
+            {TABS.map((item, index) => (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
@@ -526,10 +508,9 @@ export default function SearchBar() {
                 </ul>
               )}
             </div>
-            {}
             <IoSearch
               className="w-5 h-5 text-gray-600 cursor-pointer md:hidden"
-              onClick={() => handleNavigation()}
+              onClick={handleNavigation}
             />
           </div>
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
@@ -547,7 +528,7 @@ export default function SearchBar() {
                 </button>
                 {isOpen && (
                   <ul className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-md border border-gray-300 text-sm sm:text-base">
-                    {options.map((option) => (
+                    {OPTIONS.map((option) => (
                       <li
                         key={option}
                         onClick={() => {
@@ -572,7 +553,7 @@ export default function SearchBar() {
             />
             <button
               className="hidden md:block bg-[#1D3A76] text-white px-3 sm:px-4 py-1 rounded-full shadow-lg hover:!bg-yellow-500 hover:text-black hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap"
-              onClick={() => handleNavigation()}
+              onClick={handleNavigation}
             >
               Search
             </button>

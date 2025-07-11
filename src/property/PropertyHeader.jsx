@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -173,63 +173,84 @@ const PropertyHeader = ({ setHeaderHeight }) => {
     return ["Status", "Ready to Move", "Under Construction"];
   };
 
-  const dropdownOptions = {
-    Buy: ["Buy", "Rent"],
-    BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
-    Budget: [
-      { label: "Budget", value: "" },
-      { label: "Up to 50 Lakhs", value: "50" },
-      { label: "50-75 Lakhs", value: "50-75" },
-      { label: "75 Lakhs+", value: "75+" },
-    ],
-    "Property In": ["Property In", "Residential", "Commercial"],
-    Type: getTypeOptions(),
-    Status: getStatusOptions(),
-  };
+  const dropdownOptions = useMemo(
+    () => ({
+      Buy: ["Buy", "Rent"],
+      BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
+      Budget: [
+        { label: "Budget", value: "" },
+        { label: "Up to 50 Lakhs", value: "50" },
+        { label: "50-75 Lakhs", value: "50-75" },
+        { label: "75 Lakhs+", value: "75+" },
+      ],
+      "Property In": ["Property In", "Residential", "Commercial"],
+      Type: getTypeOptions(),
+      Status: getStatusOptions(),
+    }),
+    [selectedPropertyIn, selectedSubType]
+  );
 
-  const labelToActionMap = {
-    Buy: setTab,
-    BHK: setBHK,
-    Budget: setBudget,
-    "Property In": setPropertyIn,
-    Type: setSubType,
-    Status: setOccupancy,
-  };
+  const labelToActionMap = useMemo(
+    () => ({
+      Buy: setTab,
+      BHK: setBHK,
+      Budget: setBudget,
+      "Property In": setPropertyIn,
+      Type: setSubType,
+      Status: setOccupancy,
+    }),
+    []
+  );
 
-  const labelToLocalSetterMap = {
-    Buy: setSelectedTab,
-    BHK: setSelectedBHK,
-    Budget: setSelectedBudget,
-    "Property In": setSelectedPropertyIn,
-    Type: setSelectedSubType,
-    Status: setSelectedOccupancy,
-  };
+  const labelToLocalSetterMap = useMemo(
+    () => ({
+      Buy: setSelectedTab,
+      BHK: setSelectedBHK,
+      Budget: setSelectedBudget,
+      "Property In": setSelectedPropertyIn,
+      Type: setSelectedSubType,
+      Status: setSelectedOccupancy,
+    }),
+    []
+  );
 
-  const labelToStoreKeyMap = {
-    Buy: "tab",
-    BHK: "bhk",
-    Budget: "budget",
-    "Property In": "property_in",
-    Type: "sub_type",
-    Status: "occupancy",
-  };
+  const labelToStoreKeyMap = useMemo(
+    () => ({
+      Buy: "tab",
+      BHK: "bhk",
+      Budget: "budget",
+      "Property In": "property_in",
+      Type: "sub_type",
+      Status: "occupancy",
+    }),
+    []
+  );
 
-  const getSelectedLabel = (label, id) => {
-    const key = labelToStoreKeyMap[label];
-    const selectedValue = searchData[key];
-    if (label === "Type" && id) {
-      const subtype = commercialSubTypes.find((st) => st.id === id);
-      return subtype ? subtype.label : id || "Property Type";
-    }
-    const options =
-      label === "Type" ? getTypeOptions() : dropdownOptions[label];
-    if (!options) return label;
-    const match = options.find((opt) => {
-      if (typeof opt === "object") return opt.value === selectedValue;
-      return opt === selectedValue;
-    });
-    return typeof match === "object" ? match.label : match || options[0];
-  };
+  const getSelectedLabel = useCallback(
+    (label, id) => {
+      const key = labelToStoreKeyMap[label];
+      const selectedValue = searchData[key];
+      if (label === "Type" && id) {
+        const subtype = commercialSubTypes.find((st) => st.id === id);
+        return subtype ? subtype.label : id || "Property Type";
+      }
+      const options =
+        label === "Type" ? getTypeOptions() : dropdownOptions[label];
+      if (!options) return label;
+      const match = options.find((opt) => {
+        if (typeof opt === "object") return opt.value === selectedValue;
+        return opt === selectedValue;
+      });
+      return typeof match === "object" ? match.label : match || options[0];
+    },
+    [
+      searchData,
+      dropdownOptions,
+      labelToStoreKeyMap,
+      selectedSubType,
+      selectedPropertyIn,
+    ]
+  );
 
   const handleUserSearched = useCallback(
     async (searchValue) => {
@@ -293,26 +314,30 @@ const PropertyHeader = ({ setHeaderHeight }) => {
     [dispatch]
   );
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
     debouncedUserActivity("");
-  };
+  }, [dispatch, debouncedUserActivity]);
 
-  const handleValueChange = (value) => {
-    setSearchInput(value);
-    debouncedDispatch(value);
-    debouncedUserActivity(value);
-  };
+  const handleValueChange = useCallback(
+    (value) => {
+      setSearchInput(value);
+      debouncedDispatch(value);
+      debouncedUserActivity(value);
+    },
+    [debouncedDispatch, debouncedUserActivity]
+  );
 
   const navigate = useNavigate();
-  const handleRouteHome = () => {
+  const handleRouteHome = useCallback(() => {
     navigate("/");
-  };
-  const handleRouteListings = () => {
+  }, [navigate]);
+
+  const handleRouteListings = useCallback(() => {
     navigate("/listings");
-  };
+  }, [navigate]);
 
   return (
     <>

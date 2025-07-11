@@ -21,7 +21,7 @@ const LoginModal = ({
         />
       </div>
     </div>,
-    document.body // Render directly into body
+    document.body
   );
 };
 

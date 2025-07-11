@@ -13,7 +13,6 @@ import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { setSearchData } from "../../store/slices/searchSlice";
-
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -84,7 +83,6 @@ const Sidebar = ({
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     };
-
     return (
       <Swiper
         spaceBetween={25}
@@ -134,7 +132,6 @@ const Sidebar = ({
     );
   };
   const url = "https://meetowner.in/app";
-
   const recentData = getRecentActivity(likedProperties, intrested);
   const sidebarItems = [
     {
@@ -185,7 +182,6 @@ const Sidebar = ({
     navigate("/profile");
   };
   const dispatch = useDispatch();
-
   const handleListings = () => {
     dispatch(
       setSearchData({

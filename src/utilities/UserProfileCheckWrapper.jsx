@@ -108,6 +108,8 @@ const UserProfileCheckWrapper = ({ children }) => {
     password: "",
     city: "",
     address: "",
+    photo: "",
+    user_type: "",
   });
   const [errors, setErrors] = useState({
     name: "",
@@ -115,6 +117,64 @@ const UserProfileCheckWrapper = ({ children }) => {
     city: "",
   });
   const { pathname } = useLocation();
+  const isProfileIncomplete = (userDetails) => {
+    return (
+      !userDetails?.name?.trim() ||
+      !userDetails?.email?.trim() ||
+      !userDetails?.city?.trim()
+    );
+  };
+  const fetchProfile = useCallback(async (userId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${config.awsApiUrl}/user/v1/getProfile?user_id=${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch profile");
+      const data = await res.json();
+      const updatedUser = {
+        user_id: data.id || "",
+        name: data.name || "",
+        email: data.email || "",
+        mobile: data.mobile || "",
+        photo: data.photo || "",
+        city: data.city || "",
+        user_type: data.user_type || "",
+        address: data.address || "",
+        password: "",
+      };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      if (isProfileIncomplete(updatedUser)) {
+        setShowModal(true);
+      } else {
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error("Fetch Profile Error:", error);
+      toast.error("Failed to fetch profile data.");
+      setShowModal(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    const localUser = localStorage.getItem("user");
+    let userId = "";
+    if (localUser) {
+      try {
+        const parsed = JSON.parse(localUser);
+        userId = parsed.user_id || parsed.id || "";
+      } catch {
+        userId = "";
+      }
+    }
+    if (userId) {
+      fetchProfile(userId);
+    } else {
+      setShowModal(false);
+    }
+  }, [pathname, fetchProfile]);
   const validateForm = useCallback(() => {
     const newErrors = { name: "", email: "", city: "" };
     let isValid = true;
@@ -136,41 +196,6 @@ const UserProfileCheckWrapper = ({ children }) => {
     setErrors(newErrors);
     return isValid;
   }, [user]);
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const data = localStorage.getItem("user");
-        if (!data) {
-          setShowModal(false);
-          return;
-        }
-        const userDetails = JSON.parse(data);
-        const isLoggedIn = !!userDetails?.id;
-        const isIncomplete =
-          !userDetails?.name?.trim() ||
-          !userDetails?.email?.trim() ||
-          !userDetails?.city?.trim();
-        if (isLoggedIn && isIncomplete) {
-          setUser({
-            user_id: userDetails.user_id || "",
-            name: userDetails.name || "",
-            email: userDetails.email || "",
-            mobile: userDetails.mobile || "",
-            password: "",
-            city: userDetails.city || "",
-            address: userDetails.address || "",
-          });
-          setShowModal(true);
-        } else {
-          setShowModal(false);
-        }
-      } catch (error) {
-        console.error("Invalid user data in localStorage:", error);
-        setShowModal(false);
-      }
-    };
-    checkProfile();
-  }, [pathname]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prev) => ({ ...prev, [name]: value }));
@@ -186,7 +211,6 @@ const UserProfileCheckWrapper = ({ children }) => {
     const payload = {
       id: user.user_id,
       name: user.name,
-      mobile: user.mobile,
       email: user.email,
       password: user.password || undefined,
       city: user.city,
@@ -225,15 +249,17 @@ const UserProfileCheckWrapper = ({ children }) => {
       setLoading(false);
     }
   };
+  function filterStyle(styleObj) {
+    if (!styleObj) return styleObj;
+    const filtered = { ...styleObj };
+    delete filtered.jsx;
+    return filtered;
+  }
   return (
     <>
       {showModal && (
         <div style={modalStyles.overlay} role="dialog" aria-modal="true">
-          <div
-            style={modalStyles.modal}
-            tabIndex={-1}
-            ref={(node) => node?.focus()}
-          >
+          <div style={modalStyles.modal} tabIndex={-1}>
             <h2 style={modalStyles.title}>Update Your Profile</h2>
             <p style={modalStyles.description}>
               This action is required. Please add your name, email, and city to
@@ -301,6 +327,7 @@ const UserProfileCheckWrapper = ({ children }) => {
                     id="mobile"
                     value={user.mobile}
                     onChange={handleChange}
+                    disabled
                     placeholder="Mobile"
                     style={modalStyles.input}
                     aria-label="Mobile"
@@ -317,10 +344,10 @@ const UserProfileCheckWrapper = ({ children }) => {
                     value={user.city}
                     onChange={handleChange}
                     placeholder="City"
-                    style={{
+                    style={filterStyle({
                       ...modalStyles.input,
                       ...(errors.city ? modalStyles.inputError : {}),
-                    }}
+                    })}
                     aria-label="City"
                     aria-invalid={!!errors.city}
                     aria-describedby={errors.city ? "city-error" : undefined}
@@ -335,10 +362,10 @@ const UserProfileCheckWrapper = ({ children }) => {
               <div style={modalStyles.buttonContainer}>
                 <button
                   type="submit"
-                  style={{
+                  style={filterStyle({
                     ...modalStyles.updateBtn,
                     ...(loading ? modalStyles.updateBtnDisabled : {}),
-                  }}
+                  })}
                   disabled={loading}
                   aria-label="Update Profile"
                 >
