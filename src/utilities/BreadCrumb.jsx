@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -54,6 +53,10 @@ const Breadcrumb = () => {
         path: `/listings?city=${encodeURIComponent(
           searchData?.city || "Hyderabad"
         )}`,
+      },
+      {
+        name: searchData?.location,
+        path: searchData?.location,
       },
     ];
   } else {

@@ -286,8 +286,8 @@ const PropertyCard = memo(
              lg:shadow-[0_4px_20px_rgba(0,0,0,0.15)]  
              hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)]  
              lg:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]  
-             transition-shadow duration-300 bg-white w-full"
-        style={{ minHeight: "auto", height: "auto" }}
+             transition-shadow duration-300 bg-white w-full min-h-[300px]"
+        style={{ minHeight: "300px", height: "auto" }}
       >
         <div className="bg-[#ffff] rounded-[20px] p-3 w-full h-auto flex flex-col">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -303,7 +303,7 @@ const PropertyCard = memo(
                   }
                   alt="Property"
                   crossOrigin="anonymous"
-                  className="w-full h-50 object-cover rounded-md"
+                  className="w-full h-[250px] object-cover rounded-md"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = `https://placehold.co/600x400?text=${
@@ -359,27 +359,29 @@ const PropertyCard = memo(
                     <span className="flex items-center font-bold text-[15px]">
                       {property?.property_for === "Rent" ? (
                         <span className="flex flex-col items-end">
-                          {getPriceDisplay(
-                            property?.property_for,
-                            property?.monthly_rent
-                          )}
-                          {property?.property_cost_type && (
-                            <span>{property.property_cost_type}</span>
-                          )}
+                          <span className="flex gap-x-1">
+                            {getPriceDisplay(
+                              property?.property_for,
+                              property?.monthly_rent
+                            )}
+                            {property?.property_cost_type && (
+                              <span>{property.property_cost_type}</span>
+                            )}
+                          </span>
                           <span className="text-xs font-normal text-[#A4A4A4]">
                             Expected Monthly Rent
                           </span>
                         </span>
                       ) : (
-                        <>
+                        <span className="flex gap-x-1">
                           {getPriceDisplay(
                             property?.property_for,
                             property?.property_cost
                           )}
                           {property?.property_cost_type && (
-                            <span>{property.property_cost_type}</span>
+                            <span>({property.property_cost_type})</span>
                           )}
-                        </>
+                        </span>
                       )}
                     </span>
                     {property?.loan_facility === "Yes" ? (
@@ -1092,7 +1094,7 @@ function ListingsBody({ setShowLoginModal }) {
   }, [data, loading, hasMore]);
   const cache = new CellMeasurerCache({
     fixedWidth: true,
-    defaultHeight: 500,
+    defaultHeight: 350,
   });
   const rowRenderer = ({ index, key, style, parent }) => {
     const item = cards[index];
@@ -1113,7 +1115,7 @@ function ListingsBody({ setShowLoginModal }) {
               paddingBottom: window.innerWidth < 768 ? "24px" : "32px",
               marginBottom: window.innerWidth < 768 ? "16px" : "24px",
             }}
-            className="w-full flex justify-center px-2"
+            className="w-full flex justify-center px-2 mt-3"
           >
             <div className="w-full">
               {item.type === "skeleton" ? (
@@ -1158,7 +1160,7 @@ function ListingsBody({ setShowLoginModal }) {
   return (
     <div className="min-h-screen p-1 relative z-0 overflow-visible">
       <div className="flex justify-between flex-wrap gap-2 mb-1 mt-2 px-2">
-        <div className="flex  flex-grow overflow-hidden min-w-0">
+        <div className="flex  flex-grow overflow-hidden items-center min-w-0">
           <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
           <p className="text-sm  whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"

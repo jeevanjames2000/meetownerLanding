@@ -8,7 +8,7 @@ const LoginWrapper = () => {
     <>
       <LoginHeader />
       <Login />
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

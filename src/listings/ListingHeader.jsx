@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa";
 import Searchhome from "../assets/Images/Searchhome.png";
 import logoImage from "../assets/Images/Untitled-22.png";
@@ -574,7 +574,11 @@ const Header = () => {
                           key={item?.locality}
                           onClick={() => {
                             setSearchInput(item?.locality);
+                            dispatch(
+                              setSearchData({ location: item?.locality })
+                            );
                             setIsSearchDropdownOpen(false);
+                            debouncedUserActivity(item?.locality);
                           }}
                           className="px-2 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200 text-sm"
                         >

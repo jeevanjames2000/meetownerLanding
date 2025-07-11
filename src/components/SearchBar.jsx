@@ -351,7 +351,7 @@ export default function SearchBar() {
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`relative z-10 w-auto px-3 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
+                className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
                   activeTab === index
                     ? "bg-[#1D3A76] text-white"
                     : "text-gray-600"

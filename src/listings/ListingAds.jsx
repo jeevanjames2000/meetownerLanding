@@ -109,7 +109,7 @@ const ListingAds = () => {
         setShowLoginModal(true);
         return;
       }
-      const userDetails  = JSON.parse(data);
+      const userDetails = JSON.parse(data);
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -118,7 +118,6 @@ const ListingAds = () => {
         email: userDetails.email,
       };
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
-      // toast.success("Details submitted successfully");
     } catch (err) {
       toast.error("Something went wrong while submitting enquiry");
     }

@@ -55,8 +55,8 @@ const RecommendedSellers = () => {
                     src={
                       seller.photo
                         ? `https://api.meetowner.in/${seller.photo}`
-                        : `https://placehold.co/600x400?text=${
-                            seller?.name || "No Image Found"
+                        : `https://avatar.iran.liara.run/public/${
+                            Math.floor(Math.random() * 30) + 1
                           }`
                     }
                     alt={seller?.name}
@@ -64,11 +64,10 @@ const RecommendedSellers = () => {
                     className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-contain"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = `https://placehold.co/600x400?text=${
-                        seller?.name || "No Image Found"
-                      }`;
+                      e.target.src = "/assets/user-placeholder.jpg";
                     }}
                   />
+
                   <div className="p-3 flex justify-between items-center border-t border-gray-200">
                     <div className="text-left">
                       <p className="text-sm font-semibold text-gray-800">
