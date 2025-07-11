@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import PropertyHeader from "./PropertyHeader";
 import PropertyBody from "./PropertyBody";
@@ -6,15 +6,22 @@ import PropertyAds from "./PropertyAds";
 import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Breadcrumb from "../utilities/BreadCrumb";
+
 const Property = () => {
   const { state: property } = useLocation();
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   return (
     <>
-      <PropertyHeader />
-      <div className="flex flex-col lg:flex-row w-full justify-between h-auto p-5 pt-20 sm:pt-20 md:pt-20 lg:pt-20 gap-3">
+      <PropertyHeader setHeaderHeight={setHeaderHeight} />
+      <div
+        className="flex flex-col lg:flex-row w-full justify-between h-auto p-3 gap-3"
+        style={{ paddingTop: `${headerHeight || 80}px` }}
+      >
         <div className="w-full lg:w-[70%]">
           <Breadcrumb />
           <PropertyBody />
@@ -39,4 +46,5 @@ const Property = () => {
     </>
   );
 };
+
 export default Property;

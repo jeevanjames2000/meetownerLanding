@@ -19,6 +19,7 @@ import { debounce } from "lodash";
 import config from "../../config";
 import axios from "axios";
 import { Building, Building2, Home, Landmark, MapPin } from "lucide-react";
+
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -27,7 +28,8 @@ const commercialSubTypes = [
   { id: "Plot", label: "Plot", icon: MapPin },
   { id: "Others", label: "Others", icon: MapPin },
 ];
-const PropertyHeader = () => {
+
+const PropertyHeader = ({ setHeaderHeight }) => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
@@ -50,6 +52,20 @@ const PropertyHeader = () => {
   const [selectedOccupancy, setSelectedOccupancy] = useState(
     searchData.occupancy || ""
   );
+
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => window.removeEventListener("resize", updateHeaderHeight);
+  }, [setHeaderHeight]);
+
   const fetchCities = async () => {
     try {
       const response = await axios.get(
@@ -64,9 +80,11 @@ const PropertyHeader = () => {
       console.error("Error fetching cities:", error);
     }
   };
+
   useEffect(() => {
     fetchCities();
   }, []);
+
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -83,6 +101,7 @@ const PropertyHeader = () => {
     };
     fetchLocalities();
   }, [searchInput, location]);
+
   useEffect(() => {
     if (
       selectedPropertyIn === "Commercial" &&
@@ -105,6 +124,7 @@ const PropertyHeader = () => {
       dispatch(setSubType(""));
     }
   }, [selectedPropertyIn, selectedSubType, dispatch]);
+
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedSubType) &&
@@ -120,9 +140,12 @@ const PropertyHeader = () => {
       dispatch(setOccupancy(""));
     }
   }, [selectedSubType, selectedOccupancy, dispatch]);
+
   const toggleDropdown = (key) => {
     setActiveDropdown((prev) => (prev === key ? null : key));
+    if (key !== "Status") setIsMoreFiltersOpen(false);
   };
+
   const getTypeOptions = () => {
     if (selectedPropertyIn === "Commercial") {
       return [
@@ -142,12 +165,14 @@ const PropertyHeader = () => {
     }
     return ["Property Type"];
   };
+
   const getStatusOptions = () => {
     if (["Plot", "Land"].includes(selectedSubType)) {
       return ["Possession Status", "Immediate", "Future"];
     }
     return ["Status", "Ready to Move", "Under Construction"];
   };
+
   const dropdownOptions = {
     Buy: ["Buy", "Rent"],
     BHK: ["BHK", 1, 2, 3, 4, 5, 6, 7, 8],
@@ -161,6 +186,7 @@ const PropertyHeader = () => {
     Type: getTypeOptions(),
     Status: getStatusOptions(),
   };
+
   const labelToActionMap = {
     Buy: setTab,
     BHK: setBHK,
@@ -169,6 +195,7 @@ const PropertyHeader = () => {
     Type: setSubType,
     Status: setOccupancy,
   };
+
   const labelToLocalSetterMap = {
     Buy: setSelectedTab,
     BHK: setSelectedBHK,
@@ -177,6 +204,7 @@ const PropertyHeader = () => {
     Type: setSelectedSubType,
     Status: setSelectedOccupancy,
   };
+
   const labelToStoreKeyMap = {
     Buy: "tab",
     BHK: "bhk",
@@ -185,6 +213,7 @@ const PropertyHeader = () => {
     Type: "sub_type",
     Status: "occupancy",
   };
+
   const getSelectedLabel = (label, id) => {
     const key = labelToStoreKeyMap[label];
     const selectedValue = searchData[key];
@@ -201,20 +230,7 @@ const PropertyHeader = () => {
     });
     return typeof match === "object" ? match.label : match || options[0];
   };
-  const headerRef = useRef(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
-  useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
-    const handleResize = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
   const handleUserSearched = useCallback(
     async (searchValue) => {
       let userDetails = null;
@@ -262,29 +278,34 @@ const PropertyHeader = () => {
       selectedOccupancy,
     ]
   );
+
   const debouncedUserActivity = useCallback(
     debounce((value) => {
       handleUserSearched(value);
     }, 1000),
     [handleUserSearched]
   );
+
   const debouncedDispatch = useCallback(
     debounce((value) => {
       dispatch(setSearchData({ location: value }));
     }, 1000),
     [dispatch]
   );
+
   const handleClear = () => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
     debouncedUserActivity("");
   };
+
   const handleValueChange = (value) => {
     setSearchInput(value);
     debouncedDispatch(value);
     debouncedUserActivity(value);
   };
+
   const navigate = useNavigate();
   const handleRouteHome = () => {
     navigate("/");
@@ -292,6 +313,7 @@ const PropertyHeader = () => {
   const handleRouteListings = () => {
     navigate("/listings");
   };
+
   return (
     <>
       <header
@@ -419,14 +441,7 @@ const PropertyHeader = () => {
                   onBlur={() =>
                     setTimeout(() => setIsSearchDropdownOpen(false), 300)
                   }
-                  className="w-full pl-1 pr-10 
-                  py-2 h-11
-                  text-center placeholder:text-center 
-                  bg-[#fff] rounded-lg border border-gray-300
-                  md:py-4 md:h-13 
-                  md:bg-transparent md:rounded-none md:border-none 
-                  md:text-left md:placeholder:text-left 
-                  focus:outline-none focus:ring-0"
+                  className="w-full pl-1 pr-10 py-2 h-11 text-center placeholder:text-center bg-[#fff] rounded-lg border border-gray-300 md:py-4 md:h-13 md:bg-transparent md:rounded-none md:border-none md:text-left md:placeholder:text-left focus:outline-none focus:ring-0"
                 />
                 <div className="absolute right-3 gap-2 items-center justify-center flex flex-row top-2">
                   {searchInput && (
@@ -512,7 +527,7 @@ const PropertyHeader = () => {
             </div>
           </div>
         </div>
-        <div className="md:hidden mt-3 flex overflow-x-auto gap-2 px-4 relative pb-3">
+        <div className="md:hidden mt-2 flex overflow-x-auto gap-2 px-4 pb-2">
           {[
             "Buy",
             "BHK",
@@ -543,142 +558,79 @@ const PropertyHeader = () => {
                 <FaChevronDown className="text-xs" />
               </button>
               {activeDropdown === label && (
-                <div
-                  className="fixed inset-0 bg-transparent bg-opacity-30 z-40"
-                  onClick={() => setActiveDropdown(null)}
-                ></div>
-              )}
-              {activeDropdown === label && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-medium">
-                      {commercialSubTypes.some((st) => st.id === label)
-                        ? commercialSubTypes.find((st) => st.id === label)
-                            ?.label
-                        : label}
-                    </h3>
-                    <button
-                      onClick={() => setActiveDropdown(null)}
-                      className="text-gray-500"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(label === "Type" ||
-                    commercialSubTypes.some((st) => st.id === label)
-                      ? getTypeOptions()
-                      : dropdownOptions[label] || []
-                    ).map((option, index) => {
-                      const isObject = typeof option === "object";
-                      const value = isObject ? option.value : option;
-                      const display = isObject ? option.label : option;
-                      if (
-                        (label === "BHK" ||
-                          label === "Property In" ||
-                          label === "Type" ||
-                          commercialSubTypes.some((st) => st.id === label) ||
-                          label === "Budget") &&
-                        index === 0
-                      )
-                        return null;
-                      return (
-                        <button
-                          key={`${label}-${value}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            dispatch(
-                              labelToActionMap[
-                                commercialSubTypes.some((st) => st.id === label)
-                                  ? "Type"
-                                  : label
-                              ](value)
-                            );
-                            labelToLocalSetterMap[
-                              commercialSubTypes.some((st) => st.id === label)
-                                ? "Type"
-                                : label
-                            ](value);
-                            setActiveDropdown(null);
-                          }}
-                          className={`px-4 py-2 rounded-lg text-left text-sm ${
-                            searchData[
-                              commercialSubTypes.some((st) => st.id === label)
-                                ? "sub_type"
-                                : labelToStoreKeyMap[label]
-                            ] === value ||
-                            (value === "" &&
-                              !searchData[
-                                commercialSubTypes.some((st) => st.id === label)
-                                  ? "sub_type"
-                                  : labelToStoreKeyMap[label]
-                              ])
-                              ? "bg-[#1D3A76] text-white"
-                              : "bg-gray-100 hover:bg-gray-200"
-                          }`}
-                        >
-                          {display}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-          <div className="relative flex-shrink-0">
-            <button
-              className="flex items-center gap-1 text-sm px-3 py-[2px] bg-gray-100 rounded-full cursor-pointer whitespace-nowrap border-2 border-blue-900 text-blue-900"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsMoreFiltersOpen(!isMoreFiltersOpen);
-              }}
-            >
-              MORE FILTERS <FaChevronDown className="text-xs" />
-            </button>
-            {isMoreFiltersOpen && (
-              <div
-                className="fixed inset-0 bg-transparent bg-opacity-10 z-40"
-                onClick={() => setIsMoreFiltersOpen(false)}
-              ></div>
-            )}
-            {isMoreFiltersOpen && (
-              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-xl text-blue-900">
-                    More Filters
-                  </h3>
-                  <button
-                    onClick={() => setIsMoreFiltersOpen(false)}
-                    className="text-gray-500"
-                  >
-                    ×
-                  </button>
-                </div>
-                {["Status"].map((label) => (
-                  <div key={label} className="mb-4">
-                    <h4 className="font-medium mb-2 text-left">
-                      {getSelectedLabel(label, undefined)}
-                    </h4>
+                <>
+                  <div
+                    className="fixed inset-0 bg-transparent bg-opacity-30 z-40"
+                    onClick={() => setActiveDropdown(null)}
+                  />
+                  <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-medium">
+                        {commercialSubTypes.some((st) => st.id === label)
+                          ? commercialSubTypes.find((st) => st.id === label)
+                              ?.label
+                          : label}
+                      </h3>
+                      <button
+                        onClick={() => setActiveDropdown(null)}
+                        className="text-gray-500"
+                      >
+                        ×
+                      </button>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {(dropdownOptions[label] || []).map((option, index) => {
+                      {(label === "Type" ||
+                      commercialSubTypes.some((st) => st.id === label)
+                        ? getTypeOptions()
+                        : dropdownOptions[label] || []
+                      ).map((option, index) => {
                         const isObject = typeof option === "object";
                         const value = isObject ? option.value : option;
                         const display = isObject ? option.label : option;
-                        if (index === 0) return null;
+                        if (
+                          (label === "BHK" ||
+                            label === "Property In" ||
+                            label === "Type" ||
+                            commercialSubTypes.some((st) => st.id === label) ||
+                            label === "Budget") &&
+                          index === 0
+                        )
+                          return null;
                         return (
                           <button
                             key={`${label}-${value}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              dispatch(labelToActionMap[label](value));
-                              labelToLocalSetterMap[label](value);
+                              dispatch(
+                                labelToActionMap[
+                                  commercialSubTypes.some(
+                                    (st) => st.id === label
+                                  )
+                                    ? "Type"
+                                    : label
+                                ](value)
+                              );
+                              labelToLocalSetterMap[
+                                commercialSubTypes.some((st) => st.id === label)
+                                  ? "Type"
+                                  : label
+                              ](value);
+                              setActiveDropdown(null);
                             }}
-                            className={`px-4 py-2 text-left rounded-lg text-sm ${
-                              searchData[labelToStoreKeyMap[label]] === value ||
+                            className={`px-4 py-2 rounded-lg text-left text-sm ${
+                              searchData[
+                                commercialSubTypes.some((st) => st.id === label)
+                                  ? "sub_type"
+                                  : labelToStoreKeyMap[label]
+                              ] === value ||
                               (value === "" &&
-                                !searchData[labelToStoreKeyMap[label]])
+                                !searchData[
+                                  commercialSubTypes.some(
+                                    (st) => st.id === label
+                                  )
+                                    ? "sub_type"
+                                    : labelToStoreKeyMap[label]
+                                ])
                                 ? "bg-[#1D3A76] text-white"
                                 : "bg-gray-100 hover:bg-gray-200"
                             }`}
@@ -689,8 +641,77 @@ const PropertyHeader = () => {
                       })}
                     </div>
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+            </div>
+          ))}
+          <div className="relative flex-shrink-0">
+            <button
+              className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded-full cursor-pointer whitespace-nowrap border-2 border-blue-900 text-blue-900"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMoreFiltersOpen(!isMoreFiltersOpen);
+              }}
+            >
+              MORE FILTERS <FaChevronDown className="text-xs" />
+            </button>
+            {isMoreFiltersOpen && (
+              <>
+                <div
+                  className="fixed inset-0 bg-transparent bg-opacity-10 z-40"
+                  onClick={() => setIsMoreFiltersOpen(false)}
+                />
+                <div className="fixed top-0 left-0 right-0 bg-white rounded-b-lg shadow-lg z-50 p-4 max-h-[60vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-xl text-blue-900">
+                      More Filters
+                    </h3>
+                    <button
+                      onClick={() => setIsMoreFiltersOpen(false)}
+                      className="text-gray-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  {["Status"].map((label) => (
+                    <div key={label} className="mb-4">
+                      <h4 className="font-medium mb-2 text-left">
+                        {getSelectedLabel(label, undefined)}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(dropdownOptions[label] || []).map((option, index) => {
+                          const isObject = typeof option === "object";
+                          const value = isObject ? option.value : option;
+                          const display = isObject ? option.label : option;
+                          if (index === 0) return null;
+                          return (
+                            <button
+                              key={`${label}-${value}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                dispatch(labelToActionMap[label](value));
+                                labelToLocalSetterMap[label](value);
+                                setIsMoreFiltersOpen(false);
+                              }}
+                              className={`px-4 py-2 text-left rounded-lg text-sm ${
+                                searchData[labelToStoreKeyMap[label]] ===
+                                  value ||
+                                (value === "" &&
+                                  !searchData[labelToStoreKeyMap[label]])
+                                  ? "bg-[#1D3A76] text-white"
+                                  : "bg-gray-100 hover:bg-gray-200"
+                              }`}
+                            >
+                              {display}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -698,4 +719,5 @@ const PropertyHeader = () => {
     </>
   );
 };
+
 export default PropertyHeader;

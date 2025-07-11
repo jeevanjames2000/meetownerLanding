@@ -1254,7 +1254,7 @@ const PropertyBody = () => {
   const shortText = description.slice(0, 320);
   const toggleReadMore = () => setIsExpanded(!isExpanded);
   return (
-    <div className="relative p-1 0 lg:p-6 w-full mx-auto bg-white rounded-xl shadow-md space-y-4">
+    <div className="relative p-1 0 lg:p-6 w-full  rounded-xl shadow-md space-y-4">
       <h1 className="text-blue-900 font-bold text-left lg:text-center uppercase text-xl md:text-2xl lg:text-3xl">
         {property.property_name} PROPERTY DETAILS
       </h1>
@@ -1413,10 +1413,10 @@ const PropertyBody = () => {
               <p>RERA</p>
             </span>
           </div>
-          <div className="flex flex-wrap justify-between sm:flex-nowrap gap-1 mt-4 sm:mt-2">
+          <div className="flex flex-wrap justify-between sm:flex-nowrap  mt-4 sm:mt-2">
             <button
               onClick={handleChatClick}
-              className="w-[45%] h-10 bg-transparent flex items-center justify-center gap-1 text-green-500 border cursor-pointer border-green-500 text-sm px-6 py-2 rounded-lg"
+              className="w-[48%] h-10 bg-transparent flex items-center justify-center gap-1 text-green-500 border cursor-pointer border-green-500 text-sm px-6 py-2 rounded-lg"
             >
               <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4" />
               Chat
@@ -1427,7 +1427,7 @@ const PropertyBody = () => {
                 submittedStates[property?.unique_property_id]?.contact ||
                 contacted.includes(property.unique_property_id)
               }
-              className={`w-full h-10 bg-[#EC6F51] items-left hover:bg-[#d85e43] text-white text-sm px-5 py-2 cursor-pointer rounded-lg ${
+              className={`w-[48%] h-10 bg-[#EC6F51] items-left hover:bg-[#d85e43] text-white text-sm px-5 py-2 cursor-pointer rounded-lg ${
                 submittedStates[property?.unique_property_id]?.contact ||
                 contacted.includes(property.unique_property_id)
                   ? "opacity-50 cursor-not-allowed"
