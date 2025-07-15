@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
+import config from "../../config";
 const FooterLinks = ({ basePath = "/listings" }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -14,9 +15,7 @@ const FooterLinks = ({ basePath = "/listings" }) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          "http://localhost:5000/api/v1/getPropertyLinks"
-        );
+        const res = await fetch(`${config.awsApiUrl}/api/v1/getPropertyLinks`);
         if (!res.ok) throw new Error("Failed to fetch property links");
         const data = await res.json();
         setLinks(data);
