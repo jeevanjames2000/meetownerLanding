@@ -45,7 +45,7 @@ const FooterLinks = ({ basePath = "/listings" }) => {
   const filteredLinks = links.filter((link) => link.property_for === activeTab);
   return (
     <footer className="bg-white text-[#1D3A76] py-12 px-4">
-      <div className="max-w-8xl mx-auto px-3 py-4 rounded-xl shadow-lg border border-[#1D3A76]/10">
+      <div className="max-w-8xl mx-auto px-3 py-8 rounded-xl shadow-lg border border-[#1D3A76]/10">
         <h2 className="text-3xl font-bold text-gray-900 text-left">
           Explore Properties
         </h2>
