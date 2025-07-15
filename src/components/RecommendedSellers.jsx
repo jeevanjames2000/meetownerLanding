@@ -27,6 +27,19 @@ const RecommendedSellers = () => {
         <h1 className="text-start text-3xl font-bold text-gray-800 mb-2">
           Recommended Sellers
         </h1>
+        <svg
+          viewBox="0 0 120 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-44 ml-2 h-4 mt-2 flex items-center"
+        >
+          <path
+            d="M2 6 C20 14, 50 -6, 118 6"
+            stroke="#F0AA00"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </svg>
         <p className="text-start text-gray-600 mb-6">
           Sellers With Complete Knowledge About Locality and Verified Listings
         </p>
@@ -55,12 +68,12 @@ const RecommendedSellers = () => {
                     src={
                       seller.photo
                         ? `https://api.meetowner.in/${seller.photo}`
-                        : `https://avatar.iran.liara.run/public/${
-                            Math.floor(Math.random() * 30) + 1
-                          }`
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            seller?.name || "User"
+                          )}&color=393E46&size=100&background=fff`
                     }
                     alt={seller?.name}
-                    crossOrigin="anonymous"
+                    crossOrigin={seller.photo ? "anonymous" : undefined}
                     className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-contain"
                     onError={(e) => {
                       e.target.onerror = null;

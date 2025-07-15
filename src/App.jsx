@@ -29,7 +29,7 @@ import { HelmetProvider } from "react-helmet-async";
 import AppRedirect from "./components/AppRedirect";
 import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
 import ContactUs from "./legal/contactUs";
-
+import FooterLinks from "./utilities/FooterLinks";
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -42,6 +42,66 @@ function Home() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const footerLinks = {
+    "Properties for Buy": [
+      {
+        name: "Hyderabad",
+        listings: [
+          "House For Sale In Hyderabad",
+          "House For Sale In LB Nagar",
+          "House For Sale In Kondapur",
+          "House For Sale In Gachibowli",
+          "House For Sale In Kukatpally",
+          "Flat For Sale In Manikonda",
+          "Flat For Sale In Ameerpet",
+          "Villa For Sale In Kompally",
+          "Commercial Office For Sale In Hyderabad",
+          "Commercial Office For Sale In LB Nagar",
+          "Commercial Shop For Sale In Kondapur",
+          "Office Space For Sale In Gachibowli",
+          "Shop For Sale In Ameerpet",
+          "Showroom For Sale In Kukatpally",
+          "Commercial Space For Sale In Habsiguda",
+          "Upcoming Project In Hyderabad",
+          "Upcoming Project In LB Nagar",
+          "Upcoming Project In Kondapur",
+          "Upcoming Project In Bachupally",
+          "Upcoming Project In Kompally",
+          "Upcoming Project In Nallagandla",
+          "Upcoming Project In TSPA Junction",
+        ],
+      },
+    ],
+    "Properties for Rent": [
+      {
+        name: "Hyderabad",
+        listings: [
+          "House for Rent in Hi-Tech City",
+          "House for Rent in Kollur",
+          "House for Rent in Patancheru",
+          "House for Rent in Madhapur",
+          "Flat for Rent in Kukatpally",
+          "Flat for Rent in Gachibowli",
+          "House for Rent in Tarnaka",
+          "PG for Rent in SR Nagar",
+          "Flat for Rent in Uppal",
+          "Commercial Office For Rent In Hyderabad",
+          "Commercial Office For Rent In LB Nagar",
+          "Commercial Shop For Rent In Kondapur",
+          "Office Space For Rent In Gachibowli",
+          "Showroom For Rent In Madhapur",
+          "Shop For Rent In Kukatpally",
+          "Retail Space For Rent In KPHB",
+          "Independent House For Rent In Hyderabad",
+          "Independent House For Rent In LB Nagar",
+          "Independent House For Rent In Kondapur",
+          "Independent House For Rent In Gachibowli",
+          "Independent House For Rent In Miyapur",
+          "Independent House For Rent In Uppal",
+        ],
+      },
+    ],
+  };
   return (
     <>
       <Header />
@@ -52,6 +112,7 @@ function Home() {
       <HighDemandProjects />
       <RecommendedSellers />
       <ExclussiveCards />
+      <FooterLinks links={footerLinks} basePath="/listings" />
       <Footer />
       <ToastContainer
         position="top-right"
