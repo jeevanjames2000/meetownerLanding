@@ -4,16 +4,16 @@ import propertyDetails from "./slices/propertyDetails";
 import searchSlice from "./slices/searchSlice";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-const searchPersistConfig = {
-  key: "search",
-  storage,
-};
-const persistedSearchReducer = persistReducer(searchPersistConfig, searchSlice);
+// const searchPersistConfig = {
+//   key: "search",
+//   storage,
+// };
+// const persistedSearchReducer = persistReducer(searchPersistConfig, searchSlice);
 const store = configureStore({
   reducer: {
     auth: authSlice,
     property: propertyDetails,
-    search: persistedSearchReducer,
+    search: searchSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
