@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
@@ -62,35 +66,39 @@ const FooterLinks = ({ basePath = "/listings" }) => {
             strokeLinecap="round"
           />
         </svg>
-        <div className="flex justify-center mb-8 space-x-6">
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab("Buy");
-            }}
-            className={`px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
-              activeTab === "Buy"
-                ? "text-white bg-[#1D3A76]"
-                : "text-[#1D3A76] hover:bg-[#F5F8FC]"
-            }`}
-          >
-            Properties for Buy
-          </a>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab("Rent");
-            }}
-            className={`px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
-              activeTab === "Rent"
-                ? "text-white bg-[#1D3A76]"
-                : "text-[#1D3A76] hover:bg-[#F5F8FC]"
-            }`}
-          >
-            Properties for Rent
-          </a>
+        {}
+        <div className="block md:hidden h-4"></div>
+        <div className="flex justify-center mb-8">
+          <div className="flex justify-center w-full space-x-6 overflow-x-auto scrollbar-hide max-w-full px-1 md:overflow-visible md:space-x-6">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab("Buy");
+              }}
+              className={`whitespace-nowrap px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
+                activeTab === "Buy"
+                  ? "text-white bg-[#1D3A76]"
+                  : "text-[#1D3A76] hover:bg-[#F5F8FC]"
+              }`}
+            >
+              Properties for Buy
+            </a>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab("Rent");
+              }}
+              className={`whitespace-nowrap px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
+                activeTab === "Rent"
+                  ? "text-white bg-[#1D3A76]"
+                  : "text-[#1D3A76] hover:bg-[#F5F8FC]"
+              }`}
+            >
+              Properties for Rent
+            </a>
+          </div>
         </div>
         <div className="bg-white">
           {loading ? (
@@ -104,22 +112,61 @@ const FooterLinks = ({ basePath = "/listings" }) => {
               No links found.
             </div>
           ) : (
-            <ul className="flex flex-wrap gap-2 gap-y-4">
-              {filteredLinks.map((link) => (
-                <li key={link.id}>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLinkClick(link);
-                    }}
-                    className="text-[#1D3A76] text-sm font-medium hover:text-white hover:bg-[#1D3A76] transition-colors duration-200 px-3 py-1 rounded border border-[#1D3A76]/30"
-                  >
-                    {link.link_title}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <>
+              {}
+              <div className="block md:hidden">
+                <Swiper
+                  slidesPerView={1}
+                  pagination={{ clickable: true }}
+                  modules={[Pagination]}
+                  className="w-full"
+                  style={{ paddingBottom: "50px" }}
+                >
+                  {Array.from({
+                    length: Math.ceil(filteredLinks.length / 5),
+                  }).map((_, pageIdx) => (
+                    <SwiperSlide key={pageIdx}>
+                      <ul className="flex flex-col gap-2 items-stretch">
+                        {filteredLinks
+                          .slice(pageIdx * 5, pageIdx * 5 + 5)
+                          .map((link) => (
+                            <li key={link.id}>
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleLinkClick(link);
+                                }}
+                                className="block text-[#1D3A76] text-sm font-medium hover:text-white hover:bg-[#1D3A76] transition-colors duration-200 px-3 py-2 rounded border border-[#1D3A76]/30 w-full text-left"
+                              >
+                                {link.link_title}
+                              </a>
+                            </li>
+                          ))}
+                      </ul>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+              <div className="hidden md:block">
+                <ul className="flex flex-wrap gap-2 gap-y-4">
+                  {filteredLinks.map((link) => (
+                    <li key={link.id}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLinkClick(link);
+                        }}
+                        className="text-[#1D3A76] text-sm font-medium hover:text-white hover:bg-[#1D3A76] transition-colors duration-200 px-3 py-1 rounded border border-[#1D3A76]/30"
+                      >
+                        {link.link_title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
           )}
         </div>
       </div>
