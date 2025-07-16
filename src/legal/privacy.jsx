@@ -38,7 +38,8 @@ const PrivacyAndPolicies = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col relative top-10 items-center justify-center">
+        <h2 className="text-xl font-bold">Privacy Policy</h2>
         <div
           className="text-left flex flex-col justify-center mt-10 w-[70%]"
           dangerouslySetInnerHTML={{ __html: privacy.description }}

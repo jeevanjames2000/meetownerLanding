@@ -18,7 +18,6 @@ const Services = () => {
     fetchPrivacy();
   }, []);
   const [showScrollTop, setShowScrollTop] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -26,7 +25,6 @@ const Services = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -39,7 +37,8 @@ const Services = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col relative top-10 items-center">
+        <h2 className="text-xl font-bold">Our Services</h2>
         <div
           className="text-left flex flex-col justify-center my-10 w-[70%]"
           dangerouslySetInnerHTML={{ __html: services.description }}

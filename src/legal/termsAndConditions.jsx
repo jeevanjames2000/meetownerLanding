@@ -41,7 +41,9 @@ const TermsAndConditions = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex flex-col relative top-10 items-center justify-center">
+        <h2 className="text-xl font-bold">Terms and Conditions</h2>
+
         <div
           className="terms-container text-left flex flex-col justify-center my-10 w-[70%]"
           dangerouslySetInnerHTML={{ __html: terms.description }}
