@@ -375,13 +375,29 @@ const Header = () => {
     navigate("/");
   }, [navigate]);
   const shouldShowFurnishing = !["Plot", "Land"].includes(selectedSubType);
+  const dropdownRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+        setIsLocationOpen(false);
+        setIsSearchDropdownOpen(false);
+        setIsMoreFiltersOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     <>
       <header
         ref={headerRef}
         className="fixed top-0 left-0 w-full bg-white shadow-sm p-2 md:px-2 z-20"
       >
-        <div className="flex justify-between items-center">
+        <div ref={dropdownRef} className="flex justify-between items-center">
           <div
             className="flex text-left items-center cursor-pointer mr-1 flex-shrink-0"
             onClick={handleRouteHome}

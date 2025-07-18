@@ -65,12 +65,12 @@ const AdsCard = memo(() => {
           768: { slidesPerView: 1 },
           1024: { slidesPerView: 1 },
         }}
-        className="pb-0 overflow-hidden h-[250px]"
+        className="pb-0 overflow-hidden h-[300px]"
       >
         {property?.map((project, index) => (
           <SwiperSlide key={index}>
-            <div className="rounded-2xl border gap-2 border-gray-200 p-2 md:p-2 relative bg-white flex flex-col md:flex-row items-center ">
-              <div className="w-full md:w-1/2">
+            <div className="rounded-xl border border-gray-200 md:p-4 p-2 relative bg-white flex flex-col md:flex-row items-stretch gap-4 md:gap-6 min-h-[250px]">
+              <div className="w-full md:w-1/2 flex items-center justify-center">
                 <img
                   src={
                     project?.image
@@ -81,7 +81,7 @@ const AdsCard = memo(() => {
                   }
                   alt="Property"
                   crossOrigin="anonymous"
-                  className="w-full h-50 object-contain rounded-md"
+                  className="w-full h-[200px] md:h-[220px] object-contain rounded-md"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = `https://placehold.co/600x400?text=${
@@ -91,25 +91,25 @@ const AdsCard = memo(() => {
                 />
               </div>
               <div
-                className="w-full md:w-1/2 cursor-pointer"
+                className="w-full md:w-1/2 flex flex-col justify-between cursor-pointer px-1 md:px-2"
                 onClick={() => handleNavigation(project)}
               >
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-md text-left md:text-lg font-bold text-gray-500">
+                <div className="flex flex-col gap-2 flex-grow">
+                  <h3 className="text-lg md:text-xl font-bold text-blue-900 text-left">
+                    {project?.property_name}
+                  </h3>
+                  <p className="text-md md:text-lg font-semibold text-gray-600 text-left">
                     Rs:{" "}
                     {formatToIndianCurrency(project?.property_cost) || "N/A"}
                   </p>
-                  <h3 className="text-lg text-left  font-bold text-blue-900 mt-1 ">
-                    {project?.property_name}
-                  </h3>
+                  <p className="text-gray-600 text-left text-sm md:text-base mt-1 mb-2 md:mb-4 line-clamp-3">
+                    {project?.description?.length > 100
+                      ? project?.description.slice(0, 150) + "..."
+                      : project?.description}
+                  </p>
                 </div>
-                <p className="text-gray-600 text-left text-sm md:text-base mt-1 mb-4">
-                  {project?.description?.length > 100
-                    ? project?.description.slice(0, 150) + "..."
-                    : project?.description}
-                </p>
-                <div className="flex justify-end items-center">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-[#243cc2] hover:bg-blue-700 text-white rounded-xl shadow">
+                <div className="flex justify-end items-center mt-2">
+                  <button className="flex items-center gap-2 px-5 py-2 bg-[#1D3A76] hover:bg-blue-800 text-white rounded-xl shadow text-sm md:text-base">
                     <FaHouse />
                     View Property
                   </button>
@@ -143,7 +143,6 @@ const AdsCard = memo(() => {
           className="w-6 h-6"
         />
         <span className="text-[#FFC107] font-bold">MEET OWNER</span>
-        <span>Developer</span>
       </div>
     </div>
   );

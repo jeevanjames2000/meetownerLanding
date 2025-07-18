@@ -8,6 +8,7 @@ import CountryCodeSelector from "../utilities/CountryCodeSelector";
 import CryptoJS from "crypto-js";
 const JWT_SECRET = "khsfskhfks983493123!@#JSFKORuiweo232";
 const OTP_LENGTH = 4;
+const RESEND_COOLDOWN = 30;
 function decrypt(encryptedText) {
   try {
     const [ivHex, encryptedHex] = encryptedText.split(":");
@@ -38,6 +39,7 @@ const Login = ({ onClose }) => {
   const [loginData, setLoginData] = useState(null);
   const [selectedCode, setSelectedCode] = useState("+91");
   const [country, setCountry] = useState("India");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const validateMobile = (mobile, country) =>
     country === "India"
       ? /^[6-9]\d{9}$/.test(mobile)
@@ -61,6 +63,15 @@ const Login = ({ onClose }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
   const checkUserExists = useCallback(async () => {
     try {
       const { data } = await axios.post(
@@ -90,20 +101,28 @@ const Login = ({ onClose }) => {
         const decryptedOtp = decrypt(data.otp);
         if (decryptedOtp) {
           setOtp(decryptedOtp);
-          setMessage(`OTP sent successfully to ${selectedCode}${mobile}`);
+          setMessage(`OTP sent to ${selectedCode}${mobile}`);
           setOtpSent(true);
+          setResendCooldown(RESEND_COOLDOWN);
         } else {
-          setError("Failed to decrypt OTP. Please try again.");
+          setError("Failed to decrypt OTP. Try again.");
         }
       } else {
-        setError("Failed to send OTP. Please try again.");
+        setError("Failed to send OTP. Try again.");
       }
     } catch {
-      setError("Error sending OTP. Please check your connection.");
+      setError("Error sending OTP. Check your connection.");
     } finally {
       setIsLoading(false);
     }
   }, [mobile, selectedCode]);
+  const handleResendOtp = useCallback(async () => {
+    if (resendCooldown > 0) {
+      setError(`Please wait ${resendCooldown}s before resending.`);
+      return;
+    }
+    await sendUnifiedOtp();
+  }, [resendCooldown, sendUnifiedOtp]);
   const registerUser = useCallback(async () => {
     try {
       const { data } = await axios.post(
@@ -126,7 +145,7 @@ const Login = ({ onClose }) => {
       }
       return false;
     } catch {
-      setError("Registration failed. Please try again.");
+      setError("Registration failed. Try again.");
       return false;
     }
   }, [mobile, selectedCode, country, checkUserExists, sendUnifiedOtp]);
@@ -134,8 +153,8 @@ const Login = ({ onClose }) => {
     if (!validateMobile(mobile, country)) {
       setError(
         country === "India"
-          ? "Please enter a valid 10-digit mobile number starting with 6-9."
-          : "Please enter a valid mobile number."
+          ? "Enter a valid 10-digit mobile number (6-9)."
+          : "Enter a valid mobile number."
       );
       return;
     }
@@ -152,7 +171,7 @@ const Login = ({ onClose }) => {
   const verifyOTP = useCallback(() => {
     const trimmedEnteredOtp = enteredOtp.trim();
     if (trimmedEnteredOtp.length !== OTP_LENGTH || trimmedEnteredOtp !== otp) {
-      setError("Invalid OTP. Please try again.");
+      setError("Invalid OTP. Try again.");
       return;
     }
     setIsLoading(true);
@@ -175,106 +194,179 @@ const Login = ({ onClose }) => {
         setError("");
         onClose();
       } else {
-        toast.error("Something went wrong. Please try again.");
-        setError("User data not found. Please try again.");
+        toast.error("Something went wrong. Try again.");
+        setError("User data not found. Try again.");
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Try again.");
+      setError("Something went wrong. Try again.");
     } finally {
       setIsLoading(false);
     }
   }, [enteredOtp, otp, loginData, dispatch, onClose]);
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-opacity-75 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50 transition-opacity duration-500 ">
       <div
         ref={modalRef}
-        className="bg-[#FFFF] w-[420px] p-6 rounded-md shadow-md relative"
+        className="relative w-full max-w-sm p-6 bg-white bg-opacity-5 backdrop-blur-md rounded-xl border border-transparent animate-glow-border shadow-[0_0_15px_rgba(29,58,118,0.5)]"
       >
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-black text-2xl"
+          className="absolute top-3 right-3 text-black text-lg font-light hover:text-[#1D3A76] transition-colors duration-300"
           disabled={isLoading}
         >
           ×
         </button>
-        <h2 className="text-black text-center text-2xl font-bold mb-5">
+        <h2 className="text-black text-center text-2xl font-bold mb-6 tracking-wider animate-pulse-text">
           Login
         </h2>
         {message && (
-          <p className="text-green-400 text-center mb-3">{message}</p>
+          <p className="text-green-400 text-center text-sm mb-4 animate-neon-glow">
+            {message}
+          </p>
         )}
-        {error && <p className="text-red-400 text-center mb-3">{error}</p>}
-        <div className="relative mb-1">
-          <input
-            type="tel"
-            placeholder="Enter Mobile Number"
-            value={mobile}
-            maxLength={15}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "");
-              setMobile(value);
-              setError("");
-            }}
-            onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
-            className="w-full px-4 py-2 rounded-md bg-white border border-black text-black placeholder-gray-400 focus:outline-none pl-20 pr-4"
-            disabled={isLoading || otpSent}
-          />
-          <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-            <CountryCodeSelector
-              selectedCode={selectedCode}
-              onSelect={setSelectedCode}
-              setCountry={setCountry}
-            />
-          </div>
-        </div>
-        {otpSent && (
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={enteredOtp}
-            maxLength={OTP_LENGTH}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "");
-              setEnteredOtp(value);
-              setError("");
-            }}
-            onKeyDown={(e) => handleKeyPress(e, "verifyOtp")}
-            className="w-full px-4 py-2 mb-1 rounded-md bg-white border border-black placeholder-gray-400 focus:outline-none"
-            disabled={isLoading}
-          />
+        {error && (
+          <p className="text-red-400 text-center text-sm mb-4 animate-neon-glow">
+            {error}
+          </p>
         )}
-        <p
-          className="text-black underline cursor-pointer text-left text-xs mb-4"
-          onClick={() => {
-            setOtpSent(false);
-            setEnteredOtp("");
-            setMobile("");
-            setError("");
-            setMessage("");
-          }}
-        >
-          Change mobile number
-        </p>
         <div className="space-y-4">
-          {!otpSent && (
-            <button
-              onClick={() => handleLogin(0)}
-              className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
+          <div className="relative">
+            <input
+              type="tel"
+              placeholder="Mobile Number"
+              value={mobile}
+              maxLength={15}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                setMobile(value);
+                setError("");
+              }}
+              onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
+              className="w-full px-4 py-2 pl-20 rounded-lg bg-white bg-opacity-10 border border-black border-opacity-20 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1D3A76] focus:shadow-[0_0_10px_rgba(29,58,118,0.7)] transition-all duration-300"
+              disabled={isLoading || otpSent}
+            />
+            <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+              <CountryCodeSelector
+                selectedCode={selectedCode}
+                onSelect={setSelectedCode}
+                setCountry={setCountry}
+              />
+            </div>
+          </div>
+          {otpSent && (
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={enteredOtp}
+              maxLength={OTP_LENGTH}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                setEnteredOtp(value);
+                setError("");
+              }}
+              onKeyDown={(e) => handleKeyPress(e, "verifyOtp")}
+              className="w-full px-4 py-2 rounded-lg bg-white bg-opacity-10 border border-black border-opacity-20 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1D3A76] focus:shadow-[0_0_10px_rgba(29,58,118,0.7)] transition-all duration-300"
               disabled={isLoading}
-            >
-              {isLoading ? "Processing..." : "SEND OTP"}
-            </button>
+            />
           )}
           {otpSent && (
-            <button
-              onClick={verifyOTP}
-              className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-md hover:brightness-105 transition duration-200 disabled:opacity-50"
-              disabled={isLoading}
-            >
-              {isLoading ? "Processing..." : "VERIFY OTP"}
-            </button>
+            <div className="flex justify-between items-center">
+              <p
+                className="text-[#1D3A76] cursor-pointer text-xs font-semibold hover:text-orange-600 transition-colors duration-300"
+                onClick={() => {
+                  setOtpSent(false);
+                  setEnteredOtp("");
+                  setMobile("");
+                  setError("");
+                  setMessage("");
+                  setResendCooldown(0);
+                }}
+              >
+                Switch Number
+              </p>
+              <button
+                onClick={handleResendOtp}
+                className="text-[#1D3A76]  text-xs  cursor-pointer font-semibold hover:text-orange-600 transition-colors duration-300 disabled:opacity-50"
+                disabled={isLoading || resendCooldown > 0}
+              >
+                {resendCooldown > 0
+                  ? `Resend in ${resendCooldown}s`
+                  : "Resend Code"}
+              </button>
+            </div>
           )}
+          <div>
+            {!otpSent ? (
+              <button
+                onClick={() => handleLogin()}
+                className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-lg hover:shadow-[0_0_12px_rgba(29,58,118,0.8)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={verifyOTP}
+                className="w-full bg-[#1D3A76] text-white font-semibold py-2 rounded-lg hover:shadow-[0_0_12px_rgba(29,58,118,0.8)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5:row w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Verify OTP"
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

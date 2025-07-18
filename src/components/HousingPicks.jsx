@@ -317,8 +317,8 @@ const HousingPicks = () => {
                       }}
                     />
                     <a
-                      href="#"
-                      className="absolute top-4 right-4 text-white font-bold hover:text-blue-900  transition-colors"
+                      onClick={() => handleNavigation(property)}
+                      className="absolute top-4 right-4 cursor-pointer text-white font-bold hover:text-blue-900  transition-colors"
                     >
                       View Project
                     </a>

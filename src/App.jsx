@@ -42,6 +42,7 @@ function Home() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const footerLinks = {
     "Properties for Buy": [
       {
@@ -103,7 +104,7 @@ function Home() {
     ],
   };
   return (
-    <>
+    <div className="">
       <Header />
       <SearchBar />
       <Slider />
@@ -134,7 +135,7 @@ function Home() {
           <ChevronUp className="w-6 h-6 text-[#1D3A76]" />
         </div>
       )}
-    </>
+    </div>
   );
 }
 function App() {

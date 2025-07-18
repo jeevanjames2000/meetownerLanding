@@ -107,7 +107,7 @@ const Header = () => {
   };
   return (
     <>
-      <header className="w-full bg-white shadow-sm px-2 relative z-10">
+      <header className="w-full bg-white shadow-sm px-2 relative  z-10">
         <div className="container mx-auto px-1 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <img
@@ -147,7 +147,7 @@ const Header = () => {
             </button>
             <button
               onClick={() =>
-                (window.location.href = "https://sellers.meetowner.in/")
+                window.open("https://sellers.meetowner.in/", "_blank")
               }
               className="hidden md:flex bg-blue-900 px-6 py-1 rounded-full text-white font-medium hover:bg-[#F0AA00] hover:text-black transition-all group"
             >
@@ -156,6 +156,7 @@ const Header = () => {
                 | Free
               </span>
             </button>
+
             {Data && (
               <div
                 className="flex cursor-pointer font-medium border border-[#F0AA00] hover:bg-[#F0AA00] px-6 py-1 rounded-full"
