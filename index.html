@@ -148,22 +148,24 @@
     <!-- Footer with Schema -->
 
     <!-- Load React App -->
-    <!-- <script>
-    // Disable right-click
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    <script>
+      // Disable right-click
+      document.addEventListener("contextmenu", (event) =>
+        event.preventDefault()
+      );
 
-    // Disable common DevTools shortcuts
-    document.onkeydown = function (e) {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
-        (e.ctrlKey && e.key === 'U')
-      ) {
-        e.preventDefault();
-        return false;
-      }
-    };
-  </script> -->
+      // Disable common DevTools shortcuts
+      document.onkeydown = function (e) {
+        if (
+          e.key === "F12" ||
+          (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+          (e.ctrlKey && e.key === "U")
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      };
+    </script>
 
     <script type="module" src="/src/main.jsx"></script>
   </body>
