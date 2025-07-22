@@ -119,7 +119,7 @@ function ListingsBody({ setShowLoginModal }) {
         handleUserSearched();
         const baseUrl = `${
           config.awsApiUrl
-        }/listings/v1/getAllPropertiesByType?page=${currentPage}&property_for=${
+        }/listings/v1/getAllPropertiesByType?page=${currentPage}&limit=70&property_for=${
           searchData?.tab === "Latest"
             ? "Sell"
             : searchData.tab === "Buy"
@@ -135,7 +135,7 @@ function ListingsBody({ setShowLoginModal }) {
           searchData?.bhk || ""
         }&property_cost=${
           searchData?.budget || ""
-        }&priceFilter=${encodeURIComponent(selected)}&possession_status=${
+        }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
           searchData?.occupancy || ""
         }&property_status=${searchData.property_status}&city_id=${
           searchData.city
