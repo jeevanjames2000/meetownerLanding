@@ -1445,8 +1445,14 @@ const PropertyBody = () => {
       </div>
       <div className="mt-6">
         <img
-          src={mainImage}
-          alt="Main"
+          src={
+            mainImage
+              ? mainImage
+              : `https://placehold.co/600x400?text=${
+                  property?.property_name || "No Image Found"
+                }`
+          }
+          alt="Property Image"
           className="w-full h-auto md:h-[500px] object-cover rounded-2xl shadow-md"
           crossOrigin="anonymous"
           onError={(e) => {
