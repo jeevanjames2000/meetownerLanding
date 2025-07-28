@@ -79,6 +79,7 @@ import { MdOutlineVerified } from "react-icons/md";
 import whatsappIcon from "../assets/Images/whatsapp (3).png";
 import Login from "../auth/Login";
 import useWhatsappHook from "../utilities/useWhatsappHook";
+import { useSelector } from "react-redux";
 import config from "../../config";
 const PropertyBody = () => {
   const location = useLocation();
@@ -87,6 +88,7 @@ const PropertyBody = () => {
   const { handleAPI } = useWhatsappHook();
   const [property, setProperty] = useState(location.state);
   const [loading, setLoading] = useState(!location.state);
+  const propertyData = useSelector((state) => state.property);
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [floorplan, setFloorPlan] = useState("");
@@ -97,14 +99,12 @@ const PropertyBody = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [contacted, setContacted] = useState([]);
   const [submittedStates, setSubmittedStates] = useState({});
-
   const fetchContactedProperties = async (property) => {
     const data = localStorage.getItem("user");
     if (!data) {
       return;
     }
     const userDetails = JSON.parse(data);
-
     try {
       const response = await axios.get(
         `${config.awsApiUrl}/enquiry/v1/getUserContactSellersByID?unique_property_id=${property?.unique_property_id}&user_id=${userDetails.user_id}`
@@ -194,6 +194,11 @@ const PropertyBody = () => {
       behavior: "smooth",
     });
   }, []);
+  useEffect(() => {
+    if (propertyData.location) {
+      window.location.reload();
+    }
+  }, [propertyData.location]);
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
@@ -253,7 +258,6 @@ const PropertyBody = () => {
       console.error("err: ", err);
     }
   };
-
   const handleClose = () => {
     setShowLoginModal(false);
   };
@@ -284,7 +288,6 @@ const PropertyBody = () => {
         mobile: userDetails.mobile,
         email: userDetails.email,
       };
-
       const SubType =
         property.sub_type === "Apartment"
           ? `${property?.sub_type} ${property?.bedrooms}BHK`
@@ -311,9 +314,7 @@ const PropertyBody = () => {
         },
       }));
       setContacted((prev) => [...prev, property.unique_property_id]);
-    } catch (err) {
-      console.log("err: ", err);
-    }
+    } catch (err) {}
   };
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
@@ -1498,7 +1499,7 @@ const PropertyBody = () => {
           </h2>
           <div className="bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-6 py-5 hover:shadow-md transition">
             <img
-              src={`https://api.meetowner.in/uploads/${floorplan?.image}`}
+              src={`https://api.meetowner.in/aws/v1/s3/uploads/${floorplan?.image}`}
               alt="FloorPlan"
               crossOrigin="anonymous"
               className="w-full object- h-auto"

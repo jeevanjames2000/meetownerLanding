@@ -22,7 +22,7 @@ const Sidebar = ({
   user,
   handleLogout,
 }) => {
-  const [openSections, setOpenSections] = useState([0, 1]);
+  const [openSections, setOpenSections] = useState([0]);
   const Data = useSelector((state) => state.auth.loggedIn);
   const intrested = useSelector((state) => state.property.intrested);
   const sidebarRef = useRef();
@@ -167,7 +167,7 @@ const Sidebar = ({
               <img
                 src={
                   item.image
-                    ? `https://api.meetowner.in/uploads/${item.image}`
+                    ? `https://api.meetowner.in/aws/v1/s3/uploads/${item.image}`
                     : `https://placehold.co/600x400?text=${
                         item?.property_name || "No Image"
                       }`
@@ -279,7 +279,7 @@ const Sidebar = ({
   return (
     <div
       ref={sidebarRef}
-      className={`fixed top-0 right-0 z-[9999] h-full w-72 bg-white bg-opacity-5 backdrop-blur-md shadow-[0_0_15px_rgba(29,58,118,0.5)] transform transition-transform duration-500 ${
+      className={`fixed top-0 right-0 z-[9999] h-full w-72 bg-white bg-opacity-5 overflow-y-scroll scrollbar-hidden backdrop-blur-md shadow-[0_0_15px_rgba(29,58,118,0.5)] transform transition-transform duration-500 ${
         menuOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
@@ -324,7 +324,7 @@ const Sidebar = ({
               className="flex items-center justify-between py-4 cursor-pointer text-sm font-medium text-black hover:text-[#1D3A76] transition-colors duration-200"
             >
               <span>{item.title}</span>
-              <span className="text-gray-400 text-lg">
+              <span className="text-gray-400 text-xl">
                 {openSections.includes(index) ? "−" : "›"}
               </span>
             </div>

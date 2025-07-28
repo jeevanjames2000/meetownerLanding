@@ -8,7 +8,7 @@ import {
   FaVolumeMute,
   FaVolumeUp,
 } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { setSearchData } from "../../store/slices/searchSlice";
 import config from "../../config";
 import { setPropertyData } from "../../store/slices/propertyDetails";
@@ -18,8 +18,8 @@ const PropertyAds = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const videoRef = useRef(null);
+  const searchData = useSelector((state) => state.search);
 
-  // State management
   const [property, setProperty] = useState(location.state);
   const [loading, setLoading] = useState(!location.state);
   const [error, setError] = useState(null);
@@ -216,6 +216,7 @@ const PropertyAds = () => {
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/(^-|-$)/g, "");
       const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+
       navigate(`/property?${seoUrl}`, { state: property });
     },
 
@@ -293,7 +294,7 @@ const PropertyAds = () => {
                 <img
                   src={
                     propertyItem.image
-                      ? `https://api.meetowner.in/uploads/${propertyItem.image}`
+                      ? `https://api.meetowner.in/aws/v1/s3/uploads/${propertyItem.image}`
                       : `https://placehold.co/600x400?text=${
                           propertyItem?.property_name || "No Image Found"
                         }`

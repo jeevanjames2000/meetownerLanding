@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, ChevronDown, ChevronUp, X } from "lucide-react";
 import noPropertiesFound from "../assets/Images/14099.jpg";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -23,6 +23,7 @@ import Breadcrumb from "../utilities/BreadCrumb";
 import AdsCard from "./AdsCard";
 import PropertyCard from "./PropertyCard";
 import SkeletonPropertyCard from "./SkeletonPropertyCard";
+import { clearSearch } from "../../store/slices/searchSlice";
 const formatToIndianCurrency = (value) => {
   if (!value || isNaN(value)) return "N/A";
   const numValue = parseFloat(value);
@@ -34,6 +35,7 @@ const formatToIndianCurrency = (value) => {
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
+  console.log("searchData: ", searchData.city);
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
@@ -137,7 +139,7 @@ function ListingsBody({ setShowLoginModal }) {
           searchData?.budget || ""
         }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
           searchData?.occupancy || ""
-        }&property_status=${searchData.property_status}&city_id=${
+        }&property_status=${searchData.property_status}&city=${
           searchData.city
         }&furnished_status=${searchData.furnished_status}`;
         const response = await fetch(`${baseUrl}`);
@@ -161,7 +163,7 @@ function ListingsBody({ setShowLoginModal }) {
         setLoading(false);
       }
     },
-    [searchData, searchData.city, selected, loading]
+    [searchData, selected, loading]
   );
   const fetchContactedProperties = async () => {
     const data = localStorage.getItem("user");
@@ -182,6 +184,7 @@ function ListingsBody({ setShowLoginModal }) {
       console.error("Failed to fetch liked properties:", error);
     }
   };
+
   useEffect(() => {
     setData([]);
     setPage(1);
@@ -191,6 +194,7 @@ function ListingsBody({ setShowLoginModal }) {
   }, [
     searchData?.location,
     searchData?.bhk,
+    searchData?.city,
     searchData?.property_in,
     searchData?.tab,
     searchData?.occupancy,
@@ -200,6 +204,7 @@ function ListingsBody({ setShowLoginModal }) {
     searchData.property_status,
     selected,
   ]);
+
   useEffect(() => {
     if (page > 1) fetchProperties(page);
   }, [page]);
@@ -277,6 +282,7 @@ function ListingsBody({ setShowLoginModal }) {
     },
     [navigate, dispatch, searchData, selected]
   );
+
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [submittedStates, setSubmittedStates] = useState({});
   const [shouldSubmit, setShouldSubmit] = useState(false);
@@ -633,18 +639,90 @@ function ListingsBody({ setShowLoginModal }) {
           )}
         </WindowScroller>
       ) : !loading ? (
-        <div className="text-center mt-10 flex flex-col gap-5">
-          <>
-            <img
-              src={noPropertiesFound}
-              alt="Property"
-              crossOrigin="anonymous"
-              className="w-[100%] h-70 object-contain rounded-md"
-            />
-            <h1 className="text-2xl text-gray-500 font-bold">
-              No Properties Found!
-            </h1>
-          </>
+        <div className="text-center mt-5 flex flex-col gap-4">
+          <img
+            src={noPropertiesFound}
+            alt="Property"
+            crossOrigin="anonymous"
+            className="w-full h-[280px] object-contain rounded-md"
+          />
+          <h1 className="text-2xl text-blue-900 font-bold">
+            Oops, No Properties Found!
+          </h1>
+          <div className="border border-gray-300 rounded-xl p-4">
+            <p className="text-base font-semibold text-gray-600">
+              Adjust your filters to find the perfect property.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center mt-3">
+              {searchData &&
+                Object.entries(searchData)
+                  .filter(
+                    ([key, value]) =>
+                      ![
+                        "loading",
+                        "error",
+                        "userCity",
+                        "tab",
+                        "property_status",
+                        "plot_subType",
+                      ].includes(key) &&
+                      value !== null &&
+                      value !== "" &&
+                      value !== undefined
+                  )
+                  .map(([key, value]) => {
+                    const labels = {
+                      city: "City",
+                      property_for: "Property For",
+                      property_in: "Property In",
+                      bhk: "BHK",
+                      budget: "Budget",
+                      sub_type: "Property Type",
+                      commercial_subType: "Commercial Type",
+                      occupancy: "Occupancy",
+                      location: "Location",
+                      furnished_status: "Furnished Status",
+                    };
+
+                    const colors = {
+                      city: "bg-blue-100 text-blue-800",
+                      property_for: "bg-green-100 text-green-800",
+                      property_in: "bg-yellow-100 text-yellow-800",
+                      bhk: "bg-red-100 text-red-800",
+                      budget: "bg-indigo-100 text-indigo-800",
+                      sub_type: "bg-teal-100 text-teal-800",
+                      commercial_subType: "bg-orange-100 text-orange-800",
+                      occupancy: "bg-cyan-100 text-cyan-800",
+                      location: "bg-lime-100 text-lime-800",
+                      furnished_status: "bg-rose-100 text-rose-800",
+                    };
+
+                    return (
+                      <span
+                        key={key}
+                        className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                          colors[key] || "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {labels[key]}: {value}
+                      </span>
+                    );
+                  })}
+            </div>
+            <div className="flex justify-center mt-4">
+              <button
+                className="flex flex-row items-center cursor-pointer gap-2 bg-blue-900 text-white font-semibold px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
+                onClick={() => {
+                  dispatch(clearSearch());
+                  navigate("/listings");
+                }}
+                aria-label="Clear all applied filters"
+              >
+                Reset All Filters
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           <AdsCard />
         </div>
       ) : null}

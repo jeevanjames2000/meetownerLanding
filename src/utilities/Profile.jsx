@@ -141,7 +141,9 @@ export default function ProfilePage() {
           <div className="relative">
             <img
               src={
-                user.photo ? `${config.awsApiUrl}/${user.photo}` : profileImage
+                user.photo
+                  ? `${config.awsApiUrl}/aws/v1/s3/uploads/${user.photo}`
+                  : profileImage
               }
               alt="Profile"
               crossOrigin="anonymous"

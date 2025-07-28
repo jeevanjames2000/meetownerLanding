@@ -382,7 +382,7 @@ const PropertyListing = () => {
                   <img
                     src={
                       property.image
-                        ? `https://api.meetowner.in/uploads/${property.image}`
+                        ? `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
                         : `https://placehold.co/600x400?text=${
                             property?.property_name || "No Image Found"
                           }`

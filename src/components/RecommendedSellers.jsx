@@ -67,7 +67,7 @@ const RecommendedSellers = () => {
                   <img
                     src={
                       seller.photo
-                        ? `https://api.meetowner.in/${seller.photo}`
+                        ? `https://api.meetowner.in/aws/v1/s3/uploads/${seller.photo}`
                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                             seller?.name || "User"
                           )}&color=393E46&size=100&background=fff`
@@ -77,7 +77,6 @@ const RecommendedSellers = () => {
                     className="w-full h-48 sm:h-48 md:h-48 lg:h-38 object-contain"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = "/assets/user-placeholder.jpg";
                     }}
                   />
 

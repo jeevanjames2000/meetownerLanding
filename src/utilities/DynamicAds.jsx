@@ -73,7 +73,7 @@ const DynamicAds = () => {
       <div className="hidden relative right-0 top-0 lg:block md:block w-[24%] h-full bg-white  p-3 rounded-xl shadow-lg overflow-hidden">
         <div className="relative rounded-lg">
           <img
-            src={`https://api.meetowner.in/uploads/${property[2]?.image}`}
+            src={`https://api.meetowner.in/aws/v1/s3/uploads/${property[2]?.image}`}
             alt="Featured Property"
             crossOrigin="anonymous"
             className="w-full h-44 object-cover rounded-md"
@@ -109,7 +109,7 @@ const DynamicAds = () => {
                   <img
                     src={
                       item.image
-                        ? `https://api.meetowner.in/uploads/${item.image}`
+                        ? `https://api.meetowner.in/aws/v1/s3/uploads/${item.image}`
                         : `https://via.placeholder.com/400x200?text=No+Image`
                     }
                     crossOrigin="anonymous"

@@ -1,4 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
+const initialState = {
+  city: "",
+  tab: "Buy",
+  property_for: "Sell",
+  property_in: "",
+  bhk: null,
+  budget: "",
+  sub_type: "",
+  plot_subType: "Buy",
+  commercial_subType: "Buy",
+  occupancy: "",
+  location: "",
+  userCity: null,
+  loading: false,
+  error: null,
+  furnished_status: "",
+  property_status: "1",
+};
+
 const searchSlice = createSlice({
   name: "search",
   initialState: {
@@ -74,6 +93,9 @@ const searchSlice = createSlice({
     setPropertyStatus: (state, action) => {
       state.property_status = action.payload;
     },
+    clearSearch: () => {
+      return initialState;
+    },
   },
 });
 export const {
@@ -94,5 +116,6 @@ export const {
   setCommercialSubType,
   setFurnishedStatus,
   setPropertyStatus,
+  clearSearch,
 } = searchSlice.actions;
 export default searchSlice.reducer;

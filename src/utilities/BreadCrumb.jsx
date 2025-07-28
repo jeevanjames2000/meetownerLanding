@@ -22,6 +22,7 @@ const Breadcrumb = () => {
   if (pathnames.includes("property") && hasPropertyData) {
     crumbs = [
       { name: "Home", path: "/" },
+      { name: "Properties", path: "/listings" },
       {
         name: propertyData.location,
         path: `/listings?city=${encodeURIComponent(propertyData.location)}`,
@@ -34,11 +35,10 @@ const Breadcrumb = () => {
   } else if (pathnames.includes("property")) {
     crumbs = [
       { name: "Home", path: "/" },
+      { name: "Properties", path: "/listings" },
       {
-        name: searchData?.city || "Hyderabad",
-        path: `/listings?city=${encodeURIComponent(
-          searchData?.city || "Hyderabad"
-        )}`,
+        name: searchData?.city || "",
+        path: `/listings?city=${encodeURIComponent(searchData?.city || "")}`,
       },
       {
         name: "Property",
@@ -48,15 +48,14 @@ const Breadcrumb = () => {
   } else if (pathnames.includes("listings")) {
     crumbs = [
       { name: "Home", path: "/" },
+      { name: "Properties", path: "/listings" },
       {
-        name: searchData?.city || "Hyderabad",
-        path: `/listings?city=${encodeURIComponent(
-          searchData?.city || "Hyderabad"
-        )}`,
+        name: searchData?.city || "",
+        path: `/listings?city=${encodeURIComponent(searchData?.city || "")}`,
       },
       {
-        name: searchData?.location,
-        path: searchData?.location,
+        name: searchData?.location || "",
+        path: searchData?.location || "",
       },
     ];
   } else {
@@ -72,6 +71,7 @@ const Breadcrumb = () => {
       }),
     ];
   }
+  crumbs = crumbs.filter((crumb) => crumb.name && crumb.name.trim() !== "");
   return (
     <nav
       className="flex items-center py-1 px-5 bg-white text-gray-700"

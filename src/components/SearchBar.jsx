@@ -43,6 +43,7 @@ export default function SearchBar() {
     { id: 2, order: 2, video_url: ad2 },
     { id: 3, order: 3, video_url: ad3 },
   ]);
+
   const [localites, setLocalities] = useState([]);
   const [isError, setIsError] = useState(false);
   const containerRef = useRef(null);
@@ -161,7 +162,7 @@ export default function SearchBar() {
           .map((item) => ({
             id: item.id,
             order: item.ads_order,
-            video_url: `https://api.meetowner.in/${item.image}`,
+            video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
           }));
         setMediaList(formatted);
       }

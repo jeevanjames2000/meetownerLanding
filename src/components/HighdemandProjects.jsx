@@ -133,7 +133,7 @@ const HighDemandProjects = () => {
               <img
                 src={
                   project.image
-                    ? `https://api.meetowner.in/uploads/${project.image}`
+                    ? `https://api.meetowner.in/aws/v1/s3/uploads/${project.image}`
                     : `https://placehold.co/600x400?text=${
                         project?.property_name || "No Image Found"
                       }`

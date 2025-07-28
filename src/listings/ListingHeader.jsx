@@ -15,8 +15,9 @@ import {
   setSearchData,
   setSubType,
   setTab,
+  clearSearch,
 } from "../../store/slices/searchSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { debounce } from "lodash";
 import axios from "axios";
@@ -46,9 +47,11 @@ const getProjectOptions = () => {
 };
 const Header = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const searchData = useSelector((state) => state.search);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
-  const [location, setLocation] = useState(searchData.city || "");
+  const [city, setCity] = useState(searchData.city || "");
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
@@ -71,8 +74,38 @@ const Header = () => {
     searchData.furnished_status || ""
   );
   const [selectedProjectStatus, setSelectedProjectStatus] = useState(
-    searchData.projectStatus || ""
+    searchData.property_status || "1"
   );
+  useEffect(() => {
+    setCity(searchData.city || "");
+  }, [searchData.city]);
+  const updateUrlWithSearchData = useCallback(() => {
+    if (location.pathname !== "/listings") return;
+
+    const queryParts = Object.entries(searchData)
+      .filter(
+        ([key, value]) =>
+          ![
+            "loading",
+            "error",
+            "userCity",
+            "plot_subType",
+            "commercial_subType",
+          ].includes(key) &&
+          value !== null &&
+          value !== "" &&
+          value !== undefined
+      )
+      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
+
+    const queryString = queryParts.join("&");
+
+    navigate(`/listings?${queryString}`, { replace: true });
+  }, [navigate, searchData, location.pathname]);
+
+  useEffect(() => {
+    updateUrlWithSearchData();
+  }, [searchData, updateUrlWithSearchData]);
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedSubType) &&
@@ -100,11 +133,11 @@ const Header = () => {
     fetchCities();
   }, []);
   useEffect(() => {
-    if (!location) return;
+    if (!city) return;
     const fetchLocalities = async () => {
       try {
         const response = await fetch(
-          `${config.awsApiUrl}/api/v1/search?city=${location}&query=${searchInput}`
+          `${config.awsApiUrl}/api/v1/search?city=${city}&query=${searchInput}`
         );
         const data = await response.json();
         setLocalities(data);
@@ -114,7 +147,7 @@ const Header = () => {
       }
     };
     fetchLocalities();
-  }, [searchInput, location]);
+  }, [searchInput, city]);
   useEffect(() => {
     if (
       selectedPropertyIn === "Commercial" &&
@@ -307,7 +340,7 @@ const Header = () => {
         console.error("Error parsing localStorage data:", error);
         userDetails = null;
       }
-      if (userDetails?.user_id && location) {
+      if (userDetails?.user_id && city) {
         const viewData = {
           user_id: userDetails.user_id,
           searched_location: searchValue || "N/A",
@@ -315,7 +348,7 @@ const Header = () => {
           name: userDetails?.name || "N/A",
           mobile: userDetails?.mobile || "N/A",
           email: userDetails?.email || "N/A",
-          searched_city: location || "N/A",
+          searched_city: city || "N/A",
           property_in: selectedPropertyIn || "N/A",
           sub_type: selectedSubType || "N/A",
           occupancy: selectedOccupancy || "N/A",
@@ -337,7 +370,7 @@ const Header = () => {
     },
     [
       selectedTab,
-      location,
+      city,
       selectedPropertyIn,
       selectedSubType,
       selectedOccupancy,
@@ -348,7 +381,7 @@ const Header = () => {
     debounce((value) => {
       handleUserSearched(value);
     }, 1000),
-    [handleUserSearched, selectedFurnishedStatus]
+    [handleUserSearched]
   );
   const debouncedDispatch = useCallback(
     debounce((value) => {
@@ -361,6 +394,9 @@ const Header = () => {
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
     debouncedUserActivity("");
+    if (location.pathname === "/listings") {
+      navigate("/listings");
+    }
   };
   const handleValueChange = useCallback(
     (value) => {
@@ -370,10 +406,10 @@ const Header = () => {
     },
     [debouncedDispatch, debouncedUserActivity]
   );
-  const navigate = useNavigate();
   const handleRouteHome = useCallback(() => {
     navigate("/");
-  }, [navigate]);
+    dispatch(clearSearch());
+  }, [navigate, dispatch]);
   const shouldShowFurnishing = !["Plot", "Land"].includes(selectedSubType);
   const dropdownRef = useRef(null);
   useEffect(() => {
@@ -385,7 +421,6 @@ const Header = () => {
         setIsMoreFiltersOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -415,7 +450,7 @@ const Header = () => {
               onClick={handleRouteHome}
             />
           </div>
-          <div className="flex justify-end w-full max-w-[70rem] lg:max-w-[85rem] xl:w-[75rem] xl:max-w-none  sm:hidden md:hidden lg:flex px-1 lg:px-1">
+          <div className="flex justify-end w-full max-w-[70rem] lg:max-w-[85rem] xl:w-[75rem] xl:max-w-none sm:hidden md:hidden lg:flex px-1 lg:px-1">
             <div className="flex items-center rounded-full shadow-md w-full bg-white flex-wrap lg:flex-nowrap gap-2 lg:gap-3 justify-between">
               <div className="hidden md:flex items-center gap-2 lg:gap-4 shrink-0">
                 <div className="relative inline-block">
@@ -424,7 +459,7 @@ const Header = () => {
                     onClick={() => setIsLocationOpen(!isLocationOpen)}
                   >
                     <span className="hidden md:inline truncate max-w-[100px] lg:max-w-none">
-                      {location}
+                      {city || "Select City"}
                     </span>
                     <FaFilter className="text-xs lg:text-sm" />
                   </div>
@@ -432,12 +467,15 @@ const Header = () => {
                     <ul className="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-md border border-gray-300 max-h-78 overflow-y-auto z-50">
                       <li
                         onClick={() => {
-                          setLocation("");
-                          dispatch(setSearchData({ location: "", city: "" }));
-                          setIsLocationOpen(false);
+                          dispatch(clearSearch());
+                          setCity("");
                           setSearchInput("");
+                          setIsLocationOpen(false);
                           setIsSearchDropdownOpen(false);
                           debouncedUserActivity("");
+                          if (location.pathname === "/listings") {
+                            navigate("/listings");
+                          }
                         }}
                         className="w-full px-4 py-2 text-red-600 hover:bg-red-100 text-xs cursor-pointer flex items-center justify-start transition-all duration-150 border-b"
                       >
@@ -451,15 +489,15 @@ const Header = () => {
                             key={option}
                             onClick={() => {
                               if (!isDisabled) {
-                                setLocation(option);
+                                setCity(option);
                                 dispatch(
                                   setSearchData({
-                                    location: option,
                                     city: option,
+                                    location: "",
                                   })
                                 );
-                                setIsLocationOpen(false);
                                 setSearchInput("");
+                                setIsLocationOpen(false);
                                 setIsSearchDropdownOpen(false);
                                 debouncedUserActivity(option);
                               }
@@ -581,6 +619,7 @@ const Header = () => {
                                     setSearchData({ location: item?.locality })
                                   );
                                   setIsSearchDropdownOpen(false);
+                                  debouncedUserActivity(item?.locality);
                                 }
                               }}
                               className={`px-3 py-1 text-left rounded-md transition-all duration-200 text-sm ${
