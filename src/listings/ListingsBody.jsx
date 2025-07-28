@@ -35,7 +35,6 @@ const formatToIndianCurrency = (value) => {
 function ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
-  console.log("searchData: ", searchData.city);
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [expandedCards, setExpandedCards] = useState({});
