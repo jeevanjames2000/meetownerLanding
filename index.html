@@ -32,6 +32,15 @@
     />
 
     <!-- Open Graph (OG) Tags for Social Media -->
+
+    <meta
+      property="og:image"
+      content="https://api.meetowner.in/aws/v1/s3/uploads/{{property.image}}"
+    />
+    <meta
+      property="og:image:alt"
+      content="Image of {{property.property_name}} with Meet Owner logo"
+    />
     <meta
       property="og:title"
       content="Meet Owner | Buy & Sell Real Estate in Hyderabad"
@@ -45,6 +54,7 @@
     <meta property="og:image" content="https://www.meetowner.com/favicon.ico" />
     <meta property="og:site_name" content="Meet Owner" />
 
+    <meta property="og:logo" content="https://www.meetowner.in/favicon.ico" />
     <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
@@ -76,7 +86,11 @@
     <link rel="preload" href="/src/main.jsx" as="script" />
 
     <!-- Canonical URL to Avoid Duplicate Content -->
-    <link rel="canonical" href="https://www.meetowner.com" />
+    <!-- <link rel="canonical" href="https://www.meetowner.com" /> -->
+    <link
+      rel="canonical"
+      href="https://meetowner.in/property?{{property.sub_type | urlencode}}_{{property.location_id | urlencode}}_Id_{{property.unique_property_id | urlencode}}"
+    />
 
     <!-- Sitemap Reference -->
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
