@@ -30,6 +30,7 @@ import AppRedirect from "./components/AppRedirect";
 import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
 import ContactUs from "./legal/contactUs";
 import FooterLinks from "./utilities/FooterLinks";
+import UpcomingWrapper from "./upcomingProjects/UpcomingWrapper";
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -174,6 +175,7 @@ function App() {
               <Route path="/profile" element={<ProfileWrapper />} />
               <Route path="/app" element={<AppRedirect />} />
               <Route path="/contactUs" element={<ContactUs />} />
+              <Route path="/pre-launch" element={<UpcomingWrapper />} />
             </Routes>
           </UserProfileCheckWrapper>
         </Router>

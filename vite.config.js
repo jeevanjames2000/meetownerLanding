@@ -29,7 +29,7 @@ export default defineConfig({
     }),
     obfuscatorPlugin({
       options: {
-        debugProtection: true,
+        debugProtection: false,
       },
     }),
   ],

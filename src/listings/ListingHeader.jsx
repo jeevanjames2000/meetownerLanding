@@ -408,7 +408,6 @@ const Header = () => {
   );
   const handleRouteHome = useCallback(() => {
     navigate("/");
-    dispatch(clearSearch());
   }, [navigate, dispatch]);
   const shouldShowFurnishing = !["Plot", "Land"].includes(selectedSubType);
   const dropdownRef = useRef(null);
