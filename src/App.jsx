@@ -31,6 +31,9 @@ import UserProfileCheckWrapper from "./utilities/UserProfileCheckWrapper";
 import ContactUs from "./legal/contactUs";
 import FooterLinks from "./utilities/FooterLinks";
 import UpcomingWrapper from "./upcomingProjects/UpcomingWrapper";
+import PropertyWrapper from "./upcomingProjects/propertyDetails/PropertyWrapper";
+import QuickLinks from "./upcomingProjects/propertyDetails/QuickLinks";
+
 function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -176,6 +179,11 @@ function App() {
               <Route path="/app" element={<AppRedirect />} />
               <Route path="/contactUs" element={<ContactUs />} />
               <Route path="/pre-launch" element={<UpcomingWrapper />} />
+              <Route
+                path="/new-launch/:propertyId"
+                element={<PropertyWrapper />}
+              />
+              <Route path="/quick-Links" element={<QuickLinks />} />
             </Routes>
           </UserProfileCheckWrapper>
         </Router>

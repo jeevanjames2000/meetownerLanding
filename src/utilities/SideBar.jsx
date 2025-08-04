@@ -1,4 +1,4 @@
-import { IoClose, IoDiamondOutline } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -11,7 +11,6 @@ import { toast } from "react-toastify";
 import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { setSearchData } from "../../store/slices/searchSlice";
 import { setPropertyData } from "../../store/slices/propertyDetails";
 
 const Sidebar = ({
@@ -266,14 +265,7 @@ const Sidebar = ({
   };
 
   const handleListings = () => {
-    dispatch(
-      setSearchData({
-        property_status: "3",
-        sub_type: "",
-        property_in: "",
-      })
-    );
-    navigate("/listings");
+    navigate("/pre-launch");
   };
 
   return (

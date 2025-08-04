@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "react-toastify";
 import { IoDiamondOutline } from "react-icons/io5";
-import { setSearchData } from "../../store/slices/searchSlice";
+
 const Header = () => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
@@ -96,14 +96,7 @@ const Header = () => {
     };
   }, [showDownloadModal]);
   const handleListings = () => {
-    dispatch(
-      setSearchData({
-        property_status: "3",
-        sub_type: "",
-        property_in: "",
-      })
-    );
-    navigate("/listings");
+    navigate("/pre-launch");
   };
   return (
     <>

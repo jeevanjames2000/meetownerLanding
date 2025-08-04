@@ -38,13 +38,7 @@ const getFurnishingOptions = () => {
     { label: "Fully Furnished", value: "Fully" },
   ];
 };
-const getProjectOptions = () => {
-  return [
-    { label: "Projects", value: "" },
-    { label: "Launched Projects", value: "1" },
-    { label: "Upcoming Projects", value: "3" },
-  ];
-};
+
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -227,7 +221,6 @@ const Header = () => {
       Type: getTypeOptions(),
       Status: getStatusOptions(),
       Furnishing: getFurnishingOptions(),
-      Projects: getProjectOptions(),
     }),
     [selectedPropertyIn, selectedSubType]
   );
@@ -240,7 +233,6 @@ const Header = () => {
       Type: setSubType,
       Status: setOccupancy,
       Furnishing: setFurnishedStatus,
-      Projects: setPropertyStatus,
     }),
     []
   );
@@ -253,7 +245,6 @@ const Header = () => {
       Type: setSelectedSubType,
       Status: setSelectedOccupancy,
       Furnishing: setSelectedFurnishedStatus,
-      Projects: setSelectedProjectStatus,
     }),
     []
   );
@@ -266,7 +257,6 @@ const Header = () => {
       Type: "sub_type",
       Status: "occupancy",
       Furnishing: "furnished_status",
-      Projects: "property_status",
     }),
     []
   );
@@ -278,7 +268,6 @@ const Header = () => {
     Type: "",
     Status: "",
     Furnishing: "",
-    Projects: "1",
   };
   const getSelectedLabel = useCallback(
     (label, id) => {
@@ -549,8 +538,7 @@ const Header = () => {
                                   label === "Property In" ||
                                   label === "Status" ||
                                   label === "BHK" ||
-                                  label === "Furnishing" ||
-                                  label === "Projects") &&
+                                  label === "Furnishing") &&
                                 index === 0
                               ) {
                                 return null;
@@ -678,7 +666,6 @@ const Header = () => {
             "BHK",
             "Budget",
             "Property In",
-            "Projects",
             ...(selectedPropertyIn === "Commercial"
               ? commercialSubTypes.map((subtype) => subtype.id)
               : ["Type"]),
