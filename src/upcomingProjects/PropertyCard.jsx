@@ -48,7 +48,7 @@ export const PropertyCard = ({ property, viewMode }) => {
   return (
     <div
       onClick={handleCardClick}
-      className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group ${
+      className={`bg-white rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden group ${
         viewMode === "grid" ? "flex h-64" : "flex flex-col"
       }`}
     >
