@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import config from "../../config";
 export const useProperties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +10,7 @@ export const useProperties = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          "http://localhost:5000/upcoming/v1/getAllUpComingProjects"
+          `${config.awsApiUrl}/upcoming/v1/getAllUpComingProjects`
         );
         if (response.data.status === "success") {
           setProperties(response.data.data || []);
