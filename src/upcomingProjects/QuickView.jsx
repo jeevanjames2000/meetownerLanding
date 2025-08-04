@@ -1,7 +1,12 @@
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const QuickView = ({ properties, setShowQuickView }) => {
-  console.log("properties: ", properties);
+  const navigate = useNavigate();
+
+  const handleCardClick = (property) => {
+    navigate(`/new-launch/${property.unique_property_id}`);
+  };
   return (
     <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl z-50 transform transition-transform duration-300">
       <div className="p-4 border-b">
@@ -23,6 +28,7 @@ export const QuickView = ({ properties, setShowQuickView }) => {
           <div
             key={property.unique_property_id}
             className="p-4 border-b hover:bg-gray-50 cursor-pointer"
+            onClick={() => handleCardClick(property)}
           >
             <div className="flex space-x-3">
               <img
