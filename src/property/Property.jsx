@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import PropertyHeader from "./PropertyHeader";
 import PropertyBody from "./PropertyBody";
 import PropertyAds from "./PropertyAds";
-import { useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Breadcrumb from "../utilities/BreadCrumb";
 
 const Property = () => {
-  const { state: property } = useLocation();
+
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {

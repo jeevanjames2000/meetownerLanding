@@ -135,7 +135,7 @@ export default function ProfilePage() {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex  items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 flex flex-col md:flex-row gap-6">
         <div className="flex flex-col items-center md:w-1/3 relative">
           <div className="relative">

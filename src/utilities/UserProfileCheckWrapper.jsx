@@ -118,11 +118,7 @@ const UserProfileCheckWrapper = ({ children }) => {
   });
   const { pathname } = useLocation();
   const isProfileIncomplete = (userDetails) => {
-    return (
-      !userDetails?.name?.trim() ||
-      !userDetails?.email?.trim() ||
-      !userDetails?.city?.trim()
-    );
+    return !userDetails?.name?.trim() || !userDetails?.city?.trim();
   };
   const fetchProfile = useCallback(async (userId) => {
     setLoading(true);
@@ -241,7 +237,6 @@ const UserProfileCheckWrapper = ({ children }) => {
       setShowModal(false);
       setErrors({ name: "", email: "", city: "" });
     } catch (error) {
-      console.error("Update Error:", error);
       toast.error(
         error.message || "Something went wrong while updating profile."
       );
@@ -260,6 +255,24 @@ const UserProfileCheckWrapper = ({ children }) => {
       {showModal && (
         <div style={modalStyles.overlay} role="dialog" aria-modal="true">
           <div style={modalStyles.modal} tabIndex={-1}>
+            <button
+              onClick={() => setShowModal(false)}
+              style={{
+                position: "absolute",
+                top: "0.75rem",
+                right: "0.75rem",
+                background: "transparent",
+                border: "none",
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                color: "#4B5563",
+                cursor: "pointer",
+              }}
+              aria-label="Close Modal"
+            >
+              &times;
+            </button>
+
             <h2 style={modalStyles.title}>Update Your Profile</h2>
             <p style={modalStyles.description}>
               This action is required. Please add your name, email, and city to

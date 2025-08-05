@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -42,8 +42,6 @@ import {
   FaBorderAll,
   FaExpandArrowsAlt,
   FaDoorOpen,
-  FaRupeeSign,
-  FaHome,
   FaRulerCombined,
   FaSchool,
   FaHospital,
@@ -83,7 +81,6 @@ import { useSelector } from "react-redux";
 import config from "../../config";
 const PropertyBody = () => {
   const location = useLocation();
-  const [searchParams] = useSearchParams();
   const modalRef = useRef(null);
   const { handleAPI } = useWhatsappHook();
   const [property, setProperty] = useState(location.state);
@@ -143,9 +140,8 @@ const PropertyBody = () => {
             throw new Error("Property ID not found in URL");
           }
         } catch (err) {
-          console.error("Error fetching property:", err);
           setError(err.message || "Failed to load property details");
-          toast.error("Failed to load property details");
+          toast.error("Property Not Found!");
         } finally {
           setLoading(false);
         }

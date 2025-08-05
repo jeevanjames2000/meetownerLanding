@@ -12,6 +12,10 @@ import {
 } from "react-icons/fa";
 import { MdOutlineVerified } from "react-icons/md";
 import { CreditCard, Gift, Sparkles, Tag, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import config from "../../../config";
+import axios from "axios";
+import { toast } from "react-toastify";
 const PropertyDetails = ({
   mainFloorPlan,
   property,
@@ -32,6 +36,13 @@ const PropertyDetails = ({
       return "N/A";
     }
   };
+  const [userDetails, setUserDetails] = useState(null);
+  useEffect(() => {
+    const data = localStorage.getItem("user");
+    if (data) {
+      setUserDetails(JSON.parse(data));
+    }
+  }, []);
   const formatDistance = (distance) => {
     const d = parseFloat(distance);
     if (isNaN(d)) return distance;
@@ -79,6 +90,30 @@ const PropertyDetails = ({
   const openDocumentInNewTab = (url) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
+  const handleAPI = async (property) => {
+    console.log("property: ", property);
+    try {
+      const payload = {
+        name: userDetails?.name,
+        mobile: userDetails?.mobile,
+        ownerName: property?.builder_name,
+        ownerMobile: property?.owner_mobile,
+        property_name: property?.property_name,
+        sub_type: property?.sub_type,
+        google_address: `${property.city},${property?.location}`,
+      };
+      console.log("payload: ", payload);
+      const response = await axios.post(
+        `${config.awsApiUrl}/auth/v1/sendWhatsappLeads`,
+        payload
+      );
+      if (response.status === 200) {
+        toast.success("Details Submitted Successfully!");
+      }
+    } catch (error) {
+      console.error("Backend error:", error.response?.data || error.message);
+    }
+  };
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -105,6 +140,7 @@ const PropertyDetails = ({
       </div>
     );
   }
+
   return (
     <div className="p-4 sm:p-6 w-full bg-white rounded-xl shadow-md space-y-2">
       <h1 className="text-blue-900 font-bold text-center text-xl sm:text-2xl lg:text-3xl uppercase">
@@ -134,9 +170,9 @@ const PropertyDetails = ({
         <p className="text-base sm:text-lg font-bold text-blue-900">
           ₹{formatToIndianCurrency(property.property_cost_from)} – ₹
           {formatToIndianCurrency(property.property_cost_upto)}
-          <span className="text-gray-500 text-sm font-normal">
+          <span className="text-gray-500 text-sm font-medium">
             {" "}
-            (prices may change)
+            (Prices may change)
           </span>
         </p>
       </div>
@@ -152,7 +188,7 @@ const PropertyDetails = ({
               {option}
             </span>
           ))}
-        {property.is_rera_registered && (
+        {property.is_rera_registered === 1 && (
           <span className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium shadow-sm hover:bg-indigo-100 transition">
             <MdOutlineVerified className="text-base sm:text-lg text-indigo-600" />
             RERA Registered
@@ -189,13 +225,12 @@ const PropertyDetails = ({
             Price Sheet
           </button>
         )}
-        <button className="flex items-center gap-2 bg-green-500 hover:bg-green-600 cursor-pointer text-white font-medium py-2 px-4 rounded-full text-sm transition">
+        <button
+          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 cursor-pointer text-white font-medium py-2 px-4 rounded-full text-sm transition"
+          onClick={() => handleAPI(property)}
+        >
           <FaWhatsapp />
           Chat
-        </button>
-        <button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 cursor-pointer text-white font-medium py-2 px-4 rounded-full text-sm transition">
-          <FaPhoneAlt />
-          Contact
         </button>
       </div>
 

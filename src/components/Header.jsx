@@ -131,13 +131,7 @@ const Header = () => {
               />
               Download App
             </button>
-            <button
-              onClick={handleListings}
-              className="hidden md:flex border border-[#F0AA00] px-6 py-1 rounded-full text-gray-800 font-medium hover:bg-[#F0AA00] transition-all items-center"
-            >
-              <IoDiamondOutline className="p-1 w-6 h-6 mr-1 text-blue-900 hover:text-red-500" />
-              Upcoming Projects
-            </button>
+
             <button
               onClick={() =>
                 window.open("https://sellers.meetowner.in/", "_blank")

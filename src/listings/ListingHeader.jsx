@@ -587,7 +587,7 @@ const Header = () => {
                   <img
                     src={Searchhome}
                     alt="Search Home"
-                    className="w-[24px] h-[24px]"
+                    className="w-[34px] h-[34px]"
                   />
                 </div>
                 {isSearchDropdownOpen && (

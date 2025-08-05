@@ -142,19 +142,27 @@ export const PropertyList = ({
           </div>
         </div>
       </div>
-      <div
-        className={`space-y-6 mb-8 ${
-          viewMode === "grid" ? "gap-6" : "max-w-4xl"
-        }`}
-      >
-        {currentProperties.map((property) => (
-          <PropertyCard
-            key={property.unique_property_id}
-            property={property}
-            viewMode={viewMode}
-          />
-        ))}
-      </div>
+      {currentProperties.length > 0 ? (
+        <div
+          className={`space-y-6 mb-8 ${
+            viewMode === "grid" ? "gap-6" : "max-w-4xl"
+          }`}
+        >
+          {currentProperties.map((property) => (
+            <PropertyCard
+              key={property.unique_property_id}
+              property={property}
+              viewMode={viewMode}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex margin-auto justify-center items-center h-100">
+          <h1 className="text-2xl text-blue-900 font-bold">
+            Oops, No Properties Found!
+          </h1>
+        </div>
+      )}
       {totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
