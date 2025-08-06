@@ -190,11 +190,7 @@ const PropertyBody = () => {
       behavior: "smooth",
     });
   }, []);
-  useEffect(() => {
-    if (propertyData.location) {
-      window.location.reload();
-    }
-  }, [propertyData.location]);
+
   const facilityIconMap = {
     Lift: <Building />,
     CCTV: <MonitorCheck />,
