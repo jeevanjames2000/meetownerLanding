@@ -7,7 +7,6 @@ import QuickLinks from "./QuickLinks";
 import config from "../../../config";
 export default function PropertyWrapper() {
   const [property, setProperty] = useState(null);
-  console.log("property: ", property);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mainImage, setMainImage] = useState("");
@@ -28,7 +27,6 @@ export default function PropertyWrapper() {
           `${config.awsApiUrl}/upcoming/v1/getProjectById?unique_property_id=${id}`
         );
         const data = response.data;
-        console.log("data: ", data);
         if (response.status === 200 && data.data) {
           setProperty(data.data);
           setMainImage(data.data.gallery_images[0]?.image || "");

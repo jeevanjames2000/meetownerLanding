@@ -57,8 +57,8 @@ export default function ProfilePage() {
     }
     try {
       const userDetails = JSON.parse(storedData);
-      if (userDetails.user_id) {
-        fetchProfile(userDetails.user_id);
+      if (userDetails?.user_id) {
+        fetchProfile(userDetails?.user_id);
       } else {
         toast.error("Invalid user data. Please login again.");
       }
@@ -89,7 +89,7 @@ export default function ProfilePage() {
       if (!photoUrl) throw new Error("No photo URL returned");
       setProfileImage(photoUrl);
       toast.success("Profile photo updated successfully!");
-      await fetchProfile(user.id);
+      await fetchProfile(user.user_id);
     } catch (error) {
       console.error("Image Upload Error:", error);
       toast.error("Failed to upload photo.");
@@ -135,9 +135,9 @@ export default function ProfilePage() {
     }
   };
   return (
-    <div className="min-h-screen flex  items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 flex flex-col md:flex-row gap-6">
-        <div className="flex flex-col items-center md:w-1/3 relative">
+    <div className="min-h-screen flex max-w-[1000px] mx-auto items-center justify-center p-4">
+      <div className="rounded-2xl w-full border border-gray-300 shadow-lg p-6 bg-white flex flex-col gap-6">
+        <div className="flex flex-col items-center p-6 bg-gray-50 rounded-xl">
           <div className="relative">
             <img
               src={
@@ -167,85 +167,114 @@ export default function ProfilePage() {
               aria-hidden="true"
             />
           </div>
-          <h2 className="mt-4 text-xl font-semibold">
+          <h2 className="mt-4 text-2xl font-bold text-gray-800">
             {user.name || "User Name"}
           </h2>
-          <p className="text-gray-500">{user.email || "N/A"}</p>
+          <p className="text-gray-500 text-sm">{user.email || "N/A"}</p>
         </div>
-        <form onSubmit={handleSubmit} className="md:w-2/3 w-full space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="name"
-              value={user.name}
-              onChange={handleChange}
-              placeholder="Full Name"
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              aria-label="Full Name"
+
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+            Edit Profile
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={user.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={user.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Mobile
+                </label>
+                <input
+                  type="text"
+                  name="mobile"
+                  value={user.mobile}
+                  onChange={handleChange}
+                  placeholder="Mobile"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={user.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  City
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  value={user.city}
+                  onChange={handleChange}
+                  placeholder="City"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  value={user.address}
+                  onChange={handleChange}
+                  placeholder="Address"
+                  rows={4}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-[#1D3A76] text-white py-3 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
               disabled={loading}
-            />
-            <input
-              type="email"
-              name="email"
-              value={user.email}
-              onChange={handleChange}
-              placeholder="Email"
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              aria-label="Email"
-              disabled={loading}
-            />
-            <input
-              type="text"
-              name="mobile"
-              value={user.mobile}
-              onChange={handleChange}
-              placeholder="Mobile"
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Mobile"
-              disabled
-            />
-            <input
-              type="password"
-              name="password"
-              value={user.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Password"
-              disabled={loading}
-            />
-            <input
-              type="text"
-              name="city"
-              value={user.city}
-              onChange={handleChange}
-              placeholder="City"
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="City"
-              disabled={loading}
-            />
-          </div>
-          <textarea
-            name="address"
-            value={user.address}
-            onChange={handleChange}
-            placeholder="Address"
-            rows={3}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Address"
-            disabled={loading}
-          ></textarea>
-          <button
-            type="submit"
-            className="w-full bg-[#1D3A76] text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-            disabled={loading}
-            aria-label="Update Profile"
-          >
-            {loading ? "Updating..." : "Update Profile"}
-          </button>
-        </form>
+            >
+              {loading ? "Updating..." : "Update Profile"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

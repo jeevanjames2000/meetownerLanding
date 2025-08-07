@@ -91,7 +91,6 @@ const PropertyDetails = ({
     window.open(url, "_blank", "noopener,noreferrer");
   };
   const handleAPI = async (property) => {
-    console.log("property: ", property);
     try {
       const payload = {
         name: userDetails?.name,
@@ -102,7 +101,6 @@ const PropertyDetails = ({
         sub_type: property?.sub_type,
         google_address: `${property.city},${property?.location}`,
       };
-      console.log("payload: ", payload);
       const response = await axios.post(
         `${config.awsApiUrl}/auth/v1/sendWhatsappLeads`,
         payload

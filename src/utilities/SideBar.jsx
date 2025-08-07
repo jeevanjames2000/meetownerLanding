@@ -1,5 +1,6 @@
 import { IoClose } from "react-icons/io5";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FaApple, FaGooglePlay } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -12,7 +13,6 @@ import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { setPropertyData } from "../../store/slices/propertyDetails";
-
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -28,7 +28,6 @@ const Sidebar = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -42,7 +41,9 @@ const Sidebar = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen, setMenuOpen]);
-
+  const playStoreUrl =
+    "https://play.google.com/store/apps/details?id=com.meetowner.app&pcampaignid=web_share";
+  const appStoreUrl = "https://apps.apple.com/us/app/meetowner/id6743744178";
   const toggleSection = (section) => {
     setOpenSections((prev) =>
       prev.includes(section)
@@ -50,13 +51,60 @@ const Sidebar = ({
         : [...prev, section]
     );
   };
-
   const getRecentActivity = (apiData, reduxData) => {
     if (apiData?.length) return apiData;
     if (reduxData?.length) return reduxData;
     return null;
   };
-
+  const getUserDetails = () => {
+    try {
+      const data = localStorage.getItem("user");
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error("Error parsing user data from localStorage:", error);
+      return null;
+    }
+  };
+  const slugify = (text) =>
+    text
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^|$)/g, "");
+  const handleNavigation = useCallback(async (property) => {
+    const userDetails = getUserDetails();
+    if (!userDetails?.user_id) {
+      console.warn("User details are missing or invalid.");
+      return;
+    }
+    const viewData = {
+      user_id: userDetails.user_id,
+      property_id: property?.unique_property_id || "N/A",
+      name: userDetails?.name || "N/A",
+      mobile: userDetails?.mobile || "N/A",
+      email: userDetails?.email || "N/A",
+      property_name: property?.property_name || "N/A",
+    };
+    try {
+      await axios.post(
+        `${config.awsApiUrl}/listings/v1/propertyViewed`,
+        viewData
+      );
+    } catch (error) {
+      console.error("Failed to record property view:", error);
+    }
+    dispatch(
+      setPropertyData({
+        propertyName: property.property_name,
+        location: property.location_id,
+      })
+    );
+    const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+    const propertyId = property.unique_property_id;
+    const propertyNameSlug = slugify(property.property_name);
+    const locationSlug = slugify(property.location_id);
+    const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
+    navigate(`/property?${seoUrl}`, { state: property });
+  }, []);
   const [likedProperties, setLikedProperties] = useState([]);
   useEffect(() => {
     const fetchLikedProperties = async () => {
@@ -78,7 +126,6 @@ const Sidebar = ({
     };
     fetchLikedProperties();
   }, []);
-
   const RecentActivitySwiper = ({ data }) => {
     if (!data?.length) {
       return (
@@ -93,76 +140,16 @@ const Sidebar = ({
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     };
-
-    const getUserDetails = () => {
-      try {
-        const data = localStorage.getItem("user");
-        return data ? JSON.parse(data) : null;
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-        return null;
-      }
-    };
-
-    const slugify = (text) =>
-      text
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^_|_$)/g, "");
-
-    const handleNavigation = useCallback(
-      async (property) => {
-        const userDetails = getUserDetails();
-        if (!userDetails?.user_id) {
-          console.warn("User details are missing or invalid.");
-          return;
-        }
-
-        const viewData = {
-          user_id: userDetails.user_id,
-          property_id: property?.unique_property_id || "N/A",
-          name: userDetails?.name || "N/A",
-          mobile: userDetails?.mobile || "N/A",
-          email: userDetails?.email || "N/A",
-          property_name: property?.property_name || "N/A",
-        };
-
-        try {
-          await axios.post(
-            `${config.awsApiUrl}/listings/v1/propertyViewed`,
-            viewData
-          );
-        } catch (error) {
-          console.error("Failed to record property view:", error);
-        }
-
-        dispatch(
-          setPropertyData({
-            propertyName: property.property_name,
-            location: property.location_id,
-          })
-        );
-
-        const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-        const propertyId = property.unique_property_id;
-        const propertyNameSlug = slugify(property.property_name);
-        const locationSlug = slugify(property.location_id);
-        const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-
-        navigate(`/property?${seoUrl}`, { state: property });
-      },
-      [] // Removed unnecessary dependencies
-    );
     return (
       <Swiper
         spaceBetween={10}
         slidesPerView={1.8}
         freeMode
-        className="w-full py-4"
+        className="w-full py-4 "
       >
         {data.map((item) => (
           <SwiperSlide key={item.id}>
-            <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg p-2 shadow-[0_0_10px_rgba(29,58,118,0.3)] w-[140px]">
+            <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg p-2 shadow-[0_0_10px_rgba(29,58,118,0.3)] w-[140px] ">
               <img
                 src={
                   item.image
@@ -204,7 +191,6 @@ const Sidebar = ({
       </Swiper>
     );
   };
-
   const url = "https://meetowner.in/app";
   const recentData = getRecentActivity(likedProperties, intrested);
   const sidebarItems = [
@@ -227,7 +213,6 @@ const Sidebar = ({
       ),
     },
   ];
-
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -246,11 +231,9 @@ const Sidebar = ({
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       toast.success("Contact request sent!");
     } catch (err) {
-      console.log("err: ", err);
       toast.error("Failed to contact seller.");
     }
   };
-
   const handleRoute = () => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -263,11 +246,9 @@ const Sidebar = ({
     }
     navigate("/profile");
   };
-
   const handleListings = () => {
     navigate("/pre-launch");
   };
-
   return (
     <div
       ref={sidebarRef}
@@ -309,13 +290,13 @@ const Sidebar = ({
         {sidebarItems.map((item, index) => (
           <div
             key={index}
-            className="border-b border-[#1D3A76] border-opacity-20"
+            className="border-b border-[#1D3A76] border-opacity-20 "
           >
             <div
               onClick={() => toggleSection(index)}
               className="flex items-center justify-between py-4 cursor-pointer text-sm font-medium text-black hover:text-[#1D3A76] transition-colors duration-200"
             >
-              <span>{item.title}</span>
+              <span>{item.title} </span>
               <span className="text-gray-400 text-xl">
                 {openSections.includes(index) ? "−" : "›"}
               </span>
@@ -323,6 +304,34 @@ const Sidebar = ({
             {openSections.includes(index) && (
               <div className="pb-4 transition-all duration-300">
                 {item.content}
+                {item.title === "Download App" && (
+                  <div className="flex justify-between gap-4">
+                    <button
+                      onClick={() => window.open(playStoreUrl, "_blank")}
+                      className="flex items-center flex-1 space-x-2 px-4 py-2 rounded-lg bg-yellow-500 text-black"
+                    >
+                      <FaGooglePlay className="h-5 w-5" />
+                      <div className="flex flex-col text-left">
+                        <span className="text-[10px]">Get it on</span>
+                        <span className="text-[10px] font-semibold">
+                          Google Play
+                        </span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => window.open(appStoreUrl, "_blank")}
+                      className="flex items-center flex-1 space-x-2 sm:space-x-3 px-4 py-2 rounded-lg bg-yellow-500 text-black"
+                    >
+                      <FaApple className="h-5 w-5" />
+                      <div className="flex flex-col text-left">
+                        <span className="text-[10px]">Available on </span>
+                        <span className="text-[10px] font-semibold">
+                          App Store
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -361,5 +370,4 @@ const Sidebar = ({
     </div>
   );
 };
-
 export default Sidebar;
