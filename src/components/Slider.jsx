@@ -20,6 +20,24 @@ const PropertyListing = () => {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState("Latest");
   const [property, setProperty] = useState([]);
+  const isHomePageMode = [
+    "latest",
+    "sell",
+    "rent",
+    "buy",
+    "plot",
+    "commercial",
+  ].includes(searchData.tab?.toLowerCase());
+
+
+  useEffect(() => {
+    if (["Buy", "Plot", "Commercial"].includes(searchData.tab)) {
+      setActiveTab("Latest");
+    } else if (["Rent", "Sell"].includes(searchData.tab)) {
+      setActiveTab(searchData.tab);
+    }
+  }, [searchData.tab]);
+
 
   const navigate = useNavigate();
 
@@ -33,13 +51,15 @@ const PropertyListing = () => {
     return price.toLocaleString();
   };
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const fetchLatestProperties = async () => {
       setLoading(true);
       setProperty([]);
       try {
-        const isSellTab = activeTab === "Latest" || activeTab === "Sell";
-        const propertyFor = isSellTab ? "Sell" : "Rent";
+        //  Derive directly from activeTab 
+        const propertyFor =
+          activeTab === "Latest" || activeTab === "Sell" ? "Sell" : "Rent";
         const response = await fetch(
           `${config.awsApiUrl}/listings/v1/getLatestProperties?property_for=${propertyFor}`
         );
@@ -52,7 +72,8 @@ const PropertyListing = () => {
       }
     };
     fetchLatestProperties();
-  }, [activeTab, searchData.property_for]);
+  }, [activeTab]);
+
   const [likedProperties, setLikedProperties] = useState([]);
   useEffect(() => {
     const fetchLikedProperties = async () => {
@@ -75,20 +96,21 @@ const PropertyListing = () => {
     };
     fetchLikedProperties();
   }, []);
+
+
   const dispatch = useDispatch();
   useEffect(() => {
+    if (!isHomePageMode) return;
+
+    const property_for =
+      activeTab === "Latest" || activeTab === "Sell" ? "Sell" : "Rent";
     dispatch(
       setSearchData({
         tab: activeTab,
-        property_for:
-          activeTab === "Latest"
-            ? "Sell"
-            : activeTab === "Sell"
-            ? "Sell"
-            : "Rent",
+        property_for: property_for,
       })
     );
-  }, [activeTab, dispatch]);
+  }, [activeTab, dispatch, isHomePageMode]);
   const { handleAPI } = useWhatsappHook();
   const handleEnquireNow = async (property) => {
     try {
@@ -233,13 +255,12 @@ const PropertyListing = () => {
       .replace(/(^_|_$)/g, "");
     const locationSlug = searchData.city
       ? searchData.city
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^_|_$)/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^_|_$)/g, "")
       : "";
-    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${
-      locationSlug ? `_${locationSlug}` : ""
-    }`;
+    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${locationSlug ? `_${locationSlug}` : ""
+      }`;
     const params = {
       city: searchData.location,
       property_for: searchData?.property_for === "Rent" ? "Rent" : "Sell",
@@ -247,8 +268,8 @@ const PropertyListing = () => {
         searchData.tab === "Plot"
           ? "Plot"
           : searchData.tab === "Commercial"
-          ? "Commercial"
-          : "Apartment",
+            ? "Commercial"
+            : "Apartment",
       location: searchData.location,
     };
     navigate(`/listings${seoUrl}`, { state: params });
@@ -268,13 +289,11 @@ const PropertyListing = () => {
     const seoUrl = `/property?${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
     const shareData = {
       title: `${property.property_name} - ${property.location_id}`,
-      text: `Check out this ${property.bedrooms || ""} BHK ${
-        property.property_type
-      } for ${propertyFor} in ${property.location_id}! Price: ₹${
-        propertyFor === "rent"
+      text: `Check out this ${property.bedrooms || ""} BHK ${property.property_type
+        } for ${propertyFor} in ${property.location_id}! Price: ₹${propertyFor === "rent"
           ? formatPrice(property.monthly_rent)
           : formatPrice(property.property_cost)
-      }${propertyFor === "rent" ? " / month" : ""}.`,
+        }${propertyFor === "rent" ? " / month" : ""}.`,
       url: seoUrl,
     };
     if (navigator.share) {
@@ -320,31 +339,28 @@ const PropertyListing = () => {
           <div className="flex-1 flex justify-center space-x-4">
             <button
               onClick={() => setActiveTab("Latest")}
-              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${
-                activeTab === "Latest"
-                  ? "bg-[#1D3A76] text-white"
-                  : "bg-white text-black"
-              }`}
+              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${activeTab === "Latest"
+                ? "bg-[#1D3A76] text-white"
+                : "bg-white text-black"
+                }`}
             >
               Latest
             </button>
             <button
               onClick={() => setActiveTab("Sell")}
-              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${
-                activeTab === "Sell"
-                  ? "bg-[#1D3A76] text-white"
-                  : "bg-white text-black"
-              }`}
+              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${activeTab === "Sell"
+                ? "bg-[#1D3A76] text-white"
+                : "bg-white text-black"
+                }`}
             >
               Sell
             </button>
             <button
               onClick={() => setActiveTab("Rent")}
-              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${
-                activeTab === "Rent"
-                  ? "bg-[#1D3A76] text-white"
-                  : "bg-white text-black"
-              }`}
+              className={`px-6 py-1 rounded-full border cursor-pointer border-black ${activeTab === "Rent"
+                ? "bg-[#1D3A76] text-white"
+                : "bg-white text-black"
+                }`}
             >
               Rent
             </button>
@@ -383,18 +399,16 @@ const PropertyListing = () => {
                     src={
                       property.image
                         ? `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
-                        : `https://placehold.co/600x400?text=${
-                            property?.property_name || "No Image Found"
-                          }`
+                        : `https://placehold.co/600x400?text=${property?.property_name || "No Image Found"
+                        }`
                     }
                     alt="Property"
                     crossOrigin="anonymous"
                     className="w-full h-64 object-fit rounded-md"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = `https://placehold.co/600x400?text=${
-                        property?.property_name || "No Image Found"
-                      }`;
+                      e.target.src = `https://placehold.co/600x400?text=${property?.property_name || "No Image Found"
+                        }`;
                     }}
                   />
                   <div className="absolute top-4 left-4">
