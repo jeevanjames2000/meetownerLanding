@@ -569,7 +569,7 @@ const PropertyHeader = ({ setHeaderHeight }) => {
             </div>
           </div>
         </div>
-        <div className="md:hidden mt-2 flex overflow-x-auto gap-2 px-4 pb-2">
+        <div className="md:hidden mt-2 flex overflow-x-auto scrollbar-hidden  gap-2 px-4 pb-2">
           {[
             "Buy",
             "BHK",

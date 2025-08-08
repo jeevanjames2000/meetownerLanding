@@ -113,7 +113,7 @@ const PropertyCard = memo(
                 <img
                   src={
                     property.image
-                      ? `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
+                      ? `https://api.meetowner.in/assets/v1/serve/${property.image}`
                       : `https://placehold.co/600x400?text=${
                           property?.image || "No Image Found"
                         }`

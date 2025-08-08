@@ -21,7 +21,7 @@ const Property = () => {
         className="flex flex-col lg:flex-row w-full justify-between h-auto p-3 gap-3"
         style={{ paddingTop: `${headerHeight || 80}px` }}
       >
-        <div className="w-full lg:w-[70%]">
+        <div className="w-full  lg:w-[70%]">
           <Breadcrumb />
           <PropertyBody />
         </div>

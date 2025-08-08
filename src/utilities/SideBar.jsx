@@ -42,8 +42,8 @@ const Sidebar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen, setMenuOpen]);
   const playStoreUrl =
-    "https://play.google.com/store/apps/details?id=com.meetowner.app&pcampaignid=web_share";
-  const appStoreUrl = "https://apps.apple.com/us/app/meetowner/id6743744178";
+    "https://meetowner.in/app";
+  const appStoreUrl = "https://meetowner.in/app";
   const toggleSection = (section) => {
     setOpenSections((prev) =>
       prev.includes(section)
@@ -129,7 +129,7 @@ const Sidebar = ({
   const RecentActivitySwiper = ({ data }) => {
     if (!data?.length) {
       return (
-        <p className="text-sm text-gray-400 px-4">No recent activity found.</p>
+        <p className="text-sm text-gray-400 px-4">No  found.</p>
       );
     }
     const formatToIndianCurrency = (value) => {
@@ -153,7 +153,7 @@ const Sidebar = ({
               <img
                 src={
                   item.image
-                    ? `https://api.meetowner.in/aws/v1/s3/uploads/${item.image}`
+                    ? `https://api.meetowner.in/assets/v1/serve/${item.image}`
                     : `https://placehold.co/600x400?text=${
                         item?.property_name || "No Image"
                       }`
@@ -172,7 +172,7 @@ const Sidebar = ({
                 className="flex flex-col items-start cursor-pointer"
                 onClick={() => handleNavigation(item)}
               >
-                <p className="font-semibold text-xs text-black truncate">
+                <p className="font-semibold text-xs text-black line-clamp-1">
                   {item.property_name}
                 </p>
                 <p className="text-xs text-gray-400">

@@ -148,7 +148,7 @@ const ListingAds = () => {
           <img
             src={
               property[2]?.property_data?.image
-                ? `https://api.meetowner.in/aws/v1/s3/uploads/${property[2].property_data.image}`
+                ? `https://api.meetowner.in/assets/v1/serve/${property[2].property_data.image}`
                 : `https://via.placeholder.com/400x200?text=No+Image`
             }
             alt="Featured Property"
@@ -192,7 +192,7 @@ const ListingAds = () => {
                   <img
                     src={
                       item.property_data?.image
-                        ? `https://api.meetowner.in/aws/v1/s3/uploads/${item.property_data.image}`
+                        ? `https://api.meetowner.in/assets/v1/serve/${item.property_data.image}`
                         : `https://via.placeholder.com/400x200?text=No+Image`
                     }
                     crossOrigin="anonymous"

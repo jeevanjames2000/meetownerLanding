@@ -1497,7 +1497,7 @@ const PropertyBody = () => {
           </h2>
           <div className="bg-[#F9F9F9] rounded-xl border border-gray-300 shadow-sm px-6 py-5 hover:shadow-md transition">
             <img
-              src={`https://api.meetowner.in/aws/v1/s3/uploads/${floorplan?.image}`}
+              src={`https://api.meetowner.in/assets/v1/serve/${floorplan?.image}`}
               alt="FloorPlan"
               crossOrigin="anonymous"
               className="w-full object- h-auto"

@@ -68,15 +68,15 @@ const FooterLinks = ({ basePath = "/listings" }) => {
         </svg>
         {}
         <div className="block md:hidden h-4"></div>
-        <div className="flex justify-center mb-8">
-          <div className="flex justify-center w-full space-x-6 overflow-x-auto scrollbar-hide max-w-full px-1 md:overflow-visible md:space-x-6">
+        <div className="flex justify-center mb-8  ">
+          <div className="flex justify-center w-full flex-wrap gap-4 space-x-2 overflow-x-auto scrollbar-hide max-w-full px-1 md:overflow-visible md:space-x-6">
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
                 setActiveTab("Buy");
               }}
-              className={`whitespace-nowrap px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
+              className={`whitespace-nowrap   px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
                 activeTab === "Buy"
                   ? "text-white bg-[#1D3A76]"
                   : "text-[#1D3A76] hover:bg-[#F5F8FC]"

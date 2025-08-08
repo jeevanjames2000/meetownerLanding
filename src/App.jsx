@@ -108,7 +108,7 @@ function Home() {
     ],
   };
   return (
-    <div className="">
+    <div className=" overflow-x-hidden">
       <Header />
       <SearchBar />
       <Slider />

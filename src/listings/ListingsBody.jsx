@@ -32,7 +32,7 @@ const formatToIndianCurrency = (value) => {
   if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
   return numValue.toString();
 };
-function ListingsBody({ setShowLoginModal }) {
+function  ListingsBody({ setShowLoginModal }) {
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
   const [page, setPage] = useState(1);
@@ -562,8 +562,8 @@ function ListingsBody({ setShowLoginModal }) {
   };
   return (
     <div className="min-h-screen p-1 relative z-0 overflow-visible">
-      <div className="flex justify-between flex-wrap gap-2 mb-1 mt-2 px-2">
-        <div className="flex  flex-grow overflow-hidden items-center min-w-0">
+      <div className="flex justify-between flex-wrap gap-2 mb-1 mt-2 px-2  ">
+        <div className="flex   flex-grow overflow-hidden  items-center min-w-0">
           <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
           <p className="text-sm  whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
             {searchData?.property_in === "Commercial"
@@ -580,9 +580,9 @@ function ListingsBody({ setShowLoginModal }) {
             In {searchData?.city || ""}
           </p>
         </div>
-        <div className="relative  flex flex-row mb-1 text-left z-50 flex-shrink-0 ">
+        <div className="relative   flex gap-2 sm:gap-0 flex-col sm:flex-row mb-1 text-left z-50 flex-shrink-0  ">
           <Breadcrumb />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center  gap-2">
             <p className="text-[#000000] text-sm whitespace-nowrap font-medium">
               Sort by
             </p>

@@ -294,7 +294,7 @@ const PropertyAds = () => {
                 <img
                   src={
                     propertyItem.image
-                      ? `https://api.meetowner.in/aws/v1/s3/uploads/${propertyItem.image}`
+                      ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
                       : `https://placehold.co/600x400?text=${
                           propertyItem?.property_name || "No Image Found"
                         }`

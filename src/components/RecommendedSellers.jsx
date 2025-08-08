@@ -67,7 +67,7 @@ const RecommendedSellers = () => {
                   <img
                     src={
                       seller.photo
-                        ? `https://api.meetowner.in/aws/v1/s3/uploads/${seller.photo}`
+                        ? `https://api.meetowner.in/assets/v1/serve/${seller.photo}`
                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                             seller?.name || "User"
                           )}&color=393E46&size=100&background=fff`

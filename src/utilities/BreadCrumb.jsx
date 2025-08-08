@@ -74,10 +74,10 @@ const Breadcrumb = () => {
   crumbs = crumbs.filter((crumb) => crumb.name && crumb.name.trim() !== "");
   return (
     <nav
-      className="flex items-center py-1 px-5 bg-white text-gray-700"
+      className="flex items-center py-1 px-5 bg-white text-gray-700 "
       aria-label="Breadcrumb"
     >
-      <ol className="flex items-center space-x-2">
+      <ol className="flex items-center space-x-2  overflow-x-auto whitespace-nowrap scrollbar-hidden  ">
         {crumbs.map((crumb, index) => (
           <li key={crumb.path} className="flex items-center">
             {index < crumbs.length - 1 ? (

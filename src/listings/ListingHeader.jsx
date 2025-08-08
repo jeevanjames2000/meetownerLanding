@@ -660,7 +660,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="md:hidden mt-3 flex overflow-x-auto gap-2 px-4 relative pb-3">
+        <div className="md:hidden mt-3 flex overflow-x-auto  scrollbar-hidden gap-2 px-4 relative pb-3">
           {[
             "Buy",
             "BHK",
