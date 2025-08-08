@@ -21,7 +21,7 @@ const Sidebar = ({
   user,
   handleLogout,
 }) => {
-  const [openSections, setOpenSections] = useState([0]);
+  const [openSections, setOpenSections] = useState([1]);
   const Data = useSelector((state) => state.auth.loggedIn);
   const intrested = useSelector((state) => state.property.intrested);
   const sidebarRef = useRef();

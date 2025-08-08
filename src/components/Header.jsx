@@ -3,7 +3,7 @@ import logoImage from "../assets/Images/Untitled-22.png";
 import favicon from "../assets/Images/Favicon@10x.png";
 import { HiMenu } from "react-icons/hi";
 import Login from "../auth/Login";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DownloadApp from "../utilities/DownloadApp";
 import Sidebar from "../utilities/SideBar";
 import { setAuthData, setLoggedIn } from "../../store/slices/authSlice";
@@ -35,6 +35,7 @@ const Header = () => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const downloadRef = useRef(null);
   const navigate = useNavigate();
+  const [showAppSuggestion, setShowAppSuggestion] = useState(true)
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -100,6 +101,29 @@ const Header = () => {
   };
   return (
     <>
+    {showAppSuggestion && (
+  <div className="   md:hidden w-full z-20">
+    <div className="flex justify-between items-center mx-auto bg-gradient-to-r from-indigo-400 to-blue-600  text-white p-2  shadow-lg animate-slideUp">
+      <div className="flex items-center gap-3 sm:px-2">
+        <button
+          onClick={() => setShowAppSuggestion(false)}
+          className="text-white hover:text-gray-100 font-bold text-xl"
+        >
+          ×
+        </button>
+        <p className="text-md sm:text-sm font-medium "> Meetowner better on the app!</p>
+      </div>
+      <a
+        href="https://meetowner.in/app"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-white text-sm border border-white font-semibold px-2 py-1 rounded-full hover:bg-gray-100 transition duration-200"
+      >
+        Install
+      </a>
+    </div>
+  </div>
+)}
       <header className="w-full bg-white shadow-sm px-2 relative  z-10">
         <div className="container mx-auto px-1 py-3 flex justify-between items-center">
           <div className="flex items-center">
@@ -202,6 +226,8 @@ const Header = () => {
           </div>
         </div>
       )}
+
+
     </>
   );
 };
