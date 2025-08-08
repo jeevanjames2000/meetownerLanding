@@ -43,7 +43,6 @@ export default function SearchBar() {
     { id: 2, order: 2, video_url: ad2 },
     { id: 3, order: 3, video_url: ad3 },
   ]);
-
   const [localites, setLocalities] = useState([]);
   const [isError, setIsError] = useState(false);
   const containerRef = useRef(null);

@@ -34,7 +34,7 @@ export const PropertyCard = ({ property, viewMode }) => {
       return;
     }
     const link = document.createElement("a");
-    link.href = `https://api.meetowner.in/aws/v1/s3/${filePath}`;
+    link.href = `https://api.meetowner.in/assets/v1/serve/${filePath}`;
     link.download = fileName;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
@@ -73,7 +73,7 @@ export const PropertyCard = ({ property, viewMode }) => {
             property.gallery_images.map((image) => (
               <SwiperSlide key={image.id}>
                 <img
-                  src={`https://api.meetowner.in/aws/v1/s3/${image.image}`}
+                  src={`https://api.meetowner.in/assets/v1/serve/${image.image}`}
                   alt={property.property_name || "Property Image"}
                   className={`${
                     viewMode === "grid" ? "w-full h-full" : "w-full h-48"

@@ -32,7 +32,7 @@ export const QuickView = ({ properties, setShowQuickView }) => {
           >
             <div className="flex space-x-3">
               <img
-                src={`https://api.meetowner.in/aws/v1/s3/${property?.gallery_images[0]?.image}`}
+                src={`https://api.meetowner.in/assets/v1/serve/${property?.gallery_images[0]?.image}`}
                 alt={property.property_name}
                 crossOrigin="anonymous"
                 className="w-20 h-20 object-cover rounded"

@@ -85,7 +85,7 @@ const PropertyDetails = ({
     }
   };
   const getDocumentUrl = (path) => {
-    return `https://api.meetowner.in/aws/v1/s3/${path}`;
+    return `https://api.meetowner.in/assets/v1/serve/${path}`;
   };
   const openDocumentInNewTab = (url) => {
     window.open(url, "_blank", "noopener,noreferrer");
@@ -234,7 +234,7 @@ const PropertyDetails = ({
 
       <div className="border-t pt-3">
         <img
-          src={`https://api.meetowner.in/aws/v1/s3/${mainImage}`}
+          src={`https://api.meetowner.in/assets/v1/serve/${mainImage}`}
           alt="Property Image"
           crossOrigin="anonymous"
           className="w-full h-auto max-h-[400px] sm:max-h-[500px] object-cover rounded-xl shadow-md"
@@ -265,7 +265,7 @@ const PropertyDetails = ({
               {property.gallery_images.map((img) => (
                 <SwiperSlide key={img.id}>
                   <img
-                    src={`https://api.meetowner.in/aws/v1/s3/${img.image}`}
+                    src={`https://api.meetowner.in/assets/v1/serve/${img.image}`}
                     alt={`Thumbnail ${img.id}`}
                     crossOrigin="anonymous"
                     className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg cursor-pointer hover:scale-105 transition"
@@ -297,7 +297,7 @@ const PropertyDetails = ({
           </h2>
           <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition">
             <img
-              src={`https://api.meetowner.in/aws/v1/s3/${mainFloorPlan}`}
+              src={`https://api.meetowner.in/assets/v1/serve/${mainFloorPlan}`}
               alt="Floor Plan"
               crossOrigin="anonymous"
               className="w-full h-auto max-h-[400px] sm:max-h-[500px] object-contain rounded-lg"
@@ -328,7 +328,7 @@ const PropertyDetails = ({
                   {property.sizes.map((size) => (
                     <SwiperSlide key={size.size_id}>
                       <img
-                        src={`https://api.meetowner.in/aws/v1/s3/${size.floor_plan}`}
+                        src={`https://api.meetowner.in/assets/v1/serve/${size.floor_plan}`}
                         alt={`Floor Plan ${size.size_id}`}
                         crossOrigin="anonymous"
                         className="w-full h-16 sm:h-20 lg:h-24 object-cover rounded-lg cursor-pointer hover:scale-105 transition"
